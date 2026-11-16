@@ -31,3 +31,8 @@ Besides `updated_at` and `accounts`, data.json now holds:
 
 Agents never drop fields they don't own: decrypt with `node decrypt.mjs`, change only their part, re-encrypt with `node encrypt.mjs data.json`, `git pull --rebase`, push.
 - `cfo`: cash plan - as_of, company, cash[] {name,gbp}, other_cash[], overheads_month, overheads_top[[name,£/m]], amazon_profit_month, debts[[name,£]], floor, usd_gbp, seasons[], plan[] {t,d}, note. Source: QuickBooks AS Wholesalebuy Ltd (realm 9341455090563764, the Amazon company) and Zugati Ltd (9341457518181518). Payments may carry `gbp` for the cash forecast.
+- products[].years: [{y, s (sales £), u (units)}] for Sep-Dec 2023, 2024, 2025, 2026 so far (UK/EU account, all marketplaces summed)
+- suppliers: {name: {email, pay}} used by the order basket
+- team.rules: things Eli told the team (e.g. ignore Threecolts). Every agent must obey them.
+- links.main_chat: link to Eli's main Zugati chat
+- Feedback: the portal's "Done / Paid / Not relevant" buttons hide items in Eli's browser; "Tell team" emails eli@zelr.co.uk with subject "Zugati portal feedback - ...". Agent 3 reads these daily and turns them into team.rules / removes items.
