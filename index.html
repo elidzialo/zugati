@@ -229,7 +229,8 @@ svg text{font-family:inherit}
       </div>
       <h3 style="margin:22px 0 10px;font-size:18px">The plan</h3>
       <div class="plan" id="plan"></div>
-      <div class="two" style="margin-top:14px">
+      <div style="margin-top:14px"><span class="btn ghost" id="cfomore">Show more detail - cards & running costs ▾</span></div>
+      <div class="two hidden" id="cfodetail" style="margin-top:14px">
         <div class="card"><h4 style="margin:0 0 8px">Credit cards you owe</h4><div id="debts"></div></div>
         <div class="card"><h4 style="margin:0 0 8px">Monthly running costs</h4><div id="costs"></div></div>
       </div>
@@ -571,6 +572,7 @@ function renderCfo(){
   const cm=Math.max(...c.overheads_top.map(x=>x[1]));
   $('costs').innerHTML=c.overheads_top.slice().sort((a,b)=>b[1]-a[1]).map(([n,v])=>'<div style="margin:6px 0"><div style="display:flex;justify-content:space-between;font-size:14px"><span>'+esc(n)+'</span><b>'+money(v,'GBP')+'/m</b></div><div style="height:10px;border-radius:4px;background:#ffb84d;margin-top:3px;width:'+(v/cm*100)+'%"></div></div>').join('');
   $('cfonote').textContent=c.note;
+  $('cfomore').onclick=()=>{const d=$('cfodetail'),h=d.classList.toggle('hidden');$('cfomore').textContent=h?'Show more detail - cards & running costs ▾':'Hide detail ▴'};
 }
 
 /* ---------- winners ---------- */
