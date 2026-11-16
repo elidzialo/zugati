@@ -532,7 +532,7 @@ function yearsSvg(p){const Y=p.years;if(!Y||!Y.some(x=>x.s))return '<div class="
 /* ---------- CFO ---------- */
 function payoutFor(d){const h=DATA.history;if(!h)return 0;const L=h.months.length,ratio=h.payout[L-14]?h.payout[L-2]/h.payout[L-14]:1;const key=(d.getFullYear()-1)+'-'+String(d.getMonth()+1).padStart(2,'0');const i=h.months.indexOf(key);if(i<0)return 0;return h.payout[i]*ratio/new Date(d.getFullYear(),d.getMonth()+1,0).getDate()}
 function cashWeeks(){
-  const c=DATA.cfo,t0=today();let bal=c.cash.reduce((s,x)=>s+x.gbp,0);const start=bal;
+  const c=DATA.cfo,t0=today();let bal=c.cash.reduce((s,x)=>s+x.gbp,0);try{const o=JSON.parse(localStorage.getItem('zcash')||'null');if(o&&o.at>(c.as_of||''))bal=o.v}catch(e){}const start=bal;
   const daily=c.overheads_month*12/365,W=[{w:0,d:t0,b:bal,in:0,out:0}];
   const pays=(DATA.payments||[]).filter(p=>p.status!=='paid'&&p.status!=='forecast');
   for(let w=1;w<=12;w++){let inn=0,out=0;for(let k=0;k<7;k++){const d=addD(t0,(w-1)*7+k);inn+=payoutFor(d);out+=daily;pays.forEach(p=>{if(+new Date(p.due+'T00:00:00')===+d||(w===1&&k===0&&new Date(p.due+'T00:00:00')<t0)){const g=p.gbp!=null?p.gbp:(p.amount!=null?(p.cur==='USD'?p.amount*(c.usd_gbp||.79):p.amount):0);out+=g}})}
@@ -545,11 +545,12 @@ function renderCfo(){
   const unknown=(DATA.payments||[]).filter(p=>p.amount==null&&!['paid','forecast'].includes(p.status)).length;
   const comingIn=W.slice(1,9).reduce((s,x)=>s+x.in,0);
   $('cfokpis').innerHTML=[
-   '<div class="card kpi"><div class="l">Cash in the bank now</div><div class="v">'+money(start,'GBP')+'</div><div class="d">'+esc(c.company)+' · plus '+money(c.other_cash.reduce((s,x)=>s+x.gbp,0),'GBP')+' in Zugati Ltd</div></div>',
+   '<div class="card kpi"><div class="l">Cash in the bank now</div><div class="v" style="color:'+(start<=0?'var(--red)':'inherit')+'">'+money(start,'GBP')+'</div><div class="d">What you told us · <a href="#cfo" id="updcash">Update</a></div></div>',
    '<div class="card kpi"><div class="l">Coming in from Amazon · 8 weeks</div><div class="v" style="color:var(--green)">'+money(comingIn,'GBP')+'</div><div class="d">Christmas payouts land in December</div></div>',
    '<div class="card kpi"><div class="l">Left each month after costs</div><div class="v" style="color:var(--amber)">~'+money(c.amazon_profit_month-c.overheads_month,'GBP')+'</div><div class="d">Off-season: '+money(c.amazon_profit_month,'GBP')+' profit minus '+money(c.overheads_month,'GBP')+' costs</div></div>',
-   '<div class="card kpi" style="border:2px solid var(--orange)"><div class="l">Safe to spend on stock now</div><div class="v" style="color:var(--teal)">'+money(safe,'GBP')+'</div><div class="d">Keeps at least '+money(c.floor,'GBP')+' in the bank'+(unknown?' · '+unknown+' bills still need amounts':'')+'</div></div>'
+   (safe>0?'<div class="card kpi" style="border:2px solid var(--orange)"><div class="l">Safe to spend on stock now</div><div class="v" style="color:var(--teal)">'+money(safe,'GBP')+'</div><div class="d">Keeps at least '+money(c.floor,'GBP')+' in the bank'+(unknown?' · '+unknown+' bills still need amounts':'')+'</div></div>':(()=>{const nx=W.find(x=>x.w>0&&x.b-c.floor>=500);return '<div class="card kpi" style="border:2px solid var(--red)"><div class="l">Safe to spend on stock now</div><div class="v" style="color:var(--red)">£0</div><div class="d">'+(nx?'By '+fmtD(nx.d)+' about <b>'+money(Math.floor((nx.b-c.floor)/500)*500,'GBP')+'</b> frees up from Amazon payouts - pay deposits then':'Wait for the next Amazon payout')+(unknown?' · '+unknown+' bills still need amounts':'')+'</div></div>'})())
   ].join('');
+  const uc=$('updcash');if(uc)uc.onclick=e=>{e.preventDefault();const v=prompt('How much is in the bank right now? (£)');if(v===null)return;const n=parseFloat(String(v).replace(/[£,\s]/g,''));if(isNaN(n))return;try{localStorage.setItem('zcash',JSON.stringify({v:n,at:new Date().toISOString()}))}catch(x){}renderCfo();if(confirm('Saved on this phone. Tell the team too, so the agents use it?'))location.href='mailto:eli@zelr.co.uk?subject='+encodeURIComponent('Zugati portal feedback - bank balance')+'&body='+encodeURIComponent('Cash in the bank today: £'+n+'\n(Sent from the Zugati portal)')};
   // cash line
   const Wd=560,H=230,pl=48,pr=12,pt=14,pb=30,N=W.length-1,mx=Math.max(...W.map(x=>x.b),c.floor)*1.15,mn=Math.min(0,...W.map(x=>x.b));
   const X=i=>pl+i/N*(Wd-pl-pr),Y=v=>pt+(1-(v-mn)/(mx-mn))*(H-pt-pb);let g='';
