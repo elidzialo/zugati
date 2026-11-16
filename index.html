@@ -230,7 +230,7 @@ svg text{font-family:inherit}
       <h3 style="margin:22px 0 10px;font-size:18px">The plan</h3>
       <div class="plan" id="plan"></div>
       <div class="two" style="margin-top:14px">
-        <div class="card"><h4 style="margin:0 0 8px">What you owe (from QuickBooks)</h4><div id="debts"></div></div>
+        <div class="card"><h4 style="margin:0 0 8px">Credit cards you owe</h4><div id="debts"></div></div>
         <div class="card"><h4 style="margin:0 0 8px">Monthly running costs</h4><div id="costs"></div></div>
       </div>
       <p class="note" id="cfonote" style="margin-top:8px"></p>
@@ -567,7 +567,7 @@ function renderCfo(){
   $('bigmonths').innerHTML=sm.map(x=>{const v=x.label.indexOf('Valentine')===0;return '<div style="margin:10px 0"><div class="nm" style="display:flex;justify-content:space-between;font-size:14px;font-weight:600"><span>'+(v?'♥ ':'★ ')+esc(x.label)+'</span><b>'+money(x.profit,'GBP')+' profit</b></div><div style="height:16px;border-radius:5px;margin-top:4px;width:'+(x.profit/bm*100)+'%;background:'+(v?'#e8436a':'#1d8f5f')+'"></div><div class="note">'+money(x.sales,'GBP')+' sales</div></div>'}).join('')+'<div class="note" style="margin-top:6px">Valentine\'s is your strongest month every year. Christmas 2025 was weaker than 2024 - more stock earlier would have helped.</div>';
   $('plan').innerHTML=(c.plan||[]).map(p=>'<div class="pli"><b>'+esc(p.t)+'</b><span>'+esc(p.d)+'</span></div>').join('');
   const dm=Math.max(...c.debts.map(x=>x[1]));
-  $('debts').innerHTML=c.debts.map(([n,v])=>'<div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-size:14px"><span>'+esc(n)+'</span><b>'+money(v,'GBP')+'</b></div><div style="height:12px;border-radius:4px;background:#e66a7f;margin-top:3px;width:'+(v/dm*100)+'%"></div></div>').join('')+'<div class="note">Book figures - some may be out of date or owed between your own companies.</div>';
+  $('debts').innerHTML=(c.debts_detail||c.debts).map(([n,v])=>'<div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-size:14px"><span>'+esc(n)+'</span><b>'+money(v,'GBP')+'</b></div><div style="height:12px;border-radius:4px;background:#e66a7f;margin-top:3px;width:'+(v/dm*100)+'%"></div></div>').join('')+'<div class="note">'+(c.debts_detail?'Total on cards: '+money(c.debts.reduce((a,x)=>a+x[1],0),'GBP')+'. Amex last synced in September.':'Book figures - may be out of date.')+'</div>';
   const cm=Math.max(...c.overheads_top.map(x=>x[1]));
   $('costs').innerHTML=c.overheads_top.slice().sort((a,b)=>b[1]-a[1]).map(([n,v])=>'<div style="margin:6px 0"><div style="display:flex;justify-content:space-between;font-size:14px"><span>'+esc(n)+'</span><b>'+money(v,'GBP')+'/m</b></div><div style="height:10px;border-radius:4px;background:#ffb84d;margin-top:3px;width:'+(v/cm*100)+'%"></div></div>').join('');
   $('cfonote').textContent=c.note;
