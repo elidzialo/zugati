@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Zugati Portal</title>
+<style>
+  :root { --bg:#f6f7f9; --panel:#fff; --fg:#14171c; --muted:#69707d; --line:#e3e6eb; --good:#13834d; --bad:#c8312b; --accent:#1f4fd1; --warn:#b26a00; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width:1100px; margin:0 auto; padding:16px; }
+  h1 { font-size:22px; margin:0; }
+  h2 { font-size:16px; margin:24px 0 10px; }
+  .muted { color:var(--muted); font-size:13px; }
+  .good { color:var(--good); } .bad { color:var(--bad); } .warn { color:var(--warn); font-weight:600; }
+  header { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+  .tabs { display:flex; gap:6px; }
+  .tabs button, .btn { border:1px solid var(--line); background:var(--panel); padding:7px 14px; border-radius:8px; font-size:14px; cursor:pointer; color:var(--fg); }
+  .tabs button.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .tiles { display:grid; grid-template-columns:repeat(auto-fill, minmax(165px, 1fr)); gap:10px; }
+  .tile { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px; }
+  .tile .lbl { color:var(--muted); font-size:12px; }
+  .tile .big { font-size:22px; font-weight:600; margin:4px 0; font-variant-numeric:tabular-nums; }
+  .tile .ln { font-size:13px; font-variant-numeric:tabular-nums; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px; }
+  .scroll { overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; font-size:13px; font-variant-numeric:tabular-nums; }
+  th, td { padding:6px 8px; border-bottom:1px solid var(--line); text-align:right; white-space:nowrap; }
+  th { color:var(--muted); font-weight:600; }
+  th:first-child, td:first-child { text-align:left; }
+  td.name { max-width:260px; overflow:hidden; text-overflow:ellipsis; }
+  .chart { display:flex; flex-direction:column; gap:8px; }
+  .bar-row { display:grid; grid-template-columns:100px 1fr; gap:8px; align-items:center; font-size:12px; }
+  .bars { display:flex; flex-direction:column; gap:3px; }
+  .bar { height:12px; border-radius:3px; min-width:2px; position:relative; }
+  .bar span { position:absolute; left:calc(100% + 6px); top:-2px; white-space:nowrap; font-size:11px; color:var(--muted); }
+  .b-sales { background:#4a7bec; } .b-profit { background:#2fae74; } .b-neg { background:#e0645e; }
+  .legend { display:flex; gap:14px; font-size:12px; color:var(--muted); margin-bottom:6px; }
+  .legend i { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:-1px; }
+  #login { max-width:340px; margin:18vh auto; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:22px; }
+  #login input { width:100%; padding:10px; font-size:16px; border:1px solid var(--line); border-radius:8px; margin:12px 0; }
+  #login button { width:100%; padding:10px; font-size:16px; border:0; border-radius:8px; background:var(--accent); color:#fff; }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+
+<div id="login">
+  <h1>Zugati Portal</h1>
+  <p class="muted">Enter the password to view.</p>
+  <input id="pw" type="password" autocomplete="current-password" placeholder="Password">
+  <button id="go">Open</button>
+  <p id="err" class="bad hidden">Wrong password, or the data could not be loaded.</p>
+</div>
+
+<div id="app" class="wrap hidden">
+  <header>
+    <div>
+      <h1>Zugati Portal</h1>
+      <div id="updated" class="muted"></div>
+    </div>
+    <div class="tabs">
+      <button data-acc="UK" class="on">UK</button>
+      <button data-acc="USA">USA</button>
+      <button class="btn" id="reload">Refresh</button>
+    </div>
+  </header>
+
+  <div id="tiles" class="tiles"></div>
+
+  <h2>All periods</h2>
+  <div class="card scroll"><table id="periods"></table></div>
+
+  <h2>Sales and net profit</h2>
+  <div class="card">
+    <div class="legend"><span><i class="b-sales"></i>Sales</span><span><i class="b-profit"></i>Net profit</span></div>
+    <div id="chart" class="chart"></div>
+  </div>
+
+  <h2>Top products - last 30 days</h2>
+  <div class="card scroll"><table id="products"></table></div>
+
+  <p class="muted" style="margin-top:20px">Data from Sellerboard. Net profit is after Amazon fees, product costs, ad spend and VAT. "vs prev" compares with the period before (today vs yesterday, 7/30 days vs the 7/30 before, this month vs the same days last month, last month vs the month before). Days are UTC.</p>
+</div>
+
+<script>
+(function () {
+  let DATA = null, ACC = 'UK', KEY = null;
+  const $ = (id) => document.getElementById(id);
+  const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+
+  async function deriveKey(pw, salt, iter) {
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: iter, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+  }
+  async function load(pw) {
+    const res = await fetch('data.enc.json?t=' + Date.now(), { cache: 'no-store' });
+    const enc = await res.json();
+    if (!KEY || pw) KEY = await deriveKey(pw, b64(enc.salt), enc.iter);
+    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64(enc.iv) }, KEY, b64(enc.ct));
+    DATA = JSON.parse(new TextDecoder().decode(plain));
+    render();
+  }
+
+  const money = (cur) => (v) => v == null || isNaN(v) ? '-' : (v < 0 ? '-' : '') + (cur === 'USD' ? '$' : '£') + Math.abs(v).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const pct = (v, sign) => v == null || isNaN(v) ? '-' : (sign && v > 0 ? '+' : '') + Number(v).toFixed(1) + '%';
+  const num = (v) => v == null || isNaN(v) ? '-' : Number(v).toLocaleString('en-GB');
+  const tone = (v) => v == null || isNaN(v) || v === 0 ? '' : (v > 0 ? 'good' : 'bad');
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+  function render() {
+    const a = DATA.accounts[ACC];
+    if (!a) return;
+    const m = money(a.currency);
+    const upd = new Date(DATA.updated_at);
+    const ageH = (Date.now() - upd) / 3600000;
+    $('updated').textContent = 'Last updated: ' + upd.toLocaleString('en-GB', { timeZone: 'Europe/London', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    $('updated').className = ageH > 2 ? 'warn' : 'muted';
+
+    const tiles = $('tiles'); tiles.replaceChildren();
+    a.periods.forEach((p) => {
+      const t = el('div', 'tile');
+      t.append(el('div', 'lbl', p.label));
+      t.append(el('div', 'big', m(p.sales)));
+      const l1 = el('div', 'ln'); l1.append('Profit '); l1.append(el('b', p.net_profit < 0 ? 'bad' : '', m(p.net_profit))); t.append(l1);
+      t.append(el('div', 'ln', 'Margin ' + pct(p.margin) + ' · ' + num(p.orders) + ' orders / ' + num(p.units) + ' units'));
+      const l3 = el('div', 'ln'); l3.append(el('b', tone(p.sales_change), pct(p.sales_change, true))); l3.append(' sales vs prev'); t.append(l3);
+      tiles.append(t);
+    });
+
+    const cols = [
+      ['Period', 'label', (v) => v], ['Sales', 'sales', m], ['vs prev', 'sales_change', (v) => pct(v, true), true],
+      ['Net profit', 'net_profit', m], ['vs prev', 'profit_change', (v) => pct(v, true), true], ['Margin', 'margin', pct],
+      ['ROI', 'roi', pct], ['Orders', 'orders', num], ['Units', 'units', num], ['Refunds', 'refunds', num],
+      ['Ad spend', 'advertising', m], ['ACOS', 'acos', pct], ['PPC sales', 'sales_ppc', m], ['Amazon fees', 'amazon_fees', m],
+      ['Product costs', 'product_costs', m], ['VAT', 'vat', m], ['Est. payout', 'est_payout', m],
+      ['Sessions', 'sessions', num], ['Conversion', 'conversion', pct]
+    ];
+    table($('periods'), cols, a.periods);
+
+    const chart = $('chart'); chart.replaceChildren();
+    const max = Math.max(1, ...a.periods.map((p) => Math.max(Math.abs(p.sales || 0), Math.abs(p.net_profit || 0))));
+    a.periods.forEach((p) => {
+      const row = el('div', 'bar-row'); row.append(el('div', '', p.label));
+      const bars = el('div', 'bars');
+      [['b-sales', p.sales], [p.net_profit < 0 ? 'b-neg' : 'b-profit', p.net_profit]].forEach(([c, v]) => {
+        const b = el('div', 'bar ' + c); b.style.width = 'calc(' + (Math.abs(v || 0) / max * 100) + '% * 0.75)'; b.append(el('span', '', m(v))); bars.append(b);
+      });
+      row.append(bars); chart.append(row);
+    });
+
+    const pcols = [
+      ['#', 'rank', (v) => v], ['Product', 'name', (v) => v || '-'], ['ASIN', 'asin', (v) => v || '-'], ['SKU', 'sku', (v) => v || '-'],
+      ['Market', 'marketplace', (v) => v || '-'], ['Units', 'units', num], ['Sales', 'sales', m], ['Net profit', 'net_profit', m],
+      ['Margin', 'margin', pct], ['ROI', 'roi', pct], ['Refunds', 'refunds', num], ['Ad spend', 'advertising', m]
+    ];
+    table($('products'), pcols, a.products || []);
+  }
+
+  function table(t, cols, rows) {
+    t.replaceChildren();
+    const hr = el('tr'); cols.forEach(([h]) => hr.append(el('th', '', h)));
+    const th = el('thead'); th.append(hr); t.append(th);
+    const tb = el('tbody');
+    if (!rows.length) { const r = el('tr'); const d = el('td', 'muted', 'No data yet'); d.colSpan = cols.length; r.append(d); tb.append(r); }
+    rows.forEach((r) => {
+      const tr = el('tr');
+      cols.forEach(([, k, f, toned]) => {
+        const td = el('td', k === 'name' ? 'name' : '', f(r[k]));
+        if (k === 'name' && r[k]) td.title = r[k];
+        if (toned) td.className = tone(r[k]);
+        if (k === 'net_profit' && r[k] < 0) td.className = 'bad';
+        tr.append(td);
+      });
+      tb.append(tr);
+    });
+    t.append(tb);
+  }
+
+  async function login() {
+    const pw = $('pw').value;
+    $('err').classList.add('hidden');
+    try { await load(pw); $('login').classList.add('hidden'); $('app').classList.remove('hidden'); try { sessionStorage.setItem('zpw', pw); } catch (e) {} }
+    catch (e) { KEY = null; $('err').classList.remove('hidden'); }
+  }
+  $('go').onclick = login;
+  $('pw').addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
+  document.querySelectorAll('.tabs button[data-acc]').forEach((b) => b.onclick = () => {
+    ACC = b.dataset.acc;
+    document.querySelectorAll('.tabs button[data-acc]').forEach((x) => x.classList.toggle('on', x === b));
+    render();
+  });
+  $('reload').onclick = () => load().catch(() => {});
+  setInterval(() => { if (KEY) load().catch(() => {}); }, 5 * 60 * 1000);
+  try { const s = sessionStorage.getItem('zpw'); if (s) { $('pw').value = s; login(); } } catch (e) {}
+})();
+</script>
+</body>
+</html>
