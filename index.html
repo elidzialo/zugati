@@ -123,6 +123,25 @@ svg text{font-family:inherit}
 .mtog button.on{background:var(--nav);color:#fff}
 .mbar{transform-box:fill-box;transform-origin:bottom;animation:grow .45s ease-out both}
 @keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.confetti{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:90}
+.sov{position:fixed;inset:0;background:rgba(19,25,33,.7);z-index:80;display:flex;align-items:center;justify-content:center;padding:16px;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.sbox{background:#fff;border-radius:18px;max-width:440px;width:100%;padding:24px 20px 18px;position:relative;text-align:center;animation:bang .5s cubic-bezier(.2,1.6,.4,1);max-height:92vh;overflow:auto}
+@keyframes bang{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.06);opacity:1}100%{transform:scale(1)}}
+.sbox .bang{font-size:56px;line-height:1;animation:wob .8s ease-in-out .2s 2}
+@keyframes wob{25%{transform:rotate(-14deg) scale(1.15)}75%{transform:rotate(14deg) scale(1.15)}}
+.sbox h2{margin:6px 0 2px;font-size:26px;color:var(--nav)}
+.sbox .ssub{margin:0 0 14px;color:var(--muted)}
+.sbox .step{display:flex;gap:12px;align-items:flex-start;text-align:left;background:var(--greybg);border-radius:12px;padding:12px;margin:8px 0}
+.sbox .num{flex:none;width:30px;height:30px;border-radius:50%;background:var(--orange);color:#0f1111;font-weight:800;display:flex;align-items:center;justify-content:center}
+.sbox .tick{margin-left:auto;font-size:22px;color:#bbb;font-weight:800}
+.sbox .step.done{background:var(--greenbg)}.sbox .step.done .tick{color:var(--green)}.sbox .step.done .num{background:var(--green);color:#fff}
+.sbox a.big{display:block;margin-top:8px;background:#d97757;color:#fff;text-align:center;border-radius:24px;padding:12px;font-size:17px;font-weight:800;text-decoration:none}
+.sbox .planb{text-align:left;margin-top:12px;border-top:1px solid #eee;padding-top:10px}
+.sbox .planb summary{cursor:pointer;font-weight:700;color:var(--teal);list-style:none}
+.sbox .planb .btn{display:block;text-align:center;margin-top:8px}
+.sbox .worked{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:14px}
+.sbox .sx{top:8px;right:10px}
 /* modal */
 .ov{position:fixed;inset:0;background:rgba(15,17,17,.55);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:30px 12px;overflow:auto}
 .md{background:#fff;border-radius:12px;max-width:940px;width:100%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.35);animation:pop .18s ease-out}
@@ -464,7 +483,7 @@ function openP(id){
    '<div class="facts"><div class="fact"><div class="k">Sales 30 days</div><div class="x">'+(p.sales30==null?'-':money(p.sales30,p.cur))+'</div></div><div class="fact"><div class="k">Margin</div><div class="x">'+(p.margin==null?'-':p.margin.toFixed(0)+'%')+'</div></div><div class="fact"><div class="k">Missed sales (out of stock)</div><div class="x" style="color:'+(p.lost_sales?'var(--red)':'inherit')+'">'+money(p.lost_sales||0,p.cur)+'</div></div><div class="fact"><div class="k">Suggested order</div><div class="x">'+(f.qty?n0(f.qty)+' units':'none')+'</div></div></div>'+
    '</div></div>';
   $('ov').classList.remove('hidden');document.body.style.overflow='hidden';
-  $('md').querySelector('.mx').onclick=closeP;wireAdd($('md'));wireMonthly(p);$('md').querySelectorAll('[data-ask1]').forEach(b=>b.onclick=()=>{const id=b.dataset.ask1,pp=DATA.products.find(x=>x.id===id),ff=forecast(pp);const q=BASKET[id]||ff.qty||Math.max(100,Math.round((ff.need60||0)/50)*50);window.open('https://claude.ai/new?q='+encodeURIComponent(orderPrompt({[id]:q})),'_blank')});
+  $('md').querySelector('.mx').onclick=closeP;wireAdd($('md'));wireMonthly(p);$('md').querySelectorAll('[data-ask1]').forEach(b=>b.onclick=()=>{const id=b.dataset.ask1,pp=DATA.products.find(x=>x.id===id),ff=forecast(pp);const q=BASKET[id]||ff.qty||Math.max(100,Math.round((ff.need60||0)/50)*50);sendOrder({[id]:q})});
 }
 function closeP(){$('ov').classList.add('hidden');document.body.style.overflow=''}
 $('ov').onclick=e=>{if(e.target.id==='ov')closeP()};
@@ -501,12 +520,12 @@ function renderBar(){const n=Object.keys(BASKET).length,g=groups();const bar=$('
 function openB(){const g=groups(),d=$('bdr');
   d.innerHTML='<div class="bh"><b style="font-size:18px">Your order</b><button class="mx" style="position:static;background:none;color:#fff" id="closeb">×</button></div><div class="bc">'+
   Object.entries(g).map(([s,ps])=>'<div class="sup"><div class="sh"><span>'+esc(s)+'</span><span class="note">'+esc((DATA.suppliers&&DATA.suppliers[s]&&DATA.suppliers[s].email)||'')+'</span></div>'+ps.map(p=>'<div class="bi"><img src="'+img(p.img,100)+'" alt=""><div>'+esc(p.name)+'<div class="note">'+n0(p.stock)+' in stock · '+esc(p.market)+'</div></div><input type="number" min="0" step="50" value="'+BASKET[p.id]+'" data-q="'+esc(p.id)+'"><button class="x" data-rm="'+esc(p.id)+'">×</button></div>').join('')+'</div>').join('')+
-  '<p class="note">Change the numbers if you like. Claude will draft one email per supplier, check your last orders for prices, and show you everything before sending.</p></div><div class="bf"><button class="claude" id="askc">Ask Claude to order ↗</button><div class="btns" style="justify-content:center;margin-top:8px"><span class="btn ghost" id="copyc">Copy message instead</span><span class="btn ghost" id="clearb">Clear order</span></div></div>';
+  '<p class="note">Change the numbers if you like. Claude will draft one email per supplier, check your last orders for prices, and show you everything before sending.</p></div><div class="bf"><button class="claude" id="sendord">🚀 Send my order to Claude</button><div class="btns" style="justify-content:center;margin-top:8px"><span class="btn ghost" id="copyc">Copy message instead</span><span class="btn ghost" id="clearb">Clear order</span></div></div>';
   d.classList.remove('hidden');
   $('closeb').onclick=()=>d.classList.add('hidden');
   d.querySelectorAll('[data-q]').forEach(i=>i.onchange=()=>{BASKET[i.dataset.q]=Math.max(0,+i.value||0);saveB()});
   d.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{delete BASKET[b.dataset.rm];saveB();renderBar();renderGrid();Object.keys(BASKET).length?openB():d.classList.add('hidden')});
-  $('askc').onclick=()=>{window.open('https://claude.ai/new?q='+encodeURIComponent(orderPrompt()),'_blank')};
+  $('sendord').onclick=()=>{d.classList.add('hidden');sendOrder()};
   $('copyc').onclick=()=>{try{navigator.clipboard.writeText(orderPrompt());$('copyc').textContent='Copied - paste into Claude'}catch(e){}};
   $('clearb').onclick=()=>{BASKET={};saveB();renderBar();renderGrid();d.classList.add('hidden')};
 }
@@ -514,6 +533,45 @@ function orderPrompt(B){B=B||BASKET;const g=groups(B);let t='Hi Claude, Eli here
   Object.entries(g).forEach(([s,ps])=>{const em=DATA.suppliers&&DATA.suppliers[s]&&DATA.suppliers[s].email;t+='\nSupplier: '+s+(em?' ('+em+')':' (please find the right supplier in my emails)')+'\n';ps.forEach(p=>{const f=forecast(p);t+='- '+p.name+' - '+n0(B[p.id])+' units (my portal suggests this - tell me if you think different) (ASIN '+p.asin+', EAN '+(p.ean||'-')+', SKU '+p.sku+', for Amazon '+p.market+'). Now: '+n0(p.stock)+' in stock'+(p.inbound?', '+n0(p.inbound)+' on the way':'')+', sells ~'+(p.per_day||0).toFixed(1)+'/day'+(f.run!=null?', runs out ~'+fmtD(addD(today(),f.run)):'')+'.\n'})});
   return t;}
 
+
+/* ---------- send order: confetti + easy steps ---------- */
+function confetti(){const c=document.createElement('canvas');c.className='confetti';document.body.append(c);const x=c.getContext('2d'),W=c.width=innerWidth*devicePixelRatio,H=c.height=innerHeight*devicePixelRatio;
+  const cols=['#ff9900','#e8436a','#007185','#1d8f5f','#ffd814','#146eb4','#ffffff'],P=[];
+  for(let i=0;i<180;i++){const a=Math.random()*Math.PI*2,v=(6+Math.random()*12)*devicePixelRatio;P.push({x:W/2,y:H*0.45,vx:Math.cos(a)*v,vy:Math.sin(a)*v-8*devicePixelRatio,r:(4+Math.random()*6)*devicePixelRatio,c:cols[i%cols.length],s:Math.random()*6,t:Math.random()<.3})}
+  let f=0;(function step(){x.clearRect(0,0,W,H);P.forEach(p=>{p.vy+=0.35*devicePixelRatio;p.vx*=.985;p.x+=p.vx;p.y+=p.vy;p.s+=.2;x.save();x.translate(p.x,p.y);x.rotate(p.s);x.fillStyle=p.c;if(p.t){x.beginPath();x.arc(0,0,p.r/1.6,0,7);x.fill()}else x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);x.restore()});
+    if(++f<170)requestAnimationFrame(step);else c.remove()})()}
+function supplierMail(s,ps,B){const em=(DATA.suppliers&&DATA.suppliers[s]&&DATA.suppliers[s].email)||'';const first=s==='Supplier not set'?'there':s.split(/[\s(]/)[0];
+  const body='Hi '+first+',\n\nI hope you are well. I would like to place a new order:\n\n'+ps.map(p=>'- '+p.name+': '+n0(B[p.id])+' units (same as last time - packaging, labels and EAN '+(p.ean||'as before')+')').join('\n')+'\n\nPlease send me the PI and the payment link, and let me know the production time.\n\nThank you,\nEli';
+  return 'mailto:'+em+'?subject='+encodeURIComponent('New order - Zugati')+'&body='+encodeURIComponent(body)}
+function sendOrder(B){B=B||BASKET;if(!Object.keys(B).length)return;const txt=orderPrompt(B),g=groups(B),n=Object.keys(B).length;
+  let copied=false;try{navigator.clipboard.writeText(txt).then(()=>{copied=true;const e=$('so1');if(e)e.classList.add('done')}).catch(()=>{})}catch(e){}
+  try{navigator.vibrate&&navigator.vibrate([30,40,60])}catch(e){}
+  confetti();
+  const chat=(DATA.links&&(DATA.links.order_chat||DATA.links.main_chat))||'';const fresh='https://claude.ai/new?q='+encodeURIComponent(txt);
+  let w=0;try{w=+localStorage.getItem('zorderway')||0}catch(e){}
+  const ov=document.createElement('div');ov.className='sov';
+  ov.innerHTML='<div class="sbox"><div class="bang">🎉</div><h2>Order ready!</h2><p class="ssub">'+n+' product'+(n>1?'s':'')+' for '+Object.keys(g).length+' supplier'+(Object.keys(g).length>1?'s':'')+'. Three easy steps:</p>'+
+   '<div class="step" id="so1"><span class="num">1</span><div><b>Order copied</b><div class="note">Already done for you.</div></div><span class="tick">✓</span></div>'+
+   '<div class="step"><span class="num">2</span><div style="flex:1"><b>Open your order chat</b><a class="big" target="_blank" rel="noopener" id="sogo" href="'+esc(chat||fresh)+'">Open Claude ↗</a></div></div>'+
+   '<div class="step"><span class="num">3</span><div><b>Paste and send</b><div class="note">Press and hold in the message box, tap <b>Paste</b>, then send. Claude writes the supplier emails and shows you before anything goes out.</div></div></div>'+
+   '<details class="planb"'+(w>=1?' open':'')+'><summary>Didn\'t work? Try another way</summary>'+
+    (chat?'<a class="btn ghost" target="_blank" rel="noopener" href="'+esc(fresh)+'">Open a new Claude chat with the order filled in</a>':'')+
+    '<span class="btn ghost" id="socopy">Copy the order again</span>'+
+    '<div class="note" style="margin:10px 0 4px"><b>Or email the suppliers yourself</b> - a ready email opens, you just press send:</div>'+
+    Object.entries(g).map(([s,ps])=>'<a class="btn mail" href="'+esc(supplierMail(s,ps,B))+'">✉ Email '+esc(s==='Supplier not set'?'the supplier':s)+'</a>').join('')+
+   '</details>'+
+   '<div class="worked"><span class="note">Did it work?</span><span class="tb ok" id="soyes">👍 Yes</span><span class="tb no" id="sono">👎 No</span></div>'+
+   '<button class="mx sx" aria-label="Close">×</button></div>';
+  document.body.append(ov);
+  const close=()=>ov.remove();ov.querySelector('.sx').onclick=close;ov.onclick=e=>{if(e.target===ov)close()};
+  if(copied)$('so1').classList.add('done');
+  $('socopy').onclick=()=>{try{navigator.clipboard.writeText(txt);$('socopy').textContent='✓ Copied'}catch(e){}};
+  $('sogo').addEventListener('click',()=>{try{navigator.clipboard.writeText(txt)}catch(e){}});
+  const log=(ok)=>{try{localStorage.setItem('zorderway',ok?0:w+1)}catch(e){}};
+  $('soyes').onclick=()=>{log(true);confetti();setTimeout(close,900)};
+  $('sono').onclick=()=>{log(false);ov.querySelector('.planb').open=true;
+    if(confirm('Sorry! Tell the team so they fix it by next week?'))location.href='mailto:eli@zelr.co.uk?subject='+encodeURIComponent('Zugati portal feedback - ordering')+'&body='+encodeURIComponent('Sending my order to Claude did not work.\nWhat happened: \n\n(Sent from the Zugati portal - the team will try a different way.)')};
+}
 
 /* ---------- feedback on tasks/payments ---------- */
 function wireDis(root){root.querySelectorAll('[data-dis]').forEach(b=>b.onclick=e=>{e.stopPropagation();let D={};try{D=JSON.parse(localStorage.getItem('zdis')||'{}')}catch(x){}
