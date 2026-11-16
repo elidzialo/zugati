@@ -118,6 +118,11 @@ h2{font-size:21px;margin:30px 0 4px;font-weight:700}
 svg text{font-family:inherit}
 .legend{display:flex;gap:16px;font-size:13px;color:var(--muted);flex-wrap:wrap;margin-bottom:6px}
 .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-2px}
+.mtog{display:inline-flex;background:var(--greybg);border-radius:20px;padding:3px}
+.mtog button{border:0;background:transparent;padding:6px 14px;border-radius:16px;font:inherit;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer}
+.mtog button.on{background:var(--nav);color:#fff}
+.mbar{transform-box:fill-box;transform-origin:bottom;animation:grow .45s ease-out both}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
 /* modal */
 .ov{position:fixed;inset:0;background:rgba(15,17,17,.55);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:30px 12px;overflow:auto}
 .md{background:#fff;border-radius:12px;max-width:940px;width:100%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.35);animation:pop .18s ease-out}
@@ -455,11 +460,11 @@ function openP(id){
    '<div class="btns" style="margin-top:12px"><a class="btn ghost" target="_blank" rel="noopener" href="https://www.amazon.'+(p.account==='USA'?'com':p.market.indexOf('DE')===0?'de':p.market==='FR'?'fr':'co.uk')+'/dp/'+esc(p.asin)+'">View on Amazon</a></div></div></div>'+
    '<div class="rec '+f.st+'">'+rec+(['now','soon','ok'].includes(f.st)?'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><div style="min-width:220px">'+addBtn(p,f)+'</div><button class="claude" style="width:auto;padding:7px 16px;font-size:14px" data-ask1="'+esc(p.id)+'">Ask Claude to order this ↗</button></div>':'')+'</div>'+
    '<div class="msec"><h4>Stock forecast - next 5 months</h4><div class="legend"><span><i style="background:#ff9900"></i>Units left</span><span><i style="background:#146eb4"></i>Last day to order</span><span><i style="background:#cc0c39"></i>Runs out</span></div>'+runwaySvg(p,f)+'<div class="note">Includes stock on the way and last year\'s seasonal peaks.</div></div>'+
-   '<div class="msec"><h4>Money made each year</h4>'+yearsSvg(p)+'</div>'+'<div class="msec two"><div><h4>Units sold - then and now</h4>'+barsSvg(bars)+'</div><div><h4>Money</h4>'+
+   monthlySection(p)+'<div class="msec"><h4>Money made each year</h4>'+yearsSvg(p)+'</div>'+'<div class="msec two"><div><h4>Units sold - then and now</h4>'+barsSvg(bars)+'</div><div><h4>Money</h4>'+
    '<div class="facts"><div class="fact"><div class="k">Sales 30 days</div><div class="x">'+(p.sales30==null?'-':money(p.sales30,p.cur))+'</div></div><div class="fact"><div class="k">Margin</div><div class="x">'+(p.margin==null?'-':p.margin.toFixed(0)+'%')+'</div></div><div class="fact"><div class="k">Missed sales (out of stock)</div><div class="x" style="color:'+(p.lost_sales?'var(--red)':'inherit')+'">'+money(p.lost_sales||0,p.cur)+'</div></div><div class="fact"><div class="k">Suggested order</div><div class="x">'+(f.qty?n0(f.qty)+' units':'none')+'</div></div></div>'+
    '</div></div>';
   $('ov').classList.remove('hidden');document.body.style.overflow='hidden';
-  $('md').querySelector('.mx').onclick=closeP;wireAdd($('md'));$('md').querySelectorAll('[data-ask1]').forEach(b=>b.onclick=()=>{const id=b.dataset.ask1,pp=DATA.products.find(x=>x.id===id),ff=forecast(pp);const q=BASKET[id]||ff.qty||Math.max(100,Math.round((ff.need60||0)/50)*50);window.open('https://claude.ai/new?q='+encodeURIComponent(orderPrompt({[id]:q})),'_blank')});
+  $('md').querySelector('.mx').onclick=closeP;wireAdd($('md'));wireMonthly(p);$('md').querySelectorAll('[data-ask1]').forEach(b=>b.onclick=()=>{const id=b.dataset.ask1,pp=DATA.products.find(x=>x.id===id),ff=forecast(pp);const q=BASKET[id]||ff.qty||Math.max(100,Math.round((ff.need60||0)/50)*50);window.open('https://claude.ai/new?q='+encodeURIComponent(orderPrompt({[id]:q})),'_blank')});
 }
 function closeP(){$('ov').classList.add('hidden');document.body.style.overflow=''}
 $('ov').onclick=e=>{if(e.target.id==='ov')closeP()};
@@ -541,6 +546,37 @@ function renderFlow(){const c=DATA.cfo,f=c.real_in;if(!f){$('flow').innerHTML=''
   $('flow').innerHTML='<div style="font-weight:800;color:var(--green);margin-top:4px">Money in</div>'+ins.map(row).join('')+'<div style="font-weight:800;color:var(--red);margin-top:10px">Money out</div>'+outs.map(row).join('')+'<div class="note" style="margin-top:8px">Amazon only brought in about '+money(f.amazon_in/f.weeks,'GBP')+' a week. The rest came from Zalo Estates.</div>'}
 function renderWk(){const {W}=cashWeeks();const rows=W.slice(1,11);
   $('wkplan').innerHTML=rows.map(x=>'<div style="display:grid;grid-template-columns:58px 1fr auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #eee"><div style="font-weight:800">'+fmtD(x.d)+'</div><div style="font-size:13px">'+(x.pay?'<b>Pay:</b> '+esc(x.pay):'<span class="note">Nothing extra - let cash build</span>')+'<div class="note">In '+money(x.in,'GBP')+' · out '+money(x.out,'GBP')+'</div></div><div style="font-weight:800;color:'+(x.b<DATA.cfo.floor?'var(--red)':'var(--green)')+'">'+money(x.b,'GBP')+'</div></div>').join('')+'<div class="note" style="margin-top:8px">'+esc(DATA.cfo.weekly_note||'')+'</div>'}
+/* ---------- monthly history (24 months) ---------- */
+function monthColour(mo){return mo===1||mo===2?'#e8436a':mo===11||mo===12?'#1d8f5f':'#ff9900'}
+function monthlySvg(p,mode){const M=p.monthly;const vals=mode==='profit'?M.profit:M.units;const N=vals.length;
+  const sm=window.innerWidth<600,W=sm?400:860,H=sm?230:230,pl=4,pr=4,pt=26,pb=40,mx=Math.max(...vals,1),mn=Math.min(0,...vals),rng=mx-mn||1;
+  const slot=(W-pl-pr)/N,bw=Math.max(slot*0.72,6),Y=v=>pt+(mx-v)/rng*(H-pt-pb);let g='';
+  // season bands behind bars
+  M.months.forEach((k,i)=>{const mo=+k.slice(5);if(mo===1||mo===2||mo===11||mo===12)g+='<rect x="'+(pl+i*slot)+'" y="'+(pt-20)+'" width="'+slot+'" height="'+(H-pb-pt+20)+'" fill="'+(mo<3?'rgba(232,67,106,.07)':'rgba(29,143,95,.07)')+'"/>'});
+  g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="#ccc"/>';
+  let best=0;vals.forEach((v,i)=>{if(v>vals[best])best=i});
+  vals.forEach((v,i)=>{const k=M.months[i],mo=+k.slice(5),x=pl+i*slot+(slot-bw)/2,y0=Y(0),y=Y(v),last=i===N-1&&M.partial_last;
+    const col=mode==='profit'&&v<0?'#cc0c39':monthColour(mo);
+    g+='<rect class="mbar" style="animation-delay:'+(i*18)+'ms" x="'+x+'" y="'+Math.min(y,y0)+'" width="'+bw+'" height="'+Math.max(Math.abs(y0-y),1.5)+'" rx="3" fill="'+col+'"'+(last?' fill-opacity=".45" stroke="'+col+'" stroke-dasharray="3 2"':'')+'><title>'+mLabel(k)+(last?' (so far)':'')+': '+(mode==='profit'?money(v,p.cur):n0(v)+' sold')+'</title></rect>';
+    if(i===best&&v>0)g+='<text x="'+(x+bw/2)+'" y="'+(y-6)+'" text-anchor="middle" font-size="13" font-weight="800" fill="#0f1111">'+(mode==='profit'?money(v,p.cur):n0(v))+'</text>';
+    if(mo===1||(!sm&&(mo===7||i===0)))g+='<text x="'+(x+bw/2)+'" y="'+(H-pb+16)+'" text-anchor="middle" font-size="12" font-weight="'+(mo===1?'800':'400')+'" fill="#555">'+(mo===1?k.slice(0,4):new Date(k+'-01T00:00:00').toLocaleDateString('en-GB',{month:'short'}))+'</text>';
+    else if(!(sm&&(mo===12||mo===2)))g+='<text x="'+(x+bw/2)+'" y="'+(H-pb+16)+'" text-anchor="middle" font-size="10" fill="#aaa">'+'JFMAMJJASOND'[mo-1]+'</text>';
+  });
+  return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" class="msvg">'+g+'</svg>'}
+function mLabel(k){return new Date(k+'-01T00:00:00').toLocaleDateString('en-GB',{month:'long',year:'numeric'})}
+function monthlyStory(p){const M=p.monthly,U=M.units,N=U.length;if(!U.some(v=>v>0))return 'No sales in the last two years yet.';
+  let best=0;U.forEach((v,i)=>{if(v>U[best])best=i});
+  const avg=(f)=>{const a=U.filter((v,i)=>f(+M.months[i].slice(5))&&i<N-1);return a.length?a.reduce((s,v)=>s+v,0)/a.length:0};
+  const norm=avg(m=>m>=3&&m<=10),val=avg(m=>m<=2),xm=avg(m=>m===12);let t='Best month: <b>'+mLabel(M.months[best])+'</b>.';
+  if(norm>0&&val>norm*1.4)t+=' Valentine\'s months sell about <b>'+(val/norm).toFixed(1)+'x</b> a normal month.';
+  else if(norm>0&&xm>norm*1.4)t+=' December sells about <b>'+(xm/norm).toFixed(1)+'x</b> a normal month.';
+  const neg=M.profit.slice(0,N-1).filter(v=>v<-1).length;if(neg)t+=' Lost money in <b>'+neg+'</b> month'+(neg>1?'s':'')+'.';
+  return t}
+function monthlySection(p){if(!p.monthly||!p.monthly.units)return '<div class="msec"><h4>Month by month</h4><div class="note">Monthly history is being added.</div></div>';
+  return '<div class="msec"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h4 style="margin:0">Month by month - last 2 years</h4><div class="mtog"><button class="on" data-m="units">Units sold</button><button data-m="profit">Profit</button></div></div>'+
+   '<div class="legend" style="margin-top:8px"><span><i style="background:#e8436a"></i>Valentine\'s (Jan-Feb)</span><span><i style="background:#1d8f5f"></i>Christmas (Nov-Dec)</span><span><i style="background:#ff9900"></i>Rest of year</span></div>'+
+   '<div id="mchart">'+monthlySvg(p,'units')+'</div><div class="note">'+monthlyStory(p)+' The last bar is this month so far.</div></div>'}
+function wireMonthly(p){const t=$('md').querySelector('.mtog');if(!t)return;t.querySelectorAll('button').forEach(b=>b.onclick=()=>{t.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));$('mchart').innerHTML=monthlySvg(p,b.dataset.m)})}
 
 /* ---------- CFO ---------- */
 function payoutFor(d){const h=DATA.history;if(!h)return 0;const L=h.months.length,ratio=h.payout[L-14]?h.payout[L-2]/h.payout[L-14]:1;const key=(d.getFullYear()-1)+'-'+String(d.getMonth()+1).padStart(2,'0');const i=h.months.indexOf(key);if(i<0)return 0;return h.payout[i]*ratio/new Date(d.getFullYear(),d.getMonth()+1,0).getDate()}
