@@ -30,3 +30,4 @@ Besides `updated_at` and `accounts`, data.json now holds:
 - `team`: agent notes and the daily update shown to Eli
 
 Agents never drop fields they don't own: decrypt with `node decrypt.mjs`, change only their part, re-encrypt with `node encrypt.mjs data.json`, `git pull --rebase`, push.
+- `cfo`: cash plan - as_of, company, cash[] {name,gbp}, other_cash[], overheads_month, overheads_top[[name,£/m]], amazon_profit_month, debts[[name,£]], floor, usd_gbp, seasons[], plan[] {t,d}, note. Source: QuickBooks AS Wholesalebuy Ltd (realm 9341455090563764, the Amazon company) and Zugati Ltd (9341457518181518). Payments may carry `gbp` for the cash forecast.

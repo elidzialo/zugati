@@ -139,6 +139,11 @@ svg text{font-family:inherit}
 .msec{padding:16px 22px}
 .msec h4{margin:0 0 8px;font-size:16px}
 .note{font-size:13px;color:var(--muted)}
+.plan{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;counter-reset:pl}
+.pli{background:#fff;border-radius:8px;box-shadow:0 1px 2px rgba(15,17,17,.12);padding:14px 14px 14px 58px;position:relative;counter-increment:pl}
+.pli:before{content:counter(pl);position:absolute;left:14px;top:14px;width:32px;height:32px;border-radius:50%;background:var(--nav);color:var(--orange);font-weight:800;display:flex;align-items:center;justify-content:center}
+.pli b{display:block;font-size:15px;margin-bottom:3px}.pli span{font-size:14px;color:#333}
+.more{margin-top:10px}
 /* login */
 #login{max-width:360px;margin:16vh auto;background:#fff;border-radius:10px;padding:26px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
 #login .logo{color:var(--ink);display:inline-block;margin-bottom:6px}
@@ -162,7 +167,7 @@ svg text{font-family:inherit}
   <div class="nav"><div class="in">
     <div class="logo">zugati<small>portal</small></div>
     <div class="links">
-      <a href="#today">Today</a><a href="#products">Products</a><a href="#payments">Payments</a><a href="#winners">Going well</a><a href="#seasons">Seasons</a>
+      <a href="#today">Today</a><a href="#cfo">Money</a><a href="#products">Products</a><a href="#payments">Payments</a><a href="#winners">Going well</a><a href="#seasons">Seasons</a>
     </div>
     <div class="acc"><button data-acc="UK" class="on">UK / EU</button><button data-acc="USA">USA</button></div>
   </div></div>
@@ -178,6 +183,23 @@ svg text{font-family:inherit}
     <h2>Do this now</h2>
     <p class="h2sub">The most important jobs, from your emails and your stock.</p>
     <div class="acts" id="acts"></div>
+
+    <section id="cfo">
+      <h2>Your money - CFO view</h2>
+      <p class="h2sub">Where the cash is, what's coming in, what's going out, and how much you can safely spend on stock.</p>
+      <div class="kpis" id="cfokpis"></div>
+      <div class="two" style="margin-top:14px">
+        <div class="card"><h4 style="margin:0 0 4px">Cash in the bank - next 12 weeks</h4><div class="note" style="margin-bottom:6px">If you pay only the bills we know about and your normal costs.</div><div id="cashline"></div></div>
+        <div class="card"><h4 style="margin:0 0 4px">Your big months - last 2 years</h4><div class="note" style="margin-bottom:6px">Profit in each Christmas and Valentine's month.</div><div id="bigmonths"></div></div>
+      </div>
+      <h3 style="margin:22px 0 10px;font-size:18px">The plan</h3>
+      <div class="plan" id="plan"></div>
+      <div class="two" style="margin-top:14px">
+        <div class="card"><h4 style="margin:0 0 8px">What you owe (from QuickBooks)</h4><div id="debts"></div></div>
+        <div class="card"><h4 style="margin:0 0 8px">Monthly running costs</h4><div id="costs"></div></div>
+      </div>
+      <p class="note" id="cfonote" style="margin-top:8px"></p>
+    </section>
 
     <section id="products">
       <h2>Your products</h2>
@@ -301,7 +323,7 @@ function render(){
   $('upd').innerHTML='<span class="dot'+(age>2?' old':'')+'"></span>Last update '+esc(upd.toLocaleString('en-GB',{timeZone:'Europe/London',weekday:'short',hour:'2-digit',minute:'2-digit'}));
   const h=new Date().getHours();$('greet').textContent=(h<12?'Good morning':h<18?'Good afternoon':'Good evening')+', Eli';
   $('todaydate').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
-  renderKpis();renderActs();renderChips();renderGrid();renderPay();renderWin();renderYear();renderVal();
+  renderKpis();renderActs();renderCfo();renderChips();renderGrid();renderPay();renderWin();renderYear();renderVal();
 }
 function per(k){const a=DATA.accounts[ACC];return a&&a.periods.find(p=>p.key===k)||{}}
 function renderKpis(){
@@ -324,7 +346,9 @@ function renderKpis(){
 }
 function renderActs(){
   const t=(DATA.tasks||[]).slice().sort((a,b)=>({urgent:0,high:1,normal:2}[a.level]-{urgent:0,high:1,normal:2}[b.level]));
-  $('acts').innerHTML=t.map(x=>'<div class="card act '+esc(x.level)+'"><div class="meta">'+esc(x.who)+(x.due?' · by '+fmtD(new Date(x.due+'T00:00:00')):'')+'</div><div class="tt">'+esc(x.title)+'</div><p>'+esc(x.detail)+'</p><div class="btns">'+(x.link?'<a class="btn" target="_blank" rel="noopener" href="'+esc(x.link)+'">'+esc(x.link_label||'Open')+'</a>':'')+(x.email?'<a class="btn ghost" target="_blank" rel="noopener" href="'+esc(x.email)+'">Open email</a>':'')+'</div></div>').join('');
+  const all=t;window._actsAll=window._actsAll||false;const shown=window._actsAll?all:all.slice(0,3);
+  $('acts').innerHTML=shown.map(x=>'<div class="card act '+esc(x.level)+'"><div class="meta">'+esc(x.who)+(x.due?' · by '+fmtD(new Date(x.due+'T00:00:00')):'')+'</div><div class="tt">'+esc(x.title)+'</div><p>'+esc(x.detail)+'</p><div class="btns">'+(x.link?'<a class="btn" target="_blank" rel="noopener" href="'+esc(x.link)+'">'+esc(x.link_label||'Open')+'</a>':'')+(x.email?'<a class="btn ghost" target="_blank" rel="noopener" href="'+esc(x.email)+'">Open email</a>':'')+'</div></div>').join('')+(all.length>3?'<div class="more"><span class="btn ghost" id="actmore">'+(window._actsAll?'Show less':'Show all '+all.length+' jobs')+'</span></div>':'');
+  const am=$('actmore');if(am)am.onclick=()=>{window._actsAll=!window._actsAll;renderActs()};
 }
 function list(){return DATA.products.filter(p=>p.account===ACC).map(p=>({p,f:forecast(p)}))}
 function renderChips(){
@@ -414,6 +438,50 @@ function renderPay(){
   for(let k=0;k<4;k++){const d=new Date(t.getFullYear(),t.getMonth()+k,1);const key=d.getFullYear()-1+'-'+String(d.getMonth()+1).padStart(2,'0');const i=h.months.indexOf(key);if(i<0)continue;let v=h.payout[i]*ratio;if(k===0){const dim=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();v=v*(dim-t.getDate()+1)/dim}items.push({l:d.toLocaleDateString('en-GB',{month:'short'}),s:k===0?'rest of month':'',v:Math.round(v),c:k===2||k===3?'#e8436a':'#ff9900'})}
   $('cashchart').innerHTML=barsSvg(items).replace(/>(\d[\d,]*)<\/text>/g,(m,a)=>'>£'+a+'</text>');
   $('cashnote').textContent='This year is running at '+Math.round(ratio*100)+'% of last year. Pay the Valentine stock from November/December payouts - January and February bring the big money in.';
+}
+
+
+/* ---------- CFO ---------- */
+function payoutFor(d){const h=DATA.history;if(!h)return 0;const L=h.months.length,ratio=h.payout[L-14]?h.payout[L-2]/h.payout[L-14]:1;const key=(d.getFullYear()-1)+'-'+String(d.getMonth()+1).padStart(2,'0');const i=h.months.indexOf(key);if(i<0)return 0;return h.payout[i]*ratio/new Date(d.getFullYear(),d.getMonth()+1,0).getDate()}
+function cashWeeks(){
+  const c=DATA.cfo,t0=today();let bal=c.cash.reduce((s,x)=>s+x.gbp,0);const start=bal;
+  const daily=c.overheads_month*12/365,W=[{w:0,d:t0,b:bal,in:0,out:0}];
+  const pays=(DATA.payments||[]).filter(p=>p.status!=='paid'&&p.status!=='forecast');
+  for(let w=1;w<=12;w++){let inn=0,out=0;for(let k=0;k<7;k++){const d=addD(t0,(w-1)*7+k);inn+=payoutFor(d);out+=daily;pays.forEach(p=>{if(+new Date(p.due+'T00:00:00')===+d||(w===1&&k===0&&new Date(p.due+'T00:00:00')<t0)){const g=p.gbp!=null?p.gbp:(p.amount!=null?(p.cur==='USD'?p.amount*(c.usd_gbp||.79):p.amount):0);out+=g}})}
+    bal+=inn-out;W.push({w,d:addD(t0,w*7),b:bal,in:inn,out})}
+  return {W,start,low:Math.min(...W.map(x=>x.b))};
+}
+function renderCfo(){
+  const c=DATA.cfo;if(!c){$('cfo').classList.add('hidden');return}
+  const {W,start,low}=cashWeeks(),safe=Math.max(0,Math.floor((low-c.floor)/500)*500);
+  const unknown=(DATA.payments||[]).filter(p=>p.amount==null&&!['paid','forecast'].includes(p.status)).length;
+  const comingIn=W.slice(1,9).reduce((s,x)=>s+x.in,0);
+  $('cfokpis').innerHTML=[
+   '<div class="card kpi"><div class="l">Cash in the bank now</div><div class="v">'+money(start,'GBP')+'</div><div class="d">'+esc(c.company)+' · plus '+money(c.other_cash.reduce((s,x)=>s+x.gbp,0),'GBP')+' in Zugati Ltd</div></div>',
+   '<div class="card kpi"><div class="l">Coming in from Amazon · 8 weeks</div><div class="v" style="color:var(--green)">'+money(comingIn,'GBP')+'</div><div class="d">Christmas payouts land in December</div></div>',
+   '<div class="card kpi"><div class="l">Left each month after costs</div><div class="v" style="color:var(--amber)">~'+money(c.amazon_profit_month-c.overheads_month,'GBP')+'</div><div class="d">Off-season: '+money(c.amazon_profit_month,'GBP')+' profit minus '+money(c.overheads_month,'GBP')+' costs</div></div>',
+   '<div class="card kpi" style="border:2px solid var(--orange)"><div class="l">Safe to spend on stock now</div><div class="v" style="color:var(--teal)">'+money(safe,'GBP')+'</div><div class="d">Keeps at least '+money(c.floor,'GBP')+' in the bank'+(unknown?' · '+unknown+' bills still need amounts':'')+'</div></div>'
+  ].join('');
+  // cash line
+  const Wd=560,H=230,pl=48,pr=12,pt=14,pb=30,N=W.length-1,mx=Math.max(...W.map(x=>x.b),c.floor)*1.15,mn=Math.min(0,...W.map(x=>x.b));
+  const X=i=>pl+i/N*(Wd-pl-pr),Y=v=>pt+(1-(v-mn)/(mx-mn))*(H-pt-pb);let g='';
+  for(let k=0;k<=4;k++){const v=mn+(mx-mn)/4*k;g+='<line x1="'+pl+'" x2="'+(Wd-pr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#eee"/><text x="'+(pl-6)+'" y="'+(Y(v)+4)+'" font-size="11" fill="#888" text-anchor="end">£'+Math.round(v/1000)+'k</text>'}
+  W.forEach((x,i)=>{if(i&&x.in>0){const h=Y(mn)-Y(mn+x.in);g+='<rect x="'+(X(i)-7)+'" y="'+(Y(mn)-h)+'" width="14" height="'+h+'" rx="3" fill="rgba(6,125,98,.25)"><title>Amazon in: £'+n0(x.in)+'</title></rect>'}if(i%2===0)g+='<text x="'+X(i)+'" y="'+(H-10)+'" font-size="11" fill="#888" text-anchor="middle">'+fmtD(x.d)+'</text>'});
+  g+='<line x1="'+pl+'" x2="'+(Wd-pr)+'" y1="'+Y(c.floor)+'" y2="'+Y(c.floor)+'" stroke="#cc0c39" stroke-dasharray="6 4"/><text x="'+(Wd-pr)+'" y="'+(Y(c.floor)-5)+'" font-size="11" font-weight="700" fill="#cc0c39" text-anchor="end">safety line £'+n0(c.floor)+'</text>';
+  const pts=W.map((x,i)=>X(i)+','+Y(x.b)).join(' ');
+  g+='<polygon points="'+X(0)+','+Y(mn)+' '+pts+' '+X(N)+','+Y(mn)+'" fill="rgba(0,113,133,.10)"/><polyline points="'+pts+'" fill="none" stroke="#007185" stroke-width="3" stroke-linejoin="round"/>';
+  W.forEach((x,i)=>g+='<circle cx="'+X(i)+'" cy="'+Y(x.b)+'" r="3.5" fill="#007185"><title>'+fmtD(x.d)+': £'+n0(x.b)+'</title></circle>');
+  const li=W.findIndex(x=>x.b===low);g+='<text x="'+X(li)+'" y="'+(Y(low)+18)+'" font-size="12" font-weight="800" fill="#007185" text-anchor="middle">lowest £'+n0(low)+'</text>';
+  $('cashline').innerHTML='<svg viewBox="0 0 '+Wd+' '+H+'" width="100%">'+g+'</svg><div class="note">Green bars = money in from Amazon each week. Bills without an amount yet aren\'t included.</div>';
+  // big months
+  const sm=c.seasons||[],bm=Math.max(...sm.map(x=>x.profit));
+  $('bigmonths').innerHTML=sm.map(x=>{const v=x.label.indexOf('Valentine')===0;return '<div style="margin:10px 0"><div class="nm" style="display:flex;justify-content:space-between;font-size:14px;font-weight:600"><span>'+(v?'♥ ':'★ ')+esc(x.label)+'</span><b>'+money(x.profit,'GBP')+' profit</b></div><div style="height:16px;border-radius:5px;margin-top:4px;width:'+(x.profit/bm*100)+'%;background:'+(v?'#e8436a':'#1d8f5f')+'"></div><div class="note">'+money(x.sales,'GBP')+' sales</div></div>'}).join('')+'<div class="note" style="margin-top:6px">Valentine\'s is your strongest month every year. Christmas 2025 was weaker than 2024 - more stock earlier would have helped.</div>';
+  $('plan').innerHTML=(c.plan||[]).map(p=>'<div class="pli"><b>'+esc(p.t)+'</b><span>'+esc(p.d)+'</span></div>').join('');
+  const dm=Math.max(...c.debts.map(x=>x[1]));
+  $('debts').innerHTML=c.debts.map(([n,v])=>'<div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-size:14px"><span>'+esc(n)+'</span><b>'+money(v,'GBP')+'</b></div><div style="height:12px;border-radius:4px;background:#e66a7f;margin-top:3px;width:'+(v/dm*100)+'%"></div></div>').join('')+'<div class="note">Book figures - some may be out of date or owed between your own companies.</div>';
+  const cm=Math.max(...c.overheads_top.map(x=>x[1]));
+  $('costs').innerHTML=c.overheads_top.slice().sort((a,b)=>b[1]-a[1]).map(([n,v])=>'<div style="margin:6px 0"><div style="display:flex;justify-content:space-between;font-size:14px"><span>'+esc(n)+'</span><b>'+money(v,'GBP')+'/m</b></div><div style="height:10px;border-radius:4px;background:#ffb84d;margin-top:3px;width:'+(v/cm*100)+'%"></div></div>').join('');
+  $('cfonote').textContent=c.note;
 }
 
 /* ---------- winners ---------- */
