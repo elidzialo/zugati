@@ -19,3 +19,14 @@ Periods in this order: today, yesterday, 7d, mtd, 30d, lastmonth. Each has: key,
 Products (top 15 by sales, last 30 days): rank, name, asin, sku, marketplace, units, sales, net_profit, margin, roi, refunds, advertising.
 
 Data comes from Sellerboard (`dashboard_period` with compare windows, `dashboard_table` for products). Refreshed hourly by a scheduled Claude task.
+
+## v2 data shape (all inside the encrypted file)
+Besides `updated_at` and `accounts`, data.json now holds:
+- `lead_days` (45), `season` {valentines, christmas}
+- `products[]`: id, name, img (Amazon image id), asin, sku, market, account (UK|USA), cur, stock, inbound, on_order, per_day, units30, sales30, profit30, margin, lost_sales, val_units (15 Jan-14 Feb last year), xmas_units (Dec last year), supplier, valentine (bool), note, optional `monthly` {months[], units[], profit[]}
+- `tasks[]`: id, level (urgent|high|normal), title, who, detail, due, link, link_label, email
+- `payments[]`: id, to, what, amount, cur, amount_note, status (unpaid|overdue|check|planned|later|forecast|paid), due, why, link, email
+- `history`: UK account monthly months/sales/profit/units/payout (24 months)
+- `team`: agent notes and the daily update shown to Eli
+
+Agents never drop fields they don't own: decrypt with `node decrypt.mjs`, change only their part, re-encrypt with `node encrypt.mjs data.json`, `git pull --rebase`, push.
