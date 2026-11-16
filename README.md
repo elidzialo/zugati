@@ -39,3 +39,4 @@ Agents never drop fields they don't own: decrypt with `node decrypt.mjs`, change
 - `shipping`: production_days, checkin_days, usd_gbp, methods {air,truck,sea: label, icon, days, only?}, typical {air,truck,sea $/unit}, factory_closed[{from,to,why}], lessons[] - used by the checkout planner.
 - products[].buy: {unit_usd, air_usd, truck_usd, sea_usd, est?, src} - what Eli paid per unit (from PIs and freight emails). `est` = copied from a similar product.
 - Browser-only (localStorage): zbasket (qty), zship (chosen method per product), zsup (supplier override), zorderway (did sending work).
+- team.questions: {time, text} - Agent 2's design questions for Eli (Mon/Thu); Agent 3 puts them in the morning message and records answers in team.feedback.
