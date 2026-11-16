@@ -36,3 +36,6 @@ Agents never drop fields they don't own: decrypt with `node decrypt.mjs`, change
 - team.rules: things Eli told the team (e.g. ignore Threecolts). Every agent must obey them.
 - links.main_chat: link to Eli's main Zugati chat
 - Feedback: the portal's "Done / Paid / Not relevant" buttons hide items in Eli's browser; "Tell team" emails eli@zelr.co.uk with subject "Zugati portal feedback - ...". Agent 3 reads these daily and turns them into team.rules / removes items.
+- `shipping`: production_days, checkin_days, usd_gbp, methods {air,truck,sea: label, icon, days, only?}, typical {air,truck,sea $/unit}, factory_closed[{from,to,why}], lessons[] - used by the checkout planner.
+- products[].buy: {unit_usd, air_usd, truck_usd, sea_usd, est?, src} - what Eli paid per unit (from PIs and freight emails). `est` = copied from a similar product.
+- Browser-only (localStorage): zbasket (qty), zship (chosen method per product), zsup (supplier override), zorderway (did sending work).
