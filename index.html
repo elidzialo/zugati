@@ -299,6 +299,32 @@ svg text{font-family:inherit}
 #login button{width:100%;padding:11px;font-size:16px;border:1px solid #c7811b;border-radius:20px;background:var(--orange);font-weight:700;cursor:pointer}
 #err{color:var(--red)}
 .foot{color:var(--muted);font-size:12px;margin-top:30px}
+
+/* A2 18 Nov: floating bits never overlap on a phone */
+body.hasbar .fab{bottom:84px}
+body.hasbar .toast{bottom:150px}
+.toast{flex-wrap:wrap;animation:tin .25s ease-out}
+@keyframes tin{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
+.toast .why{flex:1 0 100%;display:flex;gap:8px}
+.toast .why input{flex:1;min-width:0;border:0;border-radius:10px;padding:10px 12px;font:inherit;font-size:16px}
+.card.act,.prow{transition:opacity .35s,transform .35s}
+.card.act.gone,.prow.gone{opacity:0;transform:translateX(40px) scale(.97)}
+img.nofoto{object-fit:contain!important;background:#f3f5f5}
+.yhead{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 10px}
+.yhead .yt{flex:1 1 140px;background:#f7f9f9;border-radius:12px;padding:10px 12px}
+.yhead .yt b{display:block;font-size:22px;line-height:1.15}
+.yhead .yt span{font-size:12px;color:#5a6670;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+.yhead .yt small{display:block;font-size:13px;color:#5a6670;margin-top:2px}
+.yscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.yswipe{display:none;font-size:12px;color:#5a6670;text-align:right;margin-top:2px}
+@media (max-width:700px){
+ .fab{padding:0;width:52px;height:52px;border-radius:50%;font-size:0;right:12px}
+ .fab::before{content:"✦";font-size:22px}
+ .bbar{left:8px;right:8px;bottom:8px;transform:none;max-width:none;justify-content:space-between;border-radius:18px;padding:10px 10px 10px 16px}
+ body.hasbar .fab{bottom:80px}
+ .yscroll svg{min-width:760px}
+ .yswipe{display:block}
+}
 </style>
 </head>
 <body>
@@ -413,6 +439,7 @@ svg text{font-family:inherit}
 <div class="ov hidden" id="ov"><div class="md" id="md"></div></div>
 
 <script>
+document.addEventListener('error',e=>{const t=e.target;if(t&&t.tagName==='IMG'&&!t.dataset.fb){t.dataset.fb=1;t.classList.add('nofoto');t.src='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#f3f5f5"/><text x="50" y="62" font-size="38" text-anchor="middle">🎁</text></svg>')}},true);
 (function(){
 let DATA=null,ACC='UK',KEY=null,FILTER='all';
 const $=id=>document.getElementById(id);
@@ -422,7 +449,7 @@ async function deriveKey(pw,salt,iter){const base=await crypto.subtle.importKey(
 async function load(pw){const r=await fetch('data.enc.json?t='+Date.now(),{cache:'no-store'});const e=await r.json();if(!KEY||pw)KEY=await deriveKey(pw,b64(e.salt),e.iter);const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(e.iv)},KEY,b64(e.ct));DATA=JSON.parse(new TextDecoder().decode(p));fixRates(DATA);render()}
 /* A2: per_day sometimes comes from one marketplace row only - never let it fall far below last 30 days' real sales */
 function fixRates(D){(D.products||[]).forEach(p=>{const r30=(p.units30||0)/30;if(p.per_day_raw==null&&r30>0&&r30>(p.per_day||0)*1.5){p.per_day_raw=p.per_day||0;p.per_day=Math.round(r30*100)/100}})}
-function lastsTxt(left){if(left==null)return 'No recent sales';if(left>365)return 'Lasts over a year';if(left>120)return 'Lasts ~'+Math.round(left/30)+' months';return 'Lasts ~'+left+' days'}
+function lastsTxt(left,p){if(p&&!(p.stock>0)&&!(p.inbound>0))return 'Out of stock now';if(left!=null&&left<=1)return 'Runs out now';if(left==null)return 'No recent sales';if(left>365)return 'Lasts over a year';if(left>120)return 'Lasts ~'+Math.round(left/30)+' months';return 'Lasts ~'+left+' days'}
 
 const DAY=864e5;
 const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
@@ -534,7 +561,7 @@ function renderGrid(){
     return '<div class="pc" data-id="'+esc(p.id)+'"><div class="pimg"><img loading="lazy" src="'+img(p.img,400)+'" alt=""><span class="rib '+cls+'">'+lab+'</span><span class="mk">'+esc(p.market)+'</span>'+(p.valentine?'<span class="vtag">♥ Valentine\'s</span>':'')+'</div>'+
     '<div class="pb"><div class="pn">'+esc(p.name)+'</div>'+
     '<div class="big"><span class="num">'+n0(p.stock)+'</span><span class="u">in stock</span>'+(p.inbound&&p.on_order?'<span class="inb">+'+n0(p.inbound+p.on_order)+' coming</span>':p.inbound?'<span class="inb">+'+n0(p.inbound)+' on the way</span>':p.on_order?'<span class="inb">+'+n0(p.on_order)+' ordered</span>':'')+'</div>'+
-    '<div class="run"><i style="width:'+pct+'%;background:'+col+'"></i></div><div class="runl"><span>'+lastsTxt(left)+'</span><span>'+(p.per_day?(p.per_day<1?p.per_day.toFixed(1):Math.round(p.per_day))+' sold / day':'')+'</span></div>'+
+    '<div class="run"><i style="width:'+pct+'%;background:'+col+'"></i></div><div class="runl"><span>'+lastsTxt(left,p)+'</span><span>'+(p.per_day?(p.per_day<1?p.per_day.toFixed(1):Math.round(p.per_day))+' sold / day':'')+'</span></div>'+
     '<div class="facts"><div class="fact">'+(p.valentine&&p.val_units?'<div class="k">Need until 14 Feb</div><div class="x">'+n0(f.needVal)+'</div>':'<div class="k">Next 60 days need</div><div class="x">'+n0(f.need60)+'</div>')+'</div><div class="fact"><div class="k">Profit 30 days</div><div class="x" style="color:'+((p.profit30||0)<0?'var(--red)':'var(--green)')+'">'+(p.profit30==null?'-':money(p.profit30,p.cur))+'</div></div></div>'+
     '<div class="order '+f.st+'">'+esc(orderLine(p,f))+'</div>'+(['now','soon','ok'].includes(f.st)?addBtn(p,f):'')+'</div></div>';
   }).join('')||'<div class="card empty"><div class="ei">'+(FILTER==='soon'?'🎉':FILTER==='now'?'✅':'📭')+'</div><b>'+(FILTER==='soon'||FILTER==='now'?'Nothing to order here - all good':'Nothing here')+'</b><span class="note">Tap <b>All</b> to see every product.</span></div>';
@@ -618,7 +645,7 @@ const saveB=()=>{try{localStorage.setItem('zbasket',JSON.stringify(BASKET))}catc
 function addBtn(p,f){const inb=BASKET[p.id];return '<button class="addb'+(inb?' in':'')+'" data-add="'+esc(p.id)+'" data-q="'+(recFor(p).sug||f.qty||Math.max(100,Math.round((f.need60||0)/50)*50))+'">'+(inb?'✓ In your order ('+n0(inb)+')':'+ Add to order')+'</button>'}
 function wireAdd(root){root.querySelectorAll('[data-add]').forEach(b=>b.onclick=e=>{e.stopPropagation();const id=b.dataset.add;if(BASKET[id])delete BASKET[id];else BASKET[id]=+b.dataset.q||100;saveB();renderGrid();renderBar();if(!$('ov').classList.contains('hidden'))openP(id)})}
 function groups(B){B=B||BASKET;const g={};Object.keys(B).forEach(id=>{const p=DATA.products.find(x=>x.id===id);if(!p)return;const s=supOf(p);(g[s]=g[s]||[]).push(p)});return g}
-function renderBar(){const n=Object.keys(BASKET).length,g=groups();const bar=$('bbar');if(!n){bar.classList.add('hidden');return}
+function renderBar(){const n=Object.keys(BASKET).length,g=groups();const bar=$('bbar');document.body.classList.toggle('hasbar',!!n);if(!n){bar.classList.add('hidden');return}
   bar.classList.remove('hidden');bar.innerHTML='<span>🛒 <b>'+n+'</b> item'+(n>1?'s':'')+' · '+Object.keys(g).length+' supplier'+(Object.keys(g).length>1?'s':'')+'</span><span class="btn" id="openb">Go to checkout</span>';$('openb').onclick=openB}
 let SUPO={},SHIP={};try{SUPO=JSON.parse(localStorage.getItem('zsup')||'{}');SHIP=JSON.parse(localStorage.getItem('zship')||'{}')}catch(e){}
 const saveCo=()=>{try{localStorage.setItem('zsup',JSON.stringify(SUPO));localStorage.setItem('zship',JSON.stringify(SHIP))}catch(e){}};
@@ -736,15 +763,16 @@ function sendOrder(B){B=B||BASKET;if(!Object.keys(B).length)return;const txt=ord
 }
 
 /* ---------- feedback on tasks/payments ---------- */
-function wireDis(root){root.querySelectorAll('[data-dis]').forEach(b=>b.onclick=e=>{e.stopPropagation();let D={};try{D=JSON.parse(localStorage.getItem('zdis')||'{}')}catch(x){}
+function wireDis(root){root.querySelectorAll('[data-dis]').forEach(b=>b.onclick=e=>{e.stopPropagation();if(b.dataset.busy)return;b.dataset.busy=1;let D={};try{D=JSON.parse(localStorage.getItem('zdis')||'{}')}catch(x){}
   D[b.dataset.dis]={st:b.dataset.st,t:b.dataset.t,at:new Date().toISOString()};try{localStorage.setItem('zdis',JSON.stringify(D))}catch(x){}
-  renderActs();renderPay();try{renderCfo()}catch(x){}try{renderToday()}catch(x){}toast(b.dataset.st,b.dataset.t)})}
+  const card=b.closest('.card.act,.prow');const go=()=>{renderActs();renderPay();try{renderCfo()}catch(x){}try{renderToday()}catch(x){}};
+  if(card){card.classList.add('gone');setTimeout(go,330)}else go();toast(b.dataset.st,b.dataset.t)})}
 function toast(st,t){const old=document.querySelector('.toast');if(old)old.remove();const el=document.createElement('div');el.className='toast';
-  el.innerHTML='<span>Marked <b>'+esc(st)+'</b>. Tell the team so they learn?</span><span class="btn" id="tellt">Tell team</span><span style="cursor:pointer;font-size:20px" id="tx">×</span>';document.body.append(el);
-  $('tx').onclick=()=>el.remove();
-  $('tellt').onclick=()=>{const why=prompt('Why? (optional - e.g. "Threecolts is for Click Supplies, not Zugati")')||'';const body='Item: '+t+'\nMarked: '+st+'\nWhy: '+why+'\n\n(Sent from the Zugati portal - the Team Leader agent reads these every morning and remembers them.)';
+  el.innerHTML='<span>✓ Marked <b>'+esc(st)+'</b>. Tell the team why?</span><span style="cursor:pointer;font-size:22px;margin-left:auto;padding:0 6px" id="tx" aria-label="Close">×</span><div class="why"><input id="twhy" placeholder="Why? (optional)" aria-label="Why"><span class="btn" id="tellt">Tell team</span></div>';document.body.append(el);
+  $('tx').onclick=()=>el.remove();let kept=false;$('twhy').onfocus=()=>kept=true;
+  $('tellt').onclick=()=>{const why=($('twhy').value||'').trim();const body='Item: '+t+'\nMarked: '+st+'\nWhy: '+why+'\n\n(Sent from the Zugati portal - the Team Leader agent reads these every morning and remembers them.)';
     location.href='mailto:eli@zelr.co.uk?subject='+encodeURIComponent('Zugati portal feedback - '+st)+'&body='+encodeURIComponent(body);el.remove()};
-  setTimeout(()=>{if(el.isConnected)el.remove()},12000)}
+  setTimeout(()=>{if(el.isConnected&&!kept)el.remove()},12000)}
 /* ---------- ask Claude ---------- */
 const CTX='Context: this is Eli from my Zugati portal (https://elidzialo.github.io/zugati). My Amazon business is Zugati UK/EU and USA (Sellerboard), emails in Gmail eli@zelr.co.uk, books in QuickBooks (AS Wholesalebuy Ltd is the Amazon company). Keep answers short and simple - I prefer pictures and plain words to tables of numbers. Never send emails or pay anything without showing me first.\n\nMy question: ';
 function setupAsk(){const S=['What should I order this week?','How is my cash looking?','Draft a chase email to Jay','Which products should I drop?','What sold best last Valentine\'s?','Ideas for new products for Valentine\'s'];
@@ -958,17 +986,22 @@ function renderYear(){
   const h=DATA.history;if(!h){$('yearchart').innerHTML='<div class="note">History coming soon.</div>';return}
   const W=1000,H=280,pl=50,pr=10,pt=20,pb=40,N=h.months.length,mx=Math.max(...h.sales)*1.1;
   const bw=(W-pl-pr)/N,Y=v=>pt+(1-v/mx)*(H-pt-pb);let g='';
-  for(let k=0;k<=4;k++){const v=mx/4*k;g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#eee"/><text x="'+(pl-6)+'" y="'+(Y(v)+4)+'" font-size="11" fill="#888" text-anchor="end">£'+Math.round(v/1000)+'k</text>'}
+  for(let k=0;k<=4;k++){const v=mx/4*k;g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#eee"/><text x="'+(pl-6)+'" y="'+(Y(v)+4)+'" font-size="13" fill="#5a6670" text-anchor="end">£'+Math.round(v/1000)+'k</text>'}
   h.months.forEach((m,i)=>{const x=pl+i*bw,mo=+m.slice(5),hot=mo===2||mo===12;
     g+='<rect x="'+(x+3)+'" y="'+Y(h.sales[i])+'" width="'+(bw-6)+'" height="'+(Y(0)-Y(h.sales[i]))+'" rx="3" fill="'+(mo===2?'#f4a3b6':mo===12?'#9ad3b8':'#ffc266')+'"'+(i===N-1?' opacity=".5"':'')+'><title>'+m+': sales £'+n0(h.sales[i])+', profit £'+n0(h.profit[i])+'</title></rect>';
-    if(mo===1)g+='<text x="'+(x+bw/2)+'" y="'+(H-8)+'" font-size="12" font-weight="700" fill="#333" text-anchor="middle">'+m.slice(0,4)+'</text>';
-    g+='<text x="'+(x+bw/2)+'" y="'+(H-24)+'" font-size="10" fill="#888" text-anchor="middle">'+new Date(m+'-01').toLocaleDateString('en-GB',{month:'narrow'})+'</text>';
-    if(hot&&h.sales[i]>40000)g+='<text x="'+(x+bw/2)+'" y="'+(Y(h.sales[i])-6)+'" font-size="11" font-weight="800" fill="'+(mo===2?'#b0123b':'#0b5d3b')+'" text-anchor="middle">'+(mo===2?'♥':'★')+'</text>';
+    if(mo===1)g+='<text x="'+(x+bw/2)+'" y="'+(H-6)+'" font-size="14" font-weight="700" fill="#333" text-anchor="middle">'+m.slice(0,4)+'</text>';
+    g+='<text x="'+(x+bw/2)+'" y="'+(H-24)+'" font-size="13" fill="#5a6670" text-anchor="middle">'+new Date(m+'-01').toLocaleDateString('en-GB',{month:'narrow'})+'</text>';
+    if(hot&&h.sales[i]>40000)g+='<text x="'+(x+bw/2)+'" y="'+(Y(h.sales[i])-8)+'" font-size="15" font-weight="800" fill="'+(mo===2?'#b0123b':'#0b5d3b')+'" text-anchor="middle">'+(mo===2?'♥':'★')+' £'+Math.round(h.sales[i]/1000)+'k</text>';
   });
   const pts=h.profit.map((v,i)=>(pl+i*bw+bw/2)+','+Y(v)).join(' ');
   g+='<polyline points="'+pts+'" fill="none" stroke="#067d62" stroke-width="3" stroke-linejoin="round"/>';
   h.profit.forEach((v,i)=>g+='<circle cx="'+(pl+i*bw+bw/2)+'" cy="'+Y(v)+'" r="3" fill="#067d62"/>');
-  $('yearchart').innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="100%">'+g+'</svg><div class="note">♥ = Valentine\'s month · ★ = Christmas · UK/EU account. This month is still in progress.</div>';
+  const sum=a=>a.reduce((x,y)=>x+(y||0),0),L12=h.sales.slice(-12),P12=h.profit.slice(-12),pp=h.profit.slice(-24,-12);
+  const bi=h.profit.indexOf(Math.max(...h.profit)),bm=new Date(h.months[bi]+'-01').toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  const ch=pp.length===12&&sum(pp.slice(0,11))?Math.round((sum(P12.slice(0,11))/sum(pp.slice(0,11))-1)*100):null;
+  const head='<div class="yhead"><div class="yt"><span>Last 12 months</span><b>'+money(sum(L12),'GBP')+'</b><small>sales</small></div><div class="yt"><span>Profit</span><b style="color:var(--green)">'+money(sum(P12),'GBP')+'</b>'+(ch!=null?'<small><b class="'+(ch>=0?'up':'down')+'" style="display:inline;font-size:13px">'+(ch>=0?'▲ ':'▼ ')+Math.abs(ch)+'%</b> vs year before</small>':'')+'</div><div class="yt"><span>Best month</span><b style="color:#b0123b">'+esc(bm)+'</b><small>'+money(h.profit[bi],'GBP')+' profit</small></div></div>';
+  $('yearchart').innerHTML=head+'<div class="yscroll"><svg viewBox="0 0 '+W+' '+H+'" width="100%">'+g+'</svg></div><div class="yswipe">Swipe for older months ←</div><div class="note">♥ = Valentine\'s month · ★ = Christmas · UK/EU account. This month is still in progress.</div>';
+  const ys=$('yearchart').querySelector('.yscroll');if(ys)requestAnimationFrame(()=>ys.scrollLeft=ys.scrollWidth);
 }
 function renderVal(){
   const L=DATA.products.filter(p=>p.account===ACC&&p.valentine&&p.val_units&&!(p.margin<0)).sort((a,b)=>b.val_units-a.val_units);
