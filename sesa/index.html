@@ -176,6 +176,21 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .hidden{display:none!important}
 @media (min-width:760px){.props{grid-template-columns:1fr 1fr}.moves{grid-template-columns:repeat(3,1fr)}.move{flex-direction:column;align-items:flex-start}.move .chk{align-self:flex-end}.alerts{grid-template-columns:1fr 1fr}.pays,.wait{grid-template-columns:1fr 1fr}}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
+/* A2 18 Nov: rent by property + in vs out */
+.io{margin-top:10px}.io .ttl{font-size:15px;font-weight:700;margin-bottom:10px}
+.io .sbar{display:flex;height:22px;border-radius:12px;overflow:hidden;background:var(--line)}
+.io .sbar i{display:block;height:100%;transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.io .sbar .r{background:var(--grn)}.io .sbar .c{background:var(--pink)}
+.io .lg{display:flex;justify-content:space-between;margin-top:8px;font-size:14px;color:var(--muted)}.io .lg b{color:var(--ink);font-size:16px}
+.io .say{margin-top:10px;font-size:15px;line-height:1.4}
+.rp{display:grid;gap:10px}
+.rpc{border-radius:20px;padding:14px 16px;color:#fff;display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;border:0;text-align:left;font:inherit;cursor:pointer;width:100%}
+.rpc .n{font-weight:700;font-size:16px}.rpc .v{font-size:24px;font-weight:800;text-align:right}
+.rpc .m{font-size:13px;opacity:.92;grid-column:1/-1}
+.rpc .tr{grid-column:1/-1;height:8px;border-radius:6px;background:rgba(255,255,255,.3);overflow:hidden}.rpc .tr i{display:block;height:100%;background:#fff;border-radius:6px;transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.rpc.zero{background:var(--card)!important;color:var(--ink);border:2px dashed var(--red)}.rpc.zero .v{color:var(--red)}.rpc.zero .tr{background:var(--redbg)}
+.rentchip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.22);border-radius:12px;padding:5px 10px;font-size:13px;font-weight:600;margin-top:8px}
 </style>
 </head>
 <body>
@@ -262,11 +277,19 @@ function home(d){let h='';
   h+=`<h2>Watch out <span class="cnt">${n}</span></h2><div class="alerts" id="alerts">${d.watch.slice(0,3).map((w,i)=>alertCard(w,i)).join('')}</div>${n>3?`<button class="more" id="morebtn">Show ${n-3} more</button>`:''}`}
  return h}
 function alertCard(w,i){return `<div class="alert ${i===0?'r':''}"><div class="ic">${ic('alert',18)}</div><div>${esc(w)}</div></div>`}
+function rentOf(p){const m=DATA.money;if(!m||!m.payments)return{sum:0,n:0,last:null};const k=short(p.name).toLowerCase();const ps=m.payments.filter(x=>String(x.property||'').toLowerCase().includes(k));
+ return{sum:ps.reduce((a,x)=>a+(+x.amount||0),0),n:ps.length,last:ps.map(x=>x.date).sort().pop()||null}}
+function dShort(d){return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
 function money(m){let h='';const max=Math.max(...m.months.map(x=>Math.max(x.rent||0,x.costs||0)),1);
  h+=`<div class="mhero"><div class="l">Rent received since Sep</div><div class="big" data-count="${Number(m.rent_total)||0}">${gbp(m.rent_total)}</div>
  ${m.months.length?`<div class="bars">${m.months.map(x=>`<div class="bar"><b>${gbp(x.rent)}</b><div class="bpair"><i class="r" data-h="${Math.round((x.rent||0)/max*100)}"></i><i class="c" data-h="${Math.round((x.costs||0)/max*100)}"></i></div><span>${esc(x.m)}${x.partial?' so far':''}</span></div>`).join('')}</div>
  <div class="legend"><span><i style="background:#fff"></i>Rent in</span><span><i style="background:rgba(255,255,255,.3)"></i>Costs out</span></div>`:''}</div>
  <div class="tiles"><div class="tile tb"><div class="ic">${ic('bank',18)}</div><b>${gbp(m.bank_balance,2)}</b><span>In the bank (last sync)</span></div><div class="tile tp"><div class="ic">${ic('out',18)}</div><b>${gbp(m.costs_total)}</b><span>Costs since Sep</span></div></div>`;
+ {const r=+m.rent_total||0,c=+m.costs_total||0,t=(r+c)||1,net=r-c;
+ h+=`<div class="card io"><div class="ttl">Money in vs money out since Sep</div><div class="sbar"><i class="r" data-w="${Math.round(r/t*100)}" style="width:0"></i><i class="c" data-w="${Math.round(c/t*100)}" style="width:0"></i></div>
+ <div class="lg"><span><b>${gbp(r)}</b> in</span><span><b>${gbp(c)}</b> out</span></div><div class="say">${net>=0?`You are <b style="color:var(--grn)">${gbp(net)} up</b> - rent covers the costs.`:`Costs are <b style="color:var(--red)">${gbp(-net)} more</b> than rent so far - mostly set-up and repairs, so this should turn round once all rents come in.`}</div></div>`;}
+ if(DATA.properties.length){const rs=DATA.properties.map(p=>[p,rentOf(p)]),mx=Math.max(...rs.map(x=>x[1].sum),1);
+ h+=`<h2>Rent by property</h2><div class="rp">${rs.map(([p,x],i)=>`<button class="rpc ${GR[i%4]} ${x.sum?'':'zero'}" data-tab="${esc(p.id)}"><div class="n">${esc(short(p.name))}</div><div class="v">${gbp(x.sum)}</div><div class="tr"><i data-w="${Math.max(x.sum?6:0,Math.round(x.sum/mx*100))}" style="width:0"></i></div><div class="m">${x.sum?`${x.n} payment${x.n>1?'s':''} since Sep - last on ${esc(dShort(x.last))}`:'No rent in yet - worth chasing'}</div></button>`).join('')}</div>`}
  if(m.expected.length)h+=`<h2>Waiting for</h2><div class="wait">${m.expected.map(e=>`<div class="wc"><div class="ic">${ic('clock',18)}</div><div><b>${esc(e.property)}</b>${esc(e.note)}</div></div>`).join('')}</div>`;
  if(m.payments.length)h+=`<h2>Money in</h2><div class="pays">${m.payments.map(p=>`<div class="pay"><div class="ic">${ic('in',18)}</div><div><div class="w">${esc(p.from)}</div><div class="d">${esc(p.property)} - ${esc(new Date(p.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'}))}</div></div><div class="amt">+${gbp(p.amount,2)}</div></div>`).join('')}</div>`;
  if(m.costs_top.length){const cols=['#F07C8C','#4c7de0','#6a4bc4','#e3a32e','#2f9a63','#8a8a8a'],tot=m.costs_top.reduce((a,c)=>a+(+c[1]||0),0)||1,R=52,C=2*Math.PI*R;let off=0;
@@ -276,7 +299,7 @@ function money(m){let h='';const max=Math.max(...m.months.map(x=>Math.max(x.rent
  h+=`<div class="note">${esc(m.note||'')} Source: ${esc(m.source||'QuickBooks')}${m.as_of?', as of '+esc(m.as_of):''}.</div>`;
  return h}
 function prop(p,i){let h='';const t=p.tasks.length,o=open_(p),att=p.units.filter(u=>u.tag!=='ok').length;
- h+=`<div class="pban ${GR[i%4]}"><div class="t">${esc(p.name)}</div><div class="a">${esc(p.area||'')}</div>${p.status?`<div class="s">${esc(p.status)}</div>`:''}${p.event?`<div class="ev">${ic('cal',16)} ${esc(p.event)}</div>`:''}
+ h+=`<div class="pban ${GR[i%4]}"><div class="t">${esc(p.name)}</div><div class="a">${esc(p.area||'')}</div>${p.status?`<div class="s">${esc(p.status)}</div>`:''}${p.event?`<div class="ev">${ic('cal',16)} ${esc(p.event)}</div>`:''}${DATA.money?(()=>{const x=rentOf(p);return `<div class="rentchip">${ic('pound',14,2.4)} ${x.sum?`${gbp(x.sum)} rent in since Sep`:'No rent in yet'}</div>`})():''}
  <div class="pstats"><div><b id="po">${o}</b><span>Jobs left</span></div><div><b>${p.units.length}</b><span>Units</span></div><div><b>${att}</b><span>Need a look</span></div></div></div>`;
  h+=`<h2>Jobs <span class="cnt" id="pc">${t-o}/${t} done</span></h2>`;
  if(!t)h+=`<div class="alldone">Nothing to do here<small>Enjoy it while it lasts</small></div>`;
@@ -313,7 +336,7 @@ function render(){const d=DATA,o=allO();let h='';
  document.getElementById('app').innerHTML=h;
  const tabs=[['home','Today','home',0],...(d.money?[['money','Money','pound',0]]:[]),...d.properties.map(p=>[p.id,short(p.name),'bld',open_(p)])];
  document.getElementById('nav').innerHTML=tabs.map(([id,l,icn,n])=>`<button class="nb ${TAB===id?'on':''}" data-tab="${esc(id)}" ${TAB===id?'aria-current="page"':''}>${ic(icn,20)}<span>${esc(l)}</span>${n?`<b class="n" data-n="${esc(id)}">${n}</b>`:''}</button>`).join('');
- requestAnimationFrame(()=>setTimeout(()=>document.querySelectorAll('.bpair i').forEach(e=>e.style.height=e.dataset.h+'%'),40));countUp()}
+ requestAnimationFrame(()=>setTimeout(()=>{document.querySelectorAll('.bpair i').forEach(e=>e.style.height=e.dataset.h+'%');document.querySelectorAll('[data-w]').forEach(e=>e.style.width=e.dataset.w+'%')},40));countUp()}
 function refresh(){const o=allO(),$=id=>document.getElementById(id);
  if($('openN'))$('openN').textContent=o;if($('hring'))$('hring').innerHTML=heroRing();if($('hisub'))$('hisub').textContent=subline(o);if($('t3c'))$('t3c').textContent=t3left()+' left';
  document.querySelectorAll('[data-n]').forEach(n=>{const p=DATA.properties.find(x=>x.id===n.dataset.n);if(p){const k=open_(p);n.textContent=k;n.style.display=k?'':'none'}});
