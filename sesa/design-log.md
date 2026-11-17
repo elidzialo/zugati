@@ -1,0 +1,1 @@
+2026-11-17 Optimizer: fixed tap targets under 44px (tabs, tick buttons), raised tiny text to 12px and guarded against missing data fields, then stacked Today's top 3 so nothing hides off-screen, added a cheer toast with buzz when you tick a task, and a count-up on the rent total.

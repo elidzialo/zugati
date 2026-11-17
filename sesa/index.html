@@ -17,23 +17,24 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Poppins,-apple
 .wrap{max-width:620px;margin:0 auto;padding:0 14px 90px}
 .hero{background:var(--dark);color:#fff;border-radius:0 0 26px 26px;padding:22px 18px 18px;margin:0 -14px 14px}
 .brand b{font-size:24px;letter-spacing:5px;font-weight:700}.brand b i{color:var(--pink);font-style:normal}
-.brand small{display:block;letter-spacing:6px;font-size:10px;color:#aaa;margin-top:1px}
+.brand small{display:block;letter-spacing:6px;font-size:12px;color:#aaa;margin-top:1px}
 .hi{font-size:20px;font-weight:600;margin:16px 0 2px}.up{font-size:12px;color:#9a9a9a}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
-.stat{background:#2a2a2c;border-radius:14px;padding:10px 10px 9px}.stat .v{font-size:19px;font-weight:700;line-height:1.2}.stat .l{font-size:11px;color:#aaa}
+.stat{background:#2a2a2c;border-radius:14px;padding:10px 10px 9px}.stat .v{font-size:19px;font-weight:700;line-height:1.2}.stat .l{font-size:12px;color:#b5b5b5}
 .stat.p .v{color:var(--pink)}
 .tabs{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:6px}
 .tabs::-webkit-scrollbar{display:none}
-.tab{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:22px;padding:8px 14px;font:500 14px Poppins,sans-serif;cursor:pointer;display:flex;gap:6px;align-items:center}
+.tabs{-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent);padding-right:28px}
+.tab{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:22px;padding:11px 15px;min-height:44px;font:500 14px Poppins,sans-serif;cursor:pointer;display:flex;gap:6px;align-items:center}
 .tab.on{background:var(--dark);color:#fff;border-color:var(--dark)}
-.tab .n{background:var(--pink);color:#fff;border-radius:10px;font-size:11px;padding:0 6px;min-width:18px;text-align:center}
+.tab .n{background:var(--pink);color:#fff;border-radius:10px;font-size:12px;padding:0 6px;min-width:18px;text-align:center}
 .sec{display:none;animation:fade .25s ease}.sec.on{display:block}@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 h2{font-size:17px;font-weight:600;margin:18px 2px 8px;display:flex;align-items:center;gap:8px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin-bottom:10px}
 .head{font-size:17px;font-weight:600;margin:0;line-height:1.35}
-.moves{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 8px;margin:0 -2px;scrollbar-width:none}.moves::-webkit-scrollbar{display:none}
-.move{flex:0 0 78%;scroll-snap-align:start;border-radius:18px;padding:14px 16px;min-height:120px;display:flex;flex-direction:column;gap:8px}
-.move .num{font-size:30px;font-weight:700;line-height:1}.move p{margin:0;font-size:15px;font-weight:500}
+.moves{display:flex;flex-direction:column;gap:8px}
+.move{border-radius:18px;padding:12px 16px;display:flex;align-items:center;gap:14px;animation:fade .35s ease both}.move:nth-child(2){animation-delay:.06s}.move:nth-child(3){animation-delay:.12s}
+.move .num{font-size:28px;font-weight:700;line-height:1;flex:0 0 22px;text-align:center}.move p{margin:0;font-size:15px;font-weight:500;line-height:1.4}
 .m1{background:var(--pinkbg);color:var(--ink)}.m1 .num{color:var(--pink)}.m2{background:var(--bluebg)}.m2 .num{color:var(--blue)}.m3{background:var(--violetbg)}.m3 .num{color:var(--violet)}
 .watch{background:var(--redbg);color:var(--red);border-radius:16px;padding:12px 14px;font-size:14px}.watch div{display:flex;gap:8px;margin:3px 0}.watch div:before{content:"!";font-weight:700}
 .pcard{border-radius:18px;padding:14px 16px;margin-bottom:10px;cursor:pointer;display:flex;gap:12px;align-items:center;border:1px solid var(--line);background:var(--card)}
@@ -54,7 +55,7 @@ h2{font-size:17px;font-weight:600;margin:18px 2px 8px;display:flex;align-items:c
 .pay .amt{margin-left:auto;font-weight:700;color:var(--grn);font-size:16px}.pay .w{font-size:14px;font-weight:500}.pay .d{font-size:12px;color:var(--muted)}
 .exp{background:var(--ambbg);color:var(--amb);border-radius:14px;padding:10px 14px;margin-bottom:8px;font-size:14px}.exp b{display:block;font-weight:600}
 .cost{margin:8px 0}.cost .row{display:flex;justify-content:space-between;font-size:13px}.cost .tr{height:8px;background:var(--line);border-radius:6px;margin-top:4px;overflow:hidden}.cost .tr i{display:block;height:100%;background:var(--pink);border-radius:6px}
-.mini{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.mini div{background:var(--bg);border-radius:12px;padding:8px 10px}.mini b{display:block;font-size:17px}.mini span{font-size:11px;color:var(--muted)}
+.mini{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.mini div{background:var(--bg);border-radius:12px;padding:8px 10px}.mini b{display:block;font-size:17px}.mini span{font-size:12px;color:var(--muted)}
 .note{font-size:12px;color:var(--muted);margin-top:8px}
 /* property */
 .pbanner{border-radius:20px;padding:16px;color:#fff;margin-bottom:10px}
@@ -64,21 +65,23 @@ h2{font-size:17px;font-weight:600;margin:18px 2px 8px;display:flex;align-items:c
 .u{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 14px}
 .uh{display:flex;gap:10px;align-items:center}.av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;flex:0 0 40px}
 .un{font-weight:600;font-size:14px}.ut{font-size:12px;color:var(--muted)}
-.tag{margin-left:auto;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.tag{margin-left:auto;font-size:12px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
 .ok{background:var(--grnbg);color:var(--grn)}.warn{background:var(--ambbg);color:var(--amb)}.bad{background:var(--redbg);color:var(--red)}
 .unote{font-size:13px;margin-top:8px;line-height:1.5}
 .task{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:8px;transition:opacity .3s,transform .2s}
 .task .bar2{width:5px;align-self:stretch;border-radius:4px;flex:0 0 5px}
 .urgent .bar2{background:var(--red)}.high .bar2{background:#e3a32e}.normal .bar2{background:var(--line)}
 .task b{font-weight:600;font-size:14px;display:block}.task span{font-size:12px;color:var(--muted)}
-.chk{margin-left:auto;width:34px;height:34px;border-radius:50%;border:2px solid var(--line);background:none;cursor:pointer;flex:0 0 34px;display:flex;align-items:center;justify-content:center;color:transparent;font-size:16px;font-weight:700;transition:all .2s}
+.chk{margin-left:auto;width:44px;height:44px;border-radius:50%;border:2px solid var(--line);background:none;cursor:pointer;flex:0 0 44px;display:flex;align-items:center;justify-content:center;color:transparent;font-size:16px;font-weight:700;transition:all .2s}
 .task.done{opacity:.45}.task.done b{text-decoration:line-through}.task.done .chk{background:var(--grn);border-color:var(--grn);color:#fff}
 .pop{animation:pop .35s ease}@keyframes pop{50%{transform:scale(1.04)}}
-.lvl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:14px 2px 6px}
+.lvl{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:14px 2px 6px}
 #gate{max-width:360px;margin:16vh auto 0;padding:0 18px;text-align:center}
 #gate .hero{border-radius:22px;margin:0 0 16px;text-align:left}
 #gate input{width:100%;font:16px Poppins,sans-serif;padding:14px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);margin:0 0 10px}
 #gate button{width:100%;font:600 16px Poppins,sans-serif;padding:14px;border-radius:14px;border:0;background:var(--pink);color:#fff;cursor:pointer}
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:var(--dark);color:#fff;border-radius:24px;padding:11px 18px;font:500 14px Poppins,sans-serif;opacity:0;transition:all .25s ease;pointer-events:none;z-index:20;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.25)}.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 .hidden{display:none!important}#err{color:var(--red);font-size:14px}
 </style>
 </head>
@@ -90,6 +93,7 @@ h2{font-size:17px;font-weight:600;margin:18px 2px 8px;display:flex;align-items:c
   <p id="err" class="hidden">Wrong password, or the data could not be loaded.</p>
 </div>
 <div id="app" class="wrap hidden"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script>
 let DATA,KEY,TAB='home';
 const COL=['#F07C8C','#2a63b0','#6a4bc4','#23824a','#c97a12'];
@@ -99,7 +103,8 @@ const gbp=(n,dp)=>'£'+Number(n||0).toLocaleString('en-GB',{minimumFractionDigit
 let DONE={};try{DONE=JSON.parse(localStorage.getItem('sesaDone')||'{}')}catch(e){}
 function saveDone(){try{localStorage.setItem('sesaDone',JSON.stringify(DONE))}catch(e){}}
 async function deriveKey(pw,salt,iter){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:iter,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt'])}
-async function load(pw){const r=await fetch('data.enc.json?t='+Date.now(),{cache:'no-store'});const e=await r.json();if(!KEY||pw)KEY=await deriveKey(pw,b64(e.salt),e.iter);const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(e.iv)},KEY,b64(e.ct));DATA=JSON.parse(new TextDecoder().decode(p));render()}
+async function load(pw){const r=await fetch('data.enc.json?t='+Date.now(),{cache:'no-store'});const e=await r.json();if(!KEY||pw)KEY=await deriveKey(pw,b64(e.salt),e.iter);const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(e.iv)},KEY,b64(e.ct));DATA=JSON.parse(new TextDecoder().decode(p));norm(DATA);render()}
+function norm(d){d.properties=d.properties||[];d.properties.forEach(p=>{p.units=p.units||[];p.tasks=p.tasks||[];p.name=p.name||'Property'});if(d.money){const m=d.money;m.months=m.months||[];m.payments=m.payments||[]}}
 async function go(){const pw=document.getElementById('pw').value;document.getElementById('err').classList.add('hidden');
  try{await load(pw);try{sessionStorage.setItem('sesaPw',pw)}catch(e){}document.getElementById('gate').classList.add('hidden');document.getElementById('app').classList.remove('hidden')}
  catch(e){KEY=null;document.getElementById('err').classList.remove('hidden')}}
@@ -107,10 +112,14 @@ function ago(t){const m=Math.round((Date.now()-new Date(t))/60000);if(m<60)retur
 function greet(){const h=new Date().getHours();return h<12?'Good morning':h<18?'Good afternoon':'Good evening'}
 function open_(p){return p.tasks.filter(t=>!DONE[t.id]).length}
 function ring(p,c){const t=p.tasks.length,d=t-open_(p),r=17,C=2*Math.PI*r,f=t?d/t:0;
- return `<svg class="ring" width="46" height="46" viewBox="0 0 46 46" aria-label="${d} of ${t} done"><circle cx="23" cy="23" r="${r}" fill="none" stroke="var(--line)" stroke-width="5"/><circle cx="23" cy="23" r="${r}" fill="none" stroke="${c}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-f)}" transform="rotate(-90 23 23)"/><text x="23" y="27" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink)">${d}/${t}</text></svg>`}
+ return `<svg class="ring" width="46" height="46" viewBox="0 0 46 46" aria-label="${d} of ${t} done"><circle cx="23" cy="23" r="${r}" fill="none" stroke="var(--line)" stroke-width="5"/><circle cx="23" cy="23" r="${r}" fill="none" stroke="${c}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-f)}" transform="rotate(-90 23 23)"/><text x="23" y="27" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink)">${d}/${t}</text></svg>`}
 function initials(s){return String(s||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()}
 function setTab(t){TAB=t;render();window.scrollTo({top:0,behavior:'smooth'})}
-function toggle(id,el){DONE[id]=!DONE[id];if(!DONE[id])delete DONE[id];saveDone();const row=el.closest('.task');row.classList.toggle('done',!!DONE[id]);row.classList.remove('pop');void row.offsetWidth;row.classList.add('pop');refreshCounts()}
+function toggle(id,el){DONE[id]=!DONE[id];if(!DONE[id])delete DONE[id];saveDone();const row=el.closest('.task');row.classList.toggle('done',!!DONE[id]);row.classList.remove('pop');void row.offsetWidth;row.classList.add('pop');refreshCounts();
+ if(DONE[id]){const p=DATA.properties.find(p=>p.tasks.some(t=>t.id===id)),left=p?open_(p):0;try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}
+  toast(left?`Nice one - ${left} left at ${p.name.replace(/^\d+\s*/,'').replace(/ Road South$/,'')}`:`All done at ${p.name.replace(/^\d+\s*/,'')}! Take the evening off`)}}
+let TT;function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('on');clearTimeout(TT);TT=setTimeout(()=>e.classList.remove('on'),2200)}
+function countUp(){document.querySelectorAll('[data-count]').forEach(e=>{const to=+e.dataset.count,t0=performance.now();if(!to||matchMedia('(prefers-reduced-motion:reduce)').matches)return;const st=n=>{const k=Math.min(1,(n-t0)/700),v=to*(1-Math.pow(1-k,3));e.textContent=gbp(v);if(k<1)requestAnimationFrame(st)};requestAnimationFrame(st)})}
 function refreshCounts(){const tot=DATA.properties.reduce((a,p)=>a+open_(p),0);const s=document.getElementById('openN');if(s)s.textContent=tot;
  DATA.properties.forEach((p,i)=>{const n=document.getElementById('tn_'+p.id);if(n)n.textContent=open_(p);const r=document.getElementById('rg_'+p.id);if(r)r.outerHTML=ring(p,COL[i%COL.length]).replace('<svg','<svg id="rg_'+p.id+'"')})}
 function home(d){let h='';
@@ -140,14 +149,14 @@ function prop(p,i){const c=COL[i%COL.length];let h='';
  return h}
 function render(){const d=DATA,tot=d.properties.reduce((a,p)=>a+open_(p),0);let h='';
  h+=`<div class="hero"><div class="brand"><b>SESA<i>.</i></b><small>ESTATES HUB</small></div><div class="hi">${greet()}, Eli</div><div class="up">Updated ${esc(ago(d.updated_at))}</div>
- <div class="stats"><div class="stat p"><div class="v">${d.money?gbp(d.money.rent_total):'-'}</div><div class="l">Rent in so far</div></div><div class="stat"><div class="v" id="openN">${tot}</div><div class="l">Open tasks</div></div><div class="stat"><div class="v">${d.money?gbp(d.money.bank_balance):'-'}</div><div class="l">In the bank</div></div></div></div>`;
- const tabs=[['home','Today',0],...(d.money?[['money','Money',0]]:[]),...d.properties.map(p=>[p.id,p.name.replace(/^\d+\s*/,'').replace(/ Road South$/,''),open_(p)])];
+ <div class="stats"><div class="stat p"><div class="v">${d.money?gbp(d.money.rent_total):'-'}</div><div class="l">Rent in so far</div></div><div class="stat"><div class="v" id="openN">${tot}</div><div class="l">Open tasks</div></div><div class="stat"><div class="v">${d.money?gbp(d.money.bank_balance):'-'}</div><div class="l">Bank, last sync</div></div></div></div>`;
+ const tabs=[['home','Today',0],...(d.money?[['money','Money',0]]:[]),...d.properties.map(p=>[p.id,p.name.replace(/^\d+\s*/,'').replace(/ Road South$/,'').replace(/ HMO$/,''),open_(p)])];
  h+=`<div class="tabs">${tabs.map(([id,l,n])=>`<button class="tab ${TAB===id?'on':''}" onclick="setTab('${esc(id)}')">${esc(l)}${n?`<span class="n" id="tn_${esc(id)}">${n}</span>`:''}</button>`).join('')}</div>`;
  h+=`<div class="sec on">`;
  if(TAB==='home')h+=home(d);else if(TAB==='money'&&d.money)h+=money(d.money);else{const i=d.properties.findIndex(p=>p.id===TAB);h+=i>=0?prop(d.properties[i],i):home(d)}
  h+=`</div>`;
  document.getElementById('app').innerHTML=h;
- requestAnimationFrame(()=>setTimeout(()=>document.querySelectorAll('.bpair i').forEach(e=>e.style.height=e.dataset.h+'%'),40))}
+ requestAnimationFrame(()=>setTimeout(()=>document.querySelectorAll('.bpair i').forEach(e=>e.style.height=e.dataset.h+'%'),40));countUp()}
 (async()=>{let pw;try{pw=sessionStorage.getItem('sesaPw')}catch(e){}if(pw){document.getElementById('pw').value=pw;go()}})();
 </script>
 </body>
