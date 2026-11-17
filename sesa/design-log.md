@@ -1,1 +1,2 @@
 2026-11-17 Optimizer: fixed tap targets under 44px (tabs, tick buttons), raised tiny text to 12px and guarded against missing data fields, then stacked Today's top 3 so nothing hides off-screen, added a cheer toast with buzz when you tick a task, and a count-up on the rent total.
+2026-11-17 Redesign (Eli asked for much better visuals): bottom app-style nav, gradient property cards with progress bars and tenant faces, tickable Today's 3 things, green money hero with bar chart, cost donut, card lists for alerts and payments, confetti when a property or the top 3 is cleared.
