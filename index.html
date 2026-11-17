@@ -249,6 +249,18 @@ svg text{font-family:inherit}
 .rec.now{background:var(--redbg);color:#7a0721}.rec.soon{background:var(--amberbg);color:#7a3500}.rec.ok{background:var(--greenbg);color:#044d3c}.rec.stop,.rec.slow{background:var(--greybg);color:#333}
 .msec{padding:16px 22px}
 .msec h4{margin:0 0 8px;font-size:16px}
+.yoy .ystory{background:var(--greybg);border-radius:12px;padding:10px 12px;margin:10px 0 2px;font-size:15px;line-height:1.45}
+.yline{stroke-dasharray:1400;stroke-dashoffset:1400;animation:ydraw 1.1s ease-out forwards}
+.yline[stroke-dasharray="5 4"]{animation:none;stroke-dashoffset:0}
+@keyframes ydraw{to{stroke-dashoffset:0}}
+.ydt{color:#888;font-weight:400}
+@media(max-width:600px){.ydt{display:none}.yoy .legend{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px}}
+.vpk{margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.vpk-h{font-weight:800;font-size:14px;color:#b0254d;margin-bottom:6px}
+.vrow{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:4px 0}
+.vy{font-weight:800}.vv{font-weight:800;font-size:15px;min-width:64px;text-align:right}
+.vbar{background:var(--greybg);border-radius:8px;height:16px;overflow:hidden}.vbar div{height:100%;border-radius:8px;transition:width .6s}
+
 .note{font-size:13px;color:var(--muted)}
 .plan{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;counter-reset:pl}
 .pli{background:#fff;border-radius:8px;box-shadow:0 1px 2px rgba(15,17,17,.12);padding:14px 14px 14px 58px;position:relative;counter-increment:pl}
@@ -754,9 +766,9 @@ function renderFlow(){const c=DATA.cfo,f=c.real_in;if(!f){$('flow').innerHTML=''
   $('flow').innerHTML='<div style="font-weight:800;color:var(--green);margin-top:4px">Money in</div>'+ins.map(row).join('')+'<div style="font-weight:800;color:var(--red);margin-top:10px">Money out</div>'+outs.map(row).join('')+'<div class="note" style="margin-top:8px">Amazon only brought in about '+money(f.amazon_in/f.weeks,'GBP')+' a week. The rest came from Zalo Estates.</div>'}
 function renderWk(){const {W}=cashWeeks();const rows=W.slice(1,11);
   $('wkplan').innerHTML=rows.map(x=>'<div style="display:grid;grid-template-columns:58px 1fr auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #eee"><div style="font-weight:800">'+fmtD(x.d)+'</div><div style="font-size:13px">'+(x.pay?'<b>Pay:</b> '+esc(x.pay):'<span class="note">Nothing extra - let cash build</span>')+'<div class="note">In '+money(x.in,'GBP')+' · out '+money(x.out,'GBP')+'</div></div><div style="font-weight:800;color:'+(x.b<DATA.cfo.floor?'var(--red)':'var(--green)')+'">'+money(x.b,'GBP')+'</div></div>').join('')+'<div class="note" style="margin-top:8px">'+esc(DATA.cfo.weekly_note||'')+'</div>'}
-/* ---------- monthly history (24 months) ---------- */
+/* ---------- monthly history (up to 39 months) ---------- */
 function monthColour(mo){return mo===1||mo===2?'#e8436a':mo===11||mo===12?'#1d8f5f':'#ff9900'}
-function monthlySvg(p,mode){const M=p.monthly;const vals=mode==='profit'?M.profit:M.units;const N=vals.length;
+function monthlySvg(p,mode){const M=p.monthly;const vals=mVals(p,mode);const N=vals.length;
   const sm=window.innerWidth<600,W=sm?400:860,H=sm?230:230,pl=4,pr=4,pt=26,pb=40,mx=Math.max(...vals,1),mn=Math.min(0,...vals),rng=mx-mn||1;
   const slot=(W-pl-pr)/N,bw=Math.max(slot*0.72,6),Y=v=>pt+(mx-v)/rng*(H-pt-pb);let g='';
   // season bands behind bars
@@ -765,14 +777,14 @@ function monthlySvg(p,mode){const M=p.monthly;const vals=mode==='profit'?M.profi
   let best=0;vals.forEach((v,i)=>{if(v>vals[best])best=i});
   vals.forEach((v,i)=>{const k=M.months[i],mo=+k.slice(5),x=pl+i*slot+(slot-bw)/2,y0=Y(0),y=Y(v),last=i===N-1&&M.partial_last;
     const col=mode==='profit'&&v<0?'#cc0c39':monthColour(mo);
-    g+='<rect class="mbar" style="animation-delay:'+(i*18)+'ms" x="'+x+'" y="'+Math.min(y,y0)+'" width="'+bw+'" height="'+Math.max(Math.abs(y0-y),1.5)+'" rx="3" fill="'+col+'"'+(last?' fill-opacity=".45" stroke="'+col+'" stroke-dasharray="3 2"':'')+'><title>'+mLabel(k)+(last?' (so far)':'')+': '+(mode==='profit'?money(v,p.cur):n0(v)+' sold')+'</title></rect>';
-    if(i===best&&v>0)g+='<text x="'+(x+bw/2)+'" y="'+(y-6)+'" text-anchor="middle" font-size="13" font-weight="800" fill="#0f1111">'+(mode==='profit'?money(v,p.cur):n0(v))+'</text>';
+    g+='<rect class="mbar" style="animation-delay:'+(i*18)+'ms" x="'+x+'" y="'+Math.min(y,y0)+'" width="'+bw+'" height="'+Math.max(Math.abs(y0-y),1.5)+'" rx="3" fill="'+col+'"'+(last?' fill-opacity=".45" stroke="'+col+'" stroke-dasharray="3 2"':'')+'><title>'+mLabel(k)+(last?' (so far)':'')+': '+(mode==='units'?n0(v)+' sold':money(v,p.cur))+'</title></rect>';
+    if(i===best&&v>0)g+='<text x="'+(x+bw/2)+'" y="'+(y-6)+'" text-anchor="middle" font-size="13" font-weight="800" fill="#0f1111">'+mFmt(p,mode,v)+'</text>';
     if(mo===1||(!sm&&(mo===7||i===0)))g+='<text x="'+(x+bw/2)+'" y="'+(H-pb+16)+'" text-anchor="middle" font-size="12" font-weight="'+(mo===1?'800':'400')+'" fill="#555">'+(mo===1?k.slice(0,4):new Date(k+'-01T00:00:00').toLocaleDateString('en-GB',{month:'short'}))+'</text>';
     else if(!(sm&&(mo===12||mo===2)))g+='<text x="'+(x+bw/2)+'" y="'+(H-pb+16)+'" text-anchor="middle" font-size="10" fill="#aaa">'+'JFMAMJJASOND'[mo-1]+'</text>';
   });
   return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" class="msvg">'+g+'</svg>'}
 function mLabel(k){return new Date(k+'-01T00:00:00').toLocaleDateString('en-GB',{month:'long',year:'numeric'})}
-function monthlyStory(p){const M=p.monthly,U=M.units,N=U.length;if(!U.some(v=>v>0))return 'No sales in the last two years yet.';
+function monthlyStory(p){const M=p.monthly,U=M.units,N=U.length;if(!U.some(v=>v>0))return 'No sales yet.';
   let best=0;U.forEach((v,i)=>{if(v>U[best])best=i});
   const avg=(f)=>{const a=U.filter((v,i)=>f(+M.months[i].slice(5))&&i<N-1);return a.length?a.reduce((s,v)=>s+v,0)/a.length:0};
   const norm=avg(m=>m>=3&&m<=10),val=avg(m=>m<=2),xm=avg(m=>m===12);let t='Best month: <b>'+mLabel(M.months[best])+'</b>.';
@@ -780,11 +792,51 @@ function monthlyStory(p){const M=p.monthly,U=M.units,N=U.length;if(!U.some(v=>v>
   else if(norm>0&&xm>norm*1.4)t+=' December sells about <b>'+(xm/norm).toFixed(1)+'x</b> a normal month.';
   const neg=M.profit.slice(0,N-1).filter(v=>v<-1).length;if(neg)t+=' Lost money in <b>'+neg+'</b> month'+(neg>1?'s':'')+'.';
   return t}
+function mVals(p,mode){const M=p.monthly;return mode==='profit'?M.profit:mode==='sales'?(M.sales||M.profit):M.units}
+function mFmt(p,mode,v){return mode==='units'?n0(v):money(v,p.cur)}
+function yearsCovered(p){const n=p.monthly.months.length;return n>=34?'last 3 years':n>=22?'last 2 years':'since launch'}
 function monthlySection(p){if(!p.monthly||!p.monthly.units)return '<div class="msec"><h4>Month by month</h4><div class="note">Monthly history is being added.</div></div>';
-  return '<div class="msec"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h4 style="margin:0">Month by month - last 2 years</h4><div class="mtog"><button class="on" data-m="units">Units sold</button><button data-m="profit">Profit</button></div></div>'+
+  const hasS=!!p.monthly.sales;
+  return yoySection(p)+'<div class="msec"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h4 style="margin:0">Month by month - '+yearsCovered(p)+'</h4><div class="mtog" data-t="m"><button class="on" data-m="units">Units</button>'+(hasS?'<button data-m="sales">Sales</button>':'')+'<button data-m="profit">Profit</button></div></div>'+
    '<div class="legend" style="margin-top:8px"><span><i style="background:#e8436a"></i>Valentine\'s (Jan-Feb)</span><span><i style="background:#1d8f5f"></i>Christmas (Nov-Dec)</span><span><i style="background:#ff9900"></i>Rest of year</span></div>'+
    '<div id="mchart">'+monthlySvg(p,'units')+'</div><div class="note">'+monthlyStory(p)+' The last bar is this month so far.</div></div>'}
-function wireMonthly(p){const t=$('md').querySelector('.mtog');if(!t)return;t.querySelectorAll('button').forEach(b=>b.onclick=()=>{t.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));$('mchart').innerHTML=monthlySvg(p,b.dataset.m)})}
+/* ---------- this year vs last year (gift seasons Sep-Aug) ---------- */
+const SEAS_M=[9,10,11,12,1,2,3,4,5,6,7,8],SEAS_COL=['#ff9900','#007185','#8d9696','#c3c9c9'];
+function seasons(p,mode){const M=p.monthly,V=mVals(p,mode),S={};
+  M.months.forEach((k,i)=>{const y=+k.slice(0,4),mo=+k.slice(5),sy=mo>=9?y:y-1;(S[sy]=S[sy]||{y:sy,v:Array(12).fill(null),units:0})
+    S[sy].v[SEAS_M.indexOf(mo)]=V[i];S[sy].units+=M.units[i];if(i===M.months.length-1&&M.partial_last)S[sy].part=SEAS_M.indexOf(mo)});
+  return Object.values(S).filter(s=>s.units>0).sort((a,b)=>b.y-a.y).slice(0,4)}
+function sName(y,i){return i===0?'This season':i===1?'Last season':(y%100)+'/'+((y+1)%100)}
+function yoySvg(p,mode){const SS=seasons(p,mode);if(!SS.length)return '';const sm=window.innerWidth<600,W=sm?400:860,H=sm?300:260,pl=sm?8:14,pr=sm?8:14,pt=48,pb=34;
+  const all=SS.flatMap(s=>s.v.filter(v=>v!=null)),mx=Math.max(...all,1),mn=Math.min(0,...all),rng=mx-mn||1,slot=(W-pl-pr)/12,X=i=>pl+slot*i+slot/2,Y=v=>pt+(mx-v)/rng*(H-pt-pb);let g='';
+  [[2,4,'rgba(29,143,95,.09)','Christmas'],[4,6,'rgba(232,67,106,.10)','Valentine\'s']].forEach(([a,b,c,t])=>{g+='<rect x="'+(pl+a*slot)+'" y="'+(pt-44)+'" width="'+(slot*(b-a))+'" height="'+(H-pb-pt+44)+'" rx="8" fill="'+c+'"/><text x="'+(pl+(a+b)/2*slot)+'" y="'+(pt-30)+'" text-anchor="middle" font-size="'+(sm?11:12)+'" font-weight="800" fill="'+(t==='Christmas'?'#1d8f5f':'#e8436a')+'">'+(sm?(t==='Christmas'?'🎄 Xmas':'❤️ Val'):(t==='Christmas'?'🎄 ':'❤️ ')+t)+'</text>'});
+  g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="#d5d9d9"/>';
+  SEAS_M.forEach((mo,i)=>g+='<text x="'+X(i)+'" y="'+(H-pb+18)+'" text-anchor="middle" font-size="11" font-weight="'+(mo<=2?'800':'400')+'" fill="'+(mo<=2?'#e8436a':'#666')+'">'+new Date(2000,mo-1,1).toLocaleDateString('en-GB',{month:'short'})+'</text>');
+  const labs=[];SS.slice().reverse().forEach(s=>{const i=SS.indexOf(s),col=SEAS_COL[i],w=i===0?4:i===1?3.2:2.2;let d='',pts='';
+    s.v.forEach((v,j)=>{if(v==null)return;d+=(d?'L':'M')+X(j).toFixed(1)+' '+Y(v).toFixed(1);const part=s.part===j;
+      pts+='<circle cx="'+X(j)+'" cy="'+Y(v)+'" r="'+(i<2?4.5:3)+'" fill="'+(part?'#fff':col)+'" stroke="'+col+'" stroke-width="2"><title>'+sName(s.y,i)+' - '+new Date(2000,SEAS_M[j]-1,1).toLocaleDateString('en-GB',{month:'long'})+(part?' (so far)':'')+': '+mFmt(p,mode,v)+'</title></circle>'});
+    g+='<path class="yline" d="'+d+'" fill="none" stroke="'+col+'" stroke-width="'+w+'" stroke-linejoin="round" stroke-linecap="round"'+(i>=3?' stroke-dasharray="5 4"':'')+'/>'+pts;
+    // Valentine peak label (Jan/Feb best) for seasons that have it
+    const vj=[4,5].filter(j=>s.v[j]!=null);if(vj.length&&i<3){const j=vj.reduce((a,b)=>s.v[b]>s.v[a]?b:a);if(s.v[j]>0)labs.push({i,x:X(j),y:Y(s.v[j]),t:mFmt(p,mode,s.v[j]),c:i===2?'#6f7373':col})}});
+  const l1=labs.find(l=>l.i===1);labs.forEach(l=>{let y=l.y-9;if(l.i!==1&&l1&&Math.abs(l.x-l1.x)<60&&Math.abs(l.y-l1.y)<18)y=Math.max(l.y,l1.y)+20;
+    g+='<text x="'+l.x+'" y="'+y+'" text-anchor="middle" font-size="12" font-weight="800" fill="'+l.c+'" paint-order="stroke" stroke="#fff" stroke-width="3">'+l.t+'</text>'});
+  return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" class="msvg">'+g+'</svg>'}
+function SS_leg(SS){return '<div class="legend" style="margin-top:8px">'+SS.map((s,i)=>'<span><i style="background:'+SEAS_COL[i]+'"></i>'+sName(s.y,i)+'<span class="ydt"> Sep '+String(s.y).slice(2)+' - Aug '+String(s.y+1).slice(2)+'</span></span>').join('')+'</div>'}
+function peakTiles(p,mode){const ALL=seasons(p,mode),SS=ALL.filter(s=>s.v[4]!=null&&s.v[5]!=null).slice(0,3);if(!SS.length)return '';
+  const tot=SS.map(s=>(s.v[4]||0)+(s.v[5]||0)),mx=Math.max(...tot,1);
+  return '<div class="vpk"><div class="vpk-h">❤️ Valentine\'s (Jan + Feb) each year</div>'+SS.map((s,k)=>{const i=ALL.indexOf(s);return '<div class="vrow"><div class="vy">'+(s.y+1)+'</div><div class="vbar"><div style="width:'+Math.max(3,tot[k]/mx*100).toFixed(1)+'%;background:'+SEAS_COL[i]+'"></div></div><div class="vv">'+mFmt(p,mode,tot[k])+'</div></div>'}).join('')+'</div>'}
+function yoyStory(p){const SS=seasons(p,'sales'),U=seasons(p,'units');const v=s=>s&&s.v[4]!=null&&s.v[5]!=null?(s.v[4]||0)+(s.v[5]||0):null;
+  const full=SS.filter(s=>v(s)!=null);if(!full.length)return 'No Valentine\'s yet for this product - next February will be its first.';
+  const a=full[0],b=full[1],ua=U.find(s=>s.y===a.y);let t='Valentine\'s '+(a.y+1)+' brought in <b>'+money(v(a),p.cur)+'</b>';
+  if(ua)t+=' ('+n0((ua.v[4]||0)+(ua.v[5]||0))+' sold)';
+  if(b&&v(b)>0){const ch=(v(a)/v(b)-1)*100;t+=Math.abs(ch)<8?', about the same as '+(b.y+1)+'.':ch>0?', <span class="up">up '+ch.toFixed(0)+'%</span> on '+(b.y+1)+'.':', <span class="down">down '+(-ch).toFixed(0)+'%</span> on '+(b.y+1)+'.'}else t+='.';
+  const cur=SS[0],last=SS[1];if(cur&&last&&cur!==a){let c=0,l=0;cur.v.forEach((x,j)=>{if(x!=null&&j!==cur.part){c+=x;l+=last.v[j]||0}});if(l>0){const ch=(c/l-1)*100;t+=' This season so far is '+(Math.abs(ch)<8?'about level with':ch>0?'<span class="up">'+ch.toFixed(0)+'% ahead of</span>':'<span class="down">'+(-ch).toFixed(0)+'% behind</span>')+' last season.'}}
+  return t}
+function yoySection(p){const hasS=!!p.monthly.sales,m0=hasS?'sales':'units';if(seasons(p,'units').length<2)return '';
+  return '<div class="msec yoy"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h4 style="margin:0">This year vs last year</h4><div class="mtog" data-t="y">'+(hasS?'<button class="on" data-m="sales">Sales</button>':'')+'<button'+(hasS?'':' class="on"')+' data-m="units">Units</button><button data-m="profit">Profit</button></div></div>'+
+   '<div class="ystory">'+yoyStory(p)+'</div>'+SS_leg(seasons(p,'units'))+'<div id="ychart">'+yoySvg(p,m0)+'</div><div id="ypk">'+peakTiles(p,m0)+'</div><div class="note">Each line is one gift season, September to August, so Christmas and Valentine\'s line up. Hollow dot = this month so far.</div></div>'}
+function wireMonthly(p){$('md').querySelectorAll('.mtog').forEach(t=>t.querySelectorAll('button').forEach(b=>b.onclick=()=>{t.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+  if(t.dataset.t==='y'){$('ychart').innerHTML=yoySvg(p,b.dataset.m);$('ypk').innerHTML=peakTiles(p,b.dataset.m)}else $('mchart').innerHTML=monthlySvg(p,b.dataset.m)}))}
 
 
 /* ---------- today strip ---------- */
