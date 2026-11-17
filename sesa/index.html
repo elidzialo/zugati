@@ -52,6 +52,8 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .chk svg{opacity:0;transition:opacity .2s}
 .done .chk{background:var(--grn);border-color:var(--grn)}.done .chk svg{opacity:1}
 .chk:active{transform:scale(.88)}
+@media (prefers-color-scheme:dark){.chk{border-color:rgba(255,255,255,.28)}}
+.task .chk{align-self:flex-start}
 /* watch */
 .alerts{display:grid;gap:8px}
 .alert{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 14px;box-shadow:var(--shadow);font-size:14px;line-height:1.45}
@@ -138,7 +140,7 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .pick.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
 .pick .av{width:38px;height:38px;flex:0 0 38px;font-size:14px}
 .other{display:grid;gap:8px;margin-top:6px}
-.other input{font:15px Poppins,sans-serif;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--soft);color:var(--ink);min-height:48px;width:100%}
+.other input{font:16px Poppins,sans-serif;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--soft);color:var(--ink);min-height:48px;width:100%}
 .btn{min-height:48px;border-radius:14px;border:0;font-weight:700;font-size:15px;cursor:pointer;background:var(--dark);color:#fff}
 @media (prefers-color-scheme:dark){.btn{background:#fff;color:#1d1d1f}}
 .btn.ghost{background:none;color:var(--muted);border:1px solid var(--line)}
@@ -240,7 +242,7 @@ const t3left=()=>DATA.top3.slice(0,3).filter(x=>!DONE[hash(x)]).length;
 const subline=o=>o?`${o} jobs to go across ${DATA.properties.length} ${DATA.properties.length===1?'property':'properties'}`:'Everything ticked off. Legend.';
 function ring(d,t,sz,stroke,col,track,txt){const r=(sz-stroke)/2,C=2*Math.PI*r,f=t?d/t:0;
  return `<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}" role="img" aria-label="${d} of ${t} done"><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="${track}" stroke-width="${stroke}"/><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="${col}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-f)}" transform="rotate(-90 ${sz/2} ${sz/2})"/>${txt||''}</svg>`}
-function heroRing(){const t=allT(),d=t-allO(),s=78;return ring(d,t,s,8,'#F07C8C','#333336',`<text x="${s/2}" y="${s/2+2}" text-anchor="middle" font-size="18" font-weight="700" fill="#fff">${t?Math.round(d/t*100):0}%</text><text x="${s/2}" y="${s/2+17}" text-anchor="middle" font-size="12" fill="#bbb">done</text>`)}
+function heroRing(){const t=allT(),d=t-allO(),s=78;return ring(d,t,s,8,'#F07C8C','#333336',`<text x="${s/2}" y="${s/2+2}" text-anchor="middle" font-size="18" font-weight="700" fill="#fff">${t?Math.round(d/t*100):0}%</text><text x="${s/2}" y="${s/2+17}" text-anchor="middle" font-size="12" fill="#bbb">${d?'done':'let\'s go'}</text>`)}
 function setTab(t){TAB=t;render();window.scrollTo({top:0,behavior:'smooth'})}
 function hash(s){let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))|0;return 't3_'+(h>>>0).toString(36)}
 const tickIcon=()=>ic('check',20,3,'#fff');
