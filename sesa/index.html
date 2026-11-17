@@ -2,58 +2,100 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#1D1D1F">
 <title>Sesa Estates Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f6f5f2;--card:#fff;--ink:#1d1d1f;--muted:#6b6a66;--line:#e6e4de;--pink:#F07C8C;
---red:#c2412d;--redbg:#fbe9e5;--amb:#9a6200;--ambbg:#fbf1dc;--grn:#2f7a3b;--grnbg:#e7f3e8;--blue:#245fa8;--bluebg:#e6effa}
-@media (prefers-color-scheme:dark){:root{--bg:#141414;--card:#1e1e1e;--ink:#f2f1ee;--muted:#a3a19b;--line:#2e2d2a;
---redbg:#3a1d17;--red:#f0907c;--ambbg:#3a2c10;--amb:#f2c063;--grnbg:#173020;--grn:#8fd49b;--bluebg:#16263b;--blue:#8db8ee}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Poppins,Roboto,sans-serif}
-.wrap{max-width:560px;margin:0 auto;padding:18px 14px 60px}
-.logo{background:#1D1D1F;color:#fff;border-radius:14px;padding:18px 18px 14px;margin-bottom:14px}
-.logo b{font-size:22px;letter-spacing:4px;font-weight:700}.logo b i{color:var(--pink);font-style:normal}
-.logo small{display:block;letter-spacing:5px;font-size:11px;color:#bbb;margin-top:2px}
-.logo .up{font-size:12px;color:#aaa;margin-top:10px;letter-spacing:0}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px}
-h2{font-size:18px;font-weight:600;margin:22px 0 8px}h3{font-size:13px;font-weight:600;color:var(--muted);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.5px}
-.head{font-size:17px;font-weight:600;margin:0 0 10px}
-.top li{margin:6px 0}.top{padding-left:20px;margin:0}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 6px}.chip{border:1px solid var(--line);background:var(--card);border-radius:20px;padding:6px 12px;font-size:14px;color:var(--ink);text-decoration:none}
-.sub{font-size:13px;color:var(--muted);margin:2px 0 0}
-.ev{background:var(--bluebg);color:var(--blue);border-radius:10px;padding:8px 12px;font-size:14px;margin:10px 0}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
-.u{border:1px solid var(--line);border-radius:12px;padding:10px 12px}
-.uh{display:flex;justify-content:space-between;align-items:center;gap:8px}.un{font-weight:600;font-size:15px}
-.tag{font-size:12px;padding:2px 9px;border-radius:20px;white-space:nowrap}.ok{background:var(--grnbg);color:var(--grn)}.warn{background:var(--ambbg);color:var(--amb)}.bad{background:var(--redbg);color:var(--red)}
-.ut{font-size:13px;color:var(--muted)}.unote{font-size:14px;margin-top:4px}
-.t{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}.t:last-child{border-bottom:0}
-.dot{min-width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
-.urgent .dot{background:var(--redbg);color:var(--red)}.high .dot{background:var(--ambbg);color:var(--amb)}.normal .dot{background:var(--line);color:var(--muted)}
-.tt{flex:1}.tt b{font-weight:600;font-size:15px}.tt div{font-size:13px;color:var(--muted)}
-.done{opacity:.4}.done b{text-decoration:line-through}
-button.tick{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:6px 10px;font-size:13px;cursor:pointer}
-.watch{background:var(--redbg);color:var(--red);border-radius:12px;padding:10px 14px;font-size:14px}.watch div{margin:3px 0}
-#gate{max-width:360px;margin:18vh auto 0;padding:0 16px;text-align:center}
-#gate input{width:100%;font-size:16px;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);margin:14px 0 8px}
-#gate button{width:100%;font-size:16px;padding:12px;border-radius:12px;border:0;background:#1D1D1F;color:#fff;cursor:pointer}
-.hidden{display:none}#err{color:var(--red);font-size:14px}
-.prog{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:8px}.prog i{display:block;height:100%;background:var(--pink)}
+:root{--bg:#f4f2ee;--card:#fff;--ink:#1d1d1f;--muted:#76746e;--line:#e8e5de;--pink:#F07C8C;--pinkbg:#fde8eb;--dark:#1D1D1F;
+--red:#c2412d;--redbg:#fbe6e1;--amb:#a26500;--ambbg:#fdf0d6;--grn:#23824a;--grnbg:#e2f4e8;--blue:#2a63b0;--bluebg:#e4eefb;--violet:#6a4bc4;--violetbg:#ece6fb}
+@media (prefers-color-scheme:dark){:root{--bg:#121212;--card:#1d1d1d;--ink:#f3f2ef;--muted:#a19f99;--line:#2d2c29;--pinkbg:#3a1e23;
+--redbg:#3a1c17;--red:#f29a87;--ambbg:#382a10;--amb:#f3c46a;--grnbg:#143022;--grn:#86d6a0;--bluebg:#16263c;--blue:#8fb9f0;--violetbg:#241c3d;--violet:#b8a4f2}}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Poppins,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:620px;margin:0 auto;padding:0 14px 90px}
+.hero{background:var(--dark);color:#fff;border-radius:0 0 26px 26px;padding:22px 18px 18px;margin:0 -14px 14px}
+.brand b{font-size:24px;letter-spacing:5px;font-weight:700}.brand b i{color:var(--pink);font-style:normal}
+.brand small{display:block;letter-spacing:6px;font-size:10px;color:#aaa;margin-top:1px}
+.hi{font-size:20px;font-weight:600;margin:16px 0 2px}.up{font-size:12px;color:#9a9a9a}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.stat{background:#2a2a2c;border-radius:14px;padding:10px 10px 9px}.stat .v{font-size:19px;font-weight:700;line-height:1.2}.stat .l{font-size:11px;color:#aaa}
+.stat.p .v{color:var(--pink)}
+.tabs{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:6px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:22px;padding:8px 14px;font:500 14px Poppins,sans-serif;cursor:pointer;display:flex;gap:6px;align-items:center}
+.tab.on{background:var(--dark);color:#fff;border-color:var(--dark)}
+.tab .n{background:var(--pink);color:#fff;border-radius:10px;font-size:11px;padding:0 6px;min-width:18px;text-align:center}
+.sec{display:none;animation:fade .25s ease}.sec.on{display:block}@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+h2{font-size:17px;font-weight:600;margin:18px 2px 8px;display:flex;align-items:center;gap:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin-bottom:10px}
+.head{font-size:17px;font-weight:600;margin:0;line-height:1.35}
+.moves{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 8px;margin:0 -2px;scrollbar-width:none}.moves::-webkit-scrollbar{display:none}
+.move{flex:0 0 78%;scroll-snap-align:start;border-radius:18px;padding:14px 16px;min-height:120px;display:flex;flex-direction:column;gap:8px}
+.move .num{font-size:30px;font-weight:700;line-height:1}.move p{margin:0;font-size:15px;font-weight:500}
+.m1{background:var(--pinkbg);color:var(--ink)}.m1 .num{color:var(--pink)}.m2{background:var(--bluebg)}.m2 .num{color:var(--blue)}.m3{background:var(--violetbg)}.m3 .num{color:var(--violet)}
+.watch{background:var(--redbg);color:var(--red);border-radius:16px;padding:12px 14px;font-size:14px}.watch div{display:flex;gap:8px;margin:3px 0}.watch div:before{content:"!";font-weight:700}
+.pcard{border-radius:18px;padding:14px 16px;margin-bottom:10px;cursor:pointer;display:flex;gap:12px;align-items:center;border:1px solid var(--line);background:var(--card)}
+.pico{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;flex:0 0 46px}
+.pname{font-weight:600;font-size:15px}.psub{font-size:12px;color:var(--muted)}
+.ring{margin-left:auto;flex:0 0 auto}
+/* money */
+.big{font-size:38px;font-weight:700;letter-spacing:-1px;line-height:1.1}.bigl{font-size:13px;color:var(--muted)}
+.bars{display:flex;gap:14px;align-items:flex-end;height:150px;margin:14px 4px 6px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.bpair{display:flex;gap:4px;align-items:flex-end;height:100%;width:100%;justify-content:center}
+.bpair i{display:block;width:42%;max-width:34px;border-radius:8px 8px 3px 3px;transition:height .8s cubic-bezier(.2,.8,.2,1);height:0}
+.bpair i.r{background:var(--grn)}.bpair i.c{background:var(--line)}
+.bar span{font-size:12px;color:var(--muted)}.bar b{font-size:12px;font-weight:600;color:var(--grn)}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted)}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.pay{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.pay:last-child{border:0}
+.pay .ic{width:38px;height:38px;border-radius:12px;background:var(--grnbg);color:var(--grn);display:flex;align-items:center;justify-content:center;font-weight:700}
+.pay .amt{margin-left:auto;font-weight:700;color:var(--grn);font-size:16px}.pay .w{font-size:14px;font-weight:500}.pay .d{font-size:12px;color:var(--muted)}
+.exp{background:var(--ambbg);color:var(--amb);border-radius:14px;padding:10px 14px;margin-bottom:8px;font-size:14px}.exp b{display:block;font-weight:600}
+.cost{margin:8px 0}.cost .row{display:flex;justify-content:space-between;font-size:13px}.cost .tr{height:8px;background:var(--line);border-radius:6px;margin-top:4px;overflow:hidden}.cost .tr i{display:block;height:100%;background:var(--pink);border-radius:6px}
+.mini{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.mini div{background:var(--bg);border-radius:12px;padding:8px 10px}.mini b{display:block;font-size:17px}.mini span{font-size:11px;color:var(--muted)}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+/* property */
+.pbanner{border-radius:20px;padding:16px;color:#fff;margin-bottom:10px}
+.pbanner .t{font-size:19px;font-weight:700}.pbanner .a{font-size:12px;opacity:.85}.pbanner .s{font-size:13px;margin-top:8px;opacity:.95}
+.ev{display:inline-block;background:rgba(255,255,255,.18);border-radius:12px;padding:6px 10px;font-size:13px;margin-top:10px;font-weight:500}
+.units{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.u{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 14px}
+.uh{display:flex;gap:10px;align-items:center}.av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;flex:0 0 40px}
+.un{font-weight:600;font-size:14px}.ut{font-size:12px;color:var(--muted)}
+.tag{margin-left:auto;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.ok{background:var(--grnbg);color:var(--grn)}.warn{background:var(--ambbg);color:var(--amb)}.bad{background:var(--redbg);color:var(--red)}
+.unote{font-size:13px;margin-top:8px;line-height:1.5}
+.task{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:8px;transition:opacity .3s,transform .2s}
+.task .bar2{width:5px;align-self:stretch;border-radius:4px;flex:0 0 5px}
+.urgent .bar2{background:var(--red)}.high .bar2{background:#e3a32e}.normal .bar2{background:var(--line)}
+.task b{font-weight:600;font-size:14px;display:block}.task span{font-size:12px;color:var(--muted)}
+.chk{margin-left:auto;width:34px;height:34px;border-radius:50%;border:2px solid var(--line);background:none;cursor:pointer;flex:0 0 34px;display:flex;align-items:center;justify-content:center;color:transparent;font-size:16px;font-weight:700;transition:all .2s}
+.task.done{opacity:.45}.task.done b{text-decoration:line-through}.task.done .chk{background:var(--grn);border-color:var(--grn);color:#fff}
+.pop{animation:pop .35s ease}@keyframes pop{50%{transform:scale(1.04)}}
+.lvl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:14px 2px 6px}
+#gate{max-width:360px;margin:16vh auto 0;padding:0 18px;text-align:center}
+#gate .hero{border-radius:22px;margin:0 0 16px;text-align:left}
+#gate input{width:100%;font:16px Poppins,sans-serif;padding:14px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);margin:0 0 10px}
+#gate button{width:100%;font:600 16px Poppins,sans-serif;padding:14px;border-radius:14px;border:0;background:var(--pink);color:#fff;cursor:pointer}
+.hidden{display:none!important}#err{color:var(--red);font-size:14px}
 </style>
 </head>
 <body>
 <div id="gate">
-  <div class="logo" style="text-align:left"><b>SESA<i>.</i></b><small>ESTATES HUB</small></div>
+  <div class="hero"><div class="brand"><b>SESA<i>.</i></b><small>ESTATES HUB</small></div></div>
   <input id="pw" type="password" autocomplete="current-password" placeholder="Password" onkeydown="if(event.key==='Enter')go()">
   <button onclick="go()">Open hub</button>
   <p id="err" class="hidden">Wrong password, or the data could not be loaded.</p>
 </div>
 <div id="app" class="wrap hidden"></div>
 <script>
-let DATA,KEY;
+let DATA,KEY,TAB='home';
+const COL=['#F07C8C','#2a63b0','#6a4bc4','#23824a','#c97a12'];
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const gbp=(n,dp)=>'£'+Number(n||0).toLocaleString('en-GB',{minimumFractionDigits:dp??0,maximumFractionDigits:dp??0});
 let DONE={};try{DONE=JSON.parse(localStorage.getItem('sesaDone')||'{}')}catch(e){}
 function saveDone(){try{localStorage.setItem('sesaDone',JSON.stringify(DONE))}catch(e){}}
 async function deriveKey(pw,salt,iter){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:iter,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt'])}
@@ -61,21 +103,51 @@ async function load(pw){const r=await fetch('data.enc.json?t='+Date.now(),{cache
 async function go(){const pw=document.getElementById('pw').value;document.getElementById('err').classList.add('hidden');
  try{await load(pw);try{sessionStorage.setItem('sesaPw',pw)}catch(e){}document.getElementById('gate').classList.add('hidden');document.getElementById('app').classList.remove('hidden')}
  catch(e){KEY=null;document.getElementById('err').classList.remove('hidden')}}
-function toggle(id){DONE[id]=!DONE[id];if(!DONE[id])delete DONE[id];saveDone();render()}
 function ago(t){const m=Math.round((Date.now()-new Date(t))/60000);if(m<60)return m+' min ago';const h=Math.round(m/60);if(h<48)return h+'h ago';return Math.round(h/24)+' days ago'}
-function render(){const d=DATA;let h='';
- h+=`<div class="logo"><b>SESA<i>.</i></b><small>ESTATES HUB</small><div class="up">Updated ${esc(ago(d.updated_at))} - ${esc(new Date(d.updated_at).toLocaleString('en-GB',{weekday:'short',hour:'2-digit',minute:'2-digit'}))}</div></div>`;
- h+=`<div class="card"><p class="head">${esc(d.headline)}</p><ol class="top">${(d.top3||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ol></div>`;
- h+=`<div class="chips">${d.properties.map(p=>{const open=p.tasks.filter(t=>!DONE[t.id]).length;return `<a class="chip" href="#${esc(p.id)}">${esc(p.name)} <b>${open}</b></a>`}).join('')}</div>`;
- if((d.watch||[]).length)h+=`<h3>Watch out</h3><div class="watch">${d.watch.map(w=>`<div>${esc(w)}</div>`).join('')}</div>`;
- for(const p of d.properties){const tot=p.tasks.length,dn=p.tasks.filter(t=>DONE[t.id]).length;
-  h+=`<h2 id="${esc(p.id)}">${esc(p.name)}</h2><div class="sub">${esc(p.area)} - ${esc(p.status)}</div>`;
-  if(p.event)h+=`<div class="ev">${esc(p.event)}</div>`;
-  h+=`<div class="grid">${p.units.map(u=>`<div class="u"><div class="uh"><span class="un">${esc(u.name)}</span><span class="tag ${esc(u.tag)}">${esc(u.label)}</span></div><div class="ut">${esc(u.tenant)}</div><div class="unote">${esc(u.note)}</div></div>`).join('')}</div>`;
-  h+=`<h3>Tasks - ${dn} of ${tot} done</h3><div class="card" style="padding-top:4px;padding-bottom:4px"><div class="prog"><i style="width:${tot?Math.round(dn/tot*100):0}%"></i></div>`;
-  p.tasks.forEach((t,i)=>{h+=`<div class="t ${esc(t.level)} ${DONE[t.id]?'done':''}"><div class="dot">${i+1}</div><div class="tt"><b>${esc(t.title)}</b><div>${esc(t.detail)}</div></div><button class="tick" onclick="toggle('${esc(t.id)}')">${DONE[t.id]?'Undo':'Done'}</button></div>`});
-  h+=`</div>`}
- document.getElementById('app').innerHTML=h}
+function greet(){const h=new Date().getHours();return h<12?'Good morning':h<18?'Good afternoon':'Good evening'}
+function open_(p){return p.tasks.filter(t=>!DONE[t.id]).length}
+function ring(p,c){const t=p.tasks.length,d=t-open_(p),r=17,C=2*Math.PI*r,f=t?d/t:0;
+ return `<svg class="ring" width="46" height="46" viewBox="0 0 46 46" aria-label="${d} of ${t} done"><circle cx="23" cy="23" r="${r}" fill="none" stroke="var(--line)" stroke-width="5"/><circle cx="23" cy="23" r="${r}" fill="none" stroke="${c}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-f)}" transform="rotate(-90 23 23)"/><text x="23" y="27" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink)">${d}/${t}</text></svg>`}
+function initials(s){return String(s||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()}
+function setTab(t){TAB=t;render();window.scrollTo({top:0,behavior:'smooth'})}
+function toggle(id,el){DONE[id]=!DONE[id];if(!DONE[id])delete DONE[id];saveDone();const row=el.closest('.task');row.classList.toggle('done',!!DONE[id]);row.classList.remove('pop');void row.offsetWidth;row.classList.add('pop');refreshCounts()}
+function refreshCounts(){const tot=DATA.properties.reduce((a,p)=>a+open_(p),0);const s=document.getElementById('openN');if(s)s.textContent=tot;
+ DATA.properties.forEach((p,i)=>{const n=document.getElementById('tn_'+p.id);if(n)n.textContent=open_(p);const r=document.getElementById('rg_'+p.id);if(r)r.outerHTML=ring(p,COL[i%COL.length]).replace('<svg','<svg id="rg_'+p.id+'"')})}
+function home(d){let h='';
+ h+=`<div class="card"><p class="head">${esc(d.headline)}</p></div>`;
+ h+=`<h2>Today's top 3</h2><div class="moves">${(d.top3||[]).map((x,i)=>`<div class="move m${i+1}"><div class="num">${i+1}</div><p>${esc(x)}</p></div>`).join('')}</div>`;
+ if((d.watch||[]).length)h+=`<h2>Watch out</h2><div class="watch">${d.watch.map(w=>`<div>${esc(w)}</div>`).join('')}</div>`;
+ h+=`<h2>Your properties</h2>`;
+ d.properties.forEach((p,i)=>{const c=COL[i%COL.length];h+=`<div class="pcard" onclick="setTab('${esc(p.id)}')"><div class="pico" style="background:${c}">${esc(initials(p.name.replace(/^\d+\s*/,'')))}</div><div><div class="pname">${esc(p.name)}</div><div class="psub">${open_(p)} open tasks - ${p.units.filter(u=>u.tag!=='ok').length} need attention</div></div>${ring(p,c).replace('<svg','<svg id="rg_'+esc(p.id)+'"')}</div>`});
+ if(d.money)h+=`<div class="pcard" onclick="setTab('money')"><div class="pico" style="background:var(--grn)">£</div><div><div class="pname">Rent in so far</div><div class="psub">Since September</div></div><div style="margin-left:auto;font-weight:700;font-size:18px;color:var(--grn)">${gbp(d.money.rent_total)}</div></div>`;
+ return h}
+function money(m){let h='';const max=Math.max(...m.months.map(x=>Math.max(x.rent,x.costs)),1);
+ h+=`<div class="card"><div class="bigl">Rent received since Sep</div><div class="big" style="color:var(--grn)" data-count="${m.rent_total}">${gbp(m.rent_total)}</div>
+ <div class="mini"><div><b>${gbp(m.bank_balance,2)}</b><span>In the Sesa bank now</span></div><div><b>${gbp(m.costs_total)}</b><span>Costs since Sep</span></div></div>
+ <div class="bars">${m.months.map(x=>`<div class="bar"><b>${gbp(x.rent)}</b><div class="bpair"><i class="r" data-h="${Math.round(x.rent/max*100)}"></i><i class="c" data-h="${Math.round(x.costs/max*100)}"></i></div><span>${esc(x.m)}${x.partial?' so far':''}</span></div>`).join('')}</div>
+ <div class="legend"><span><i style="background:var(--grn)"></i>Rent in</span><span><i style="background:var(--line)"></i>Costs out</span></div></div>`;
+ if((m.expected||[]).length)h+=`<h2>Waiting for</h2>${m.expected.map(e=>`<div class="exp"><b>${esc(e.property)}</b>${esc(e.note)}</div>`).join('')}`;
+ h+=`<h2>Money in</h2><div class="card">${m.payments.map(p=>`<div class="pay"><div class="ic">+</div><div><div class="w">${esc(p.from)}</div><div class="d">${esc(p.property)} - ${new Date(p.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div></div><div class="amt">${gbp(p.amount,2)}</div></div>`).join('')}</div>`;
+ if((m.costs_top||[]).length){const cm=Math.max(...m.costs_top.map(c=>c[1]),1);h+=`<h2>Where the money went</h2><div class="card">${m.costs_top.map(c=>`<div class="cost"><div class="row"><span>${esc(c[0])}</span><b>${gbp(c[1])}</b></div><div class="tr"><i style="width:${Math.round(c[1]/cm*100)}%"></i></div></div>`).join('')}</div>`}
+ h+=`<div class="note">${esc(m.note||'')} Source: ${esc(m.source||'QuickBooks')}, as of ${esc(m.as_of||'')}.</div>`;
+ return h}
+function prop(p,i){const c=COL[i%COL.length];let h='';
+ h+=`<div class="pbanner" style="background:${c}"><div class="t">${esc(p.name)}</div><div class="a">${esc(p.area)}</div><div class="s">${esc(p.status)}</div>${p.event?`<div class="ev">${esc(p.event)}</div>`:''}</div>`;
+ h+=`<h2>Who's who</h2><div class="units">${p.units.map(u=>`<div class="u"><div class="uh"><div class="av" style="background:${u.tag==='ok'?'var(--grnbg)':u.tag==='bad'?'var(--redbg)':'var(--ambbg)'};color:${u.tag==='ok'?'var(--grn)':u.tag==='bad'?'var(--red)':'var(--amb)'}">${esc(initials(u.tenant))}</div><div><div class="un">${esc(u.name)}</div><div class="ut">${esc(u.tenant)}</div></div><span class="tag ${esc(u.tag)}">${esc(u.label)}</span></div><div class="unote">${esc(u.note)}</div></div>`).join('')}</div>`;
+ h+=`<h2>Tasks</h2>`;
+ for(const [lv,name] of [['urgent','Do now'],['high','This week'],['normal','When you can']]){const ts=p.tasks.filter(t=>t.level===lv);if(!ts.length)continue;
+  h+=`<div class="lvl">${name}</div>`+ts.map(t=>`<div class="task ${esc(t.level)} ${DONE[t.id]?'done':''}"><div class="bar2"></div><div><b>${esc(t.title)}</b><span>${esc(t.detail)}</span></div><button class="chk" aria-label="Mark done" onclick="toggle('${esc(t.id)}',this)">&#10003;</button></div>`).join('')}
+ return h}
+function render(){const d=DATA,tot=d.properties.reduce((a,p)=>a+open_(p),0);let h='';
+ h+=`<div class="hero"><div class="brand"><b>SESA<i>.</i></b><small>ESTATES HUB</small></div><div class="hi">${greet()}, Eli</div><div class="up">Updated ${esc(ago(d.updated_at))}</div>
+ <div class="stats"><div class="stat p"><div class="v">${d.money?gbp(d.money.rent_total):'-'}</div><div class="l">Rent in so far</div></div><div class="stat"><div class="v" id="openN">${tot}</div><div class="l">Open tasks</div></div><div class="stat"><div class="v">${d.money?gbp(d.money.bank_balance):'-'}</div><div class="l">In the bank</div></div></div></div>`;
+ const tabs=[['home','Today',0],...(d.money?[['money','Money',0]]:[]),...d.properties.map(p=>[p.id,p.name.replace(/^\d+\s*/,'').replace(/ Road South$/,''),open_(p)])];
+ h+=`<div class="tabs">${tabs.map(([id,l,n])=>`<button class="tab ${TAB===id?'on':''}" onclick="setTab('${esc(id)}')">${esc(l)}${n?`<span class="n" id="tn_${esc(id)}">${n}</span>`:''}</button>`).join('')}</div>`;
+ h+=`<div class="sec on">`;
+ if(TAB==='home')h+=home(d);else if(TAB==='money'&&d.money)h+=money(d.money);else{const i=d.properties.findIndex(p=>p.id===TAB);h+=i>=0?prop(d.properties[i],i):home(d)}
+ h+=`</div>`;
+ document.getElementById('app').innerHTML=h;
+ requestAnimationFrame(()=>setTimeout(()=>document.querySelectorAll('.bpair i').forEach(e=>e.style.height=e.dataset.h+'%'),40))}
 (async()=>{let pw;try{pw=sessionStorage.getItem('sesaPw')}catch(e){}if(pw){document.getElementById('pw').value=pw;go()}})();
 </script>
 </body>
