@@ -14,3 +14,8 @@ Keep task ids stable so the "Done" ticks (stored in the browser) stick. New task
 `money`: {as_of, source, bank_balance, rent_total, costs_total, months[] {m, rent, costs, partial?}, payments[] {date, amount, from, property} (rent only, newest first), costs_top[[name, £]], expected[] {property, note}, note}.
 Source: QuickBooks SESA ESTATES LTD realm 9341457863772786 (READ-ONLY) - Profit and Loss by month from 1 Sep 2026 (Rental income account), Rental income deposits, Wise bank feed (account 57) for money not yet categorised and the bank balance. Loans from Zalo / Sesa Investments are not income.
 The page has tabs: Today, Money, one per property.
+
+## People and nudges (added 17 Nov)
+`people[]`: {id, name, email, me?} - who tasks can be assigned to (Eli Dzialo is `me`). Keep this list; add a partner only if Eli asks.
+`tasks[].owner`: optional person id. Keep it when a task stays. Picks made on the page override it on that device only (localStorage `sesaOwners`, extra people in `sesaPeople`).
+The Nudge button opens a ready email to the owner, cc Eli, subject "Sesa nudge: <task title>". Replies to those threads say whether the task is done - the refresh task reads them.
