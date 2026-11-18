@@ -78,6 +78,12 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .mt .v{font-size:22px;font-weight:700;color:var(--grn);line-height:1.1}.mt .l{font-size:13px;color:var(--muted)}
 .spark{margin-left:auto;display:flex;gap:7px;align-items:flex-end;height:52px}.spark span{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;height:100%;font-size:12px;font-weight:600;color:var(--muted)}.spark i{width:16px;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,#5bd68b,var(--grn));display:block;min-height:4px;max-height:34px}.spark .pt i{opacity:.55}
 /* money */
+.bar em.net{font-style:normal;font-size:11px;font-weight:800;border-radius:10px;padding:2px 7px;margin-top:4px;background:#fff;white-space:nowrap;animation:netpop .5s cubic-bezier(.2,.9,.3,1.4) both}
+.bar em.net.neg{color:#c2334a}.bar em.net.pos{color:#1f7a45}
+.bar:nth-child(2) em.net{animation-delay:.12s}.bar:nth-child(3) em.net{animation-delay:.24s}.bar:nth-child(4) em.net{animation-delay:.36s}
+.mhero .bars{height:156px}
+.netkey{font-size:12px;opacity:.85;margin:10px 0 2px}
+@keyframes netpop{from{opacity:0;transform:translateY(6px) scale(.8)}to{opacity:1;transform:none}}
 .mhero{background:linear-gradient(135deg,#1f7a45,#2fa463);color:#fff;border-radius:24px;padding:18px;box-shadow:0 10px 24px rgba(31,122,69,.25)}
 .mhero .l{font-size:13px;opacity:.9;font-weight:500}.mhero .big{font-size:40px;font-weight:800;letter-spacing:-1px;line-height:1.1}
 .bars{display:flex;gap:12px;align-items:flex-end;height:130px;margin:16px 2px 4px}
@@ -478,7 +484,7 @@ function rentOf(p){const m=DATA.money;if(!m||!m.payments)return{sum:0,n:0,last:n
 function dShort(d){return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
 function money(m){let h='';const max=Math.max(...m.months.map(x=>Math.max(x.rent||0,x.costs||0)),1);
  h+=`<div class="mhero"><div class="l">Rent received since Sep</div><div class="big" data-count="${Number(m.rent_total)||0}">${gbp(m.rent_total)}</div>
- ${m.months.length?`<div class="bars">${m.months.map(x=>`<div class="bar"><b>${gbp(x.rent)}</b><div class="bpair"><i class="r" data-h="${Math.round((x.rent||0)/max*100)}"></i><i class="c" data-h="${Math.round((x.costs||0)/max*100)}"></i></div><span>${esc(x.m)}${x.partial?' so far':''}</span></div>`).join('')}</div>
+ ${m.months.length?`<div class="bars">${m.months.map(x=>`<div class="bar"><b>${gbp(x.rent)}</b><div class="bpair"><i class="r" data-h="${Math.round((x.rent||0)/max*100)}"></i><i class="c" data-h="${Math.round((x.costs||0)/max*100)}"></i></div><span>${esc(x.m)}${x.partial?' so far':''}</span>${(()=>{const n=(+x.rent||0)-(+x.costs||0);return `<em class="net ${n<0?'neg':'pos'}" title="Rent ${gbp(x.rent)} - costs ${gbp(x.costs)}">${n<0?'-':'+'}${gbp(Math.abs(n))}</em>`})()}</div>`).join('')}</div><div class="netkey">Under each month: what was left after costs (red = spent more than came in)</div>
  <div class="legend"><span><i style="background:#fff"></i>Rent in</span><span><i style="background:rgba(255,255,255,.3)"></i>Costs out</span></div>`:''}</div>
  <div class="tiles"><div class="tile tb"><div class="ic">${ic('bank',18)}</div><b>${gbp(m.bank_balance,2)}</b><span>In the bank (last sync)</span></div><div class="tile tp"><div class="ic">${ic('out',18)}</div><b>${gbp(m.costs_total)}</b><span>Costs since Sep</span></div></div>`;
  {const r=+m.rent_total||0,c=+m.costs_total||0,t=(r+c)||1,net=r-c;
