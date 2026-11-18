@@ -368,7 +368,13 @@ function nudgeUrl(id){const[t,pr]=findTask(id);const o=t&&person(ownerId(t));if(
  const body=`Hi ${first(o.name)},\n\nI'm the Sesa task portal AI agent. Please make sure this ${verb}:\n\n${t.title}${t.detail?'\n'+t.detail:''}\nProperty: ${pr.name}\n\nReply to this email when it's done so I can update the portal.\n\nThanks,\nSesa Estates Hub`;
  const cc=m&&m.email&&m.email!==o.email?`cc=${encodeURIComponent(m.email)}&`:'';
  return [`mailto:${encodeURIComponent(o.email)}?${cc}subject=${encodeURIComponent('Sesa nudge: '+t.title)}&body=${encodeURIComponent(body)}`,o]}
-function nudge(id){const r=nudgeUrl(id);if(!r)return;location.href=r[0];toast(`Email to ${first(r[1].name)} ready - tap Send`)}
+function nudgePrompt(id){const[t,pr]=findTask(id);const o=t&&person(ownerId(t));if(!o||!o.email)return null;const m=me();
+ const verb=/\bpay|paid|£/i.test(t.title)?'gets paid':'gets done';
+ const body=`Hi ${first(o.name)},\n\nI'm the Sesa task portal AI agent. Please make sure this ${verb}:\n\n${t.title}${t.detail?'\n'+t.detail:''}\nProperty: ${pr.name}\n\nReply to this email when it's done so I can update the portal.\n\nThanks,\nSesa Estates Hub`;
+ const cc=m&&m.email&&m.email!==o.email?`Cc: ${m.email}\n`:'';
+ const q=`Send this email now from my Gmail${m&&m.email?' ('+m.email+')':''}. Send it, don't just draft it.\n\nTo: ${o.name} <${o.email}>\n${cc}Subject: Sesa nudge: ${t.title}\n\n${body}`;
+ return ['https://claude.ai/new?q='+encodeURIComponent(q),o]}
+function nudge(id){const r=nudgePrompt(id)||nudgeUrl(id);if(!r)return;const w=window.open(r[0],'_blank');if(!w)location.href=r[0];toast(`Claude is ready to email ${first(r[1].name)} - tap Send`)}
 function render(){const d=DATA,o=allO();let h='';
  h+=`<div class="hero"><div class="top"><div class="brand"><b>SESA<i>.</i></b><small>ESTATES HUB</small></div><div class="upd"><i></i>${esc(ago(d.updated_at))}</div></div>
  <div class="hrow"><div><div class="hi">${greet()}, Eli</div><div class="hisub" id="hisub">${subline(o)}</div></div><div class="bigring" id="hring">${heroRing()}</div></div>

@@ -18,4 +18,4 @@ The page has tabs: Today, Money, one per property.
 ## People and nudges (added 17 Nov)
 `people[]`: {id, name, email, me?} - who tasks can be assigned to (Eli Dzialo is `me`). Keep this list; add a partner only if Eli asks.
 `tasks[].owner`: optional person id. Keep it when a task stays. Picks made on the page override it on that device only (localStorage `sesaOwners`, extra people in `sesaPeople`).
-The Nudge button opens a ready email to the owner, cc Eli, subject "Sesa nudge: <task title>". Replies to those threads say whether the task is done - the refresh task reads them.
+The Nudge button opens Claude (claude.ai/new?q=...) with a one-line prompt to send the nudge email from eli@zelr.co.uk to the owner, cc Eli, subject "Sesa nudge: <task title>". Replies to those threads say whether the task is done - the refresh task reads them.
