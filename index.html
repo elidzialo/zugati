@@ -206,6 +206,21 @@ svg text{font-family:inherit}
 .recb{display:flex;gap:12px;justify-content:space-between;align-items:center;background:#eef6f8;border-left:4px solid var(--teal);border-radius:8px;padding:10px 12px;margin-top:12px}
 .recb .rt{font-size:15px}.recb .use{border:1px solid var(--teal);background:#fff;color:var(--teal);border-radius:14px;font-weight:700;padding:2px 10px;cursor:pointer;margin-left:6px}
 .shp{margin-top:10px}
+.ptools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:-2px 0 14px}
+.psrch{flex:1 1 260px;display:flex;align-items:center;gap:8px;background:#fff;border:2px solid var(--line);border-radius:12px;padding:0 10px;transition:border-color .15s,box-shadow .15s}
+.psrch:focus-within{border-color:#007185;box-shadow:0 0 0 3px rgba(0,113,133,.15)}
+.psrch input{flex:1;border:0;outline:0;font:inherit;font-size:16px;padding:11px 0;background:transparent;min-width:0}
+.psrch input::-webkit-search-cancel-button{display:none}
+.psx{border:0;background:#eaeded;border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:12px;color:#232f3e}
+.psort{display:flex;gap:4px;background:#eaeded;border-radius:12px;padding:4px;overflow-x:auto;max-width:100%;scrollbar-width:none}
+.psort::-webkit-scrollbar{display:none}
+.psort button{border:0;background:transparent;font:inherit;font-size:13px;padding:8px 11px;border-radius:9px;cursor:pointer;white-space:nowrap;color:#232f3e;transition:background .15s,box-shadow .15s}
+.psort button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15);font-weight:700;color:#007185}
+.gfade>*{animation:gfin .35s ease both}
+.gfade>*:nth-child(2){animation-delay:.03s}.gfade>*:nth-child(3){animation-delay:.06s}.gfade>*:nth-child(4){animation-delay:.09s}.gfade>*:nth-child(n+5){animation-delay:.12s}
+@keyframes gfin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.gfade>*{animation:none}}
+@media (max-width:600px){.ptools{flex-direction:column;align-items:stretch}.psrch{flex:none}.psort{display:grid;grid-template-columns:repeat(4,auto)}.psort button{padding:8px 6px;font-size:12.5px}}
 .chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
 .chip{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;border:2px solid var(--line);background:#fff;border-radius:10px;padding:8px 10px;font:inherit;font-size:13px;cursor:pointer;transition:all .15s}
 .chip .ci{font-size:20px}.chip b{font-size:15px}
@@ -387,6 +402,7 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
       <h2>Your products</h2>
       <p class="h2sub">Tap any product for its full picture - graphs, forecast and what to order.</p>
       <div class="chips" id="chips"></div>
+      <div class="ptools"><label class="psrch"><span aria-hidden="true">🔍</span><input id="psq" type="search" placeholder="Find a product - name, ASIN or supplier" autocomplete="off"><button id="psx" class="psx hidden" aria-label="Clear">✕</button></label><div class="psort" id="psort"></div></div>
       <div class="grid" id="grid"></div>
     </section>
 
@@ -577,9 +593,18 @@ function renderChips(){
   $('chips').innerHTML=defs.map(([k,l])=>'<span class="chip'+(FILTER===k?' on':'')+'" data-k="'+k+'">'+l+'<b>'+c(k)+'</b></span>').join('');
   $('chips').querySelectorAll('.chip').forEach(x=>x.onclick=()=>{FILTER=x.dataset.k;renderChips();renderGrid()});
 }
+let PQ='',PSORT='urgent';try{PSORT=localStorage.getItem('zpsort')||'urgent'}catch(e){}
+function pMatch(p,q){if(!q)return true;const h=[p.name,p.asin,p.sku,p.market,p.supplier,p.id].filter(Boolean).join(' ').toLowerCase();return q.toLowerCase().split(/\s+/).filter(Boolean).every(w=>h.includes(w))}
+function renderSort(){const d=[['urgent','⏰ Urgent'],['profit','💷 Profit'],['sold','📦 Top sellers'],['az','A-Z']];
+  $('psort').innerHTML=d.map(([k,l])=>'<button class="'+(PSORT===k?'on':'')+'" data-s="'+k+'">'+l+'</button>').join('');
+  $('psort').querySelectorAll('button').forEach(b=>b.onclick=()=>{PSORT=b.dataset.s;try{localStorage.setItem('zpsort',PSORT)}catch(e){}renderSort();renderGrid()})}
+function wireSearch(){const i=$('psq'),x=$('psx');if(!i||i._w)return;i._w=1;renderSort();
+  i.oninput=()=>{PQ=i.value.trim();x.classList.toggle('hidden',!i.value);renderGrid()};
+  x.onclick=e=>{e.preventDefault();i.value='';PQ='';x.classList.add('hidden');renderGrid();i.focus()}}
 function renderGrid(){
-  const ord={now:0,soon:1,ok:2,slow:3,stop:4};
-  const L=list().filter(x=>FILTER==='all'||(FILTER==='val'?x.p.valentine:x.f.st===FILTER)).sort((a,b)=>ord[a.f.st]-ord[b.f.st]||(b.p.profit30||0)-(a.p.profit30||0));
+  wireSearch();const ord={now:0,soon:1,ok:2,slow:3,stop:4};
+  const srt={urgent:(a,b)=>ord[a.f.st]-ord[b.f.st]||(a.f.left??1e9)-(b.f.left??1e9)||(b.p.profit30||0)-(a.p.profit30||0),profit:(a,b)=>(b.p.profit30||0)-(a.p.profit30||0),sold:(a,b)=>(b.p.per_day||0)-(a.p.per_day||0),az:(a,b)=>String(a.p.name).localeCompare(String(b.p.name))}[PSORT]||((a,b)=>0);
+  const L=list().filter(x=>FILTER==='all'||(FILTER==='val'?x.p.valentine:x.f.st===FILTER)).filter(x=>pMatch(x.p,PQ)).sort(srt);
   $('grid').innerHTML=L.map(({p,f})=>{
     const [lab,cls]=ST[f.st];const left=f.left;const pct=left==null?0:Math.min(100,left/120*100);
     const col=f.st==='now'?'var(--red)':f.st==='soon'?'var(--amber)':'var(--green)';
@@ -589,7 +614,9 @@ function renderGrid(){
     '<div class="run"><i style="width:'+pct+'%;background:'+col+'"></i></div><div class="runl"><span>'+lastsTxt(left,p)+'</span><span>'+(p.per_day?(p.per_day<1?p.per_day.toFixed(1):Math.round(p.per_day))+' sold / day':'')+'</span></div>'+
     '<div class="facts"><div class="fact">'+(p.valentine&&p.val_units?'<div class="k">Need until 14 Feb</div><div class="x">'+n0(f.needVal)+'</div>':'<div class="k">Next 60 days need</div><div class="x">'+n0(f.need60)+'</div>')+'</div><div class="fact"><div class="k">Profit 30 days</div><div class="x" style="color:'+((p.profit30||0)<0?'var(--red)':'var(--green)')+'">'+(p.profit30==null?'-':money(p.profit30,p.cur))+'</div></div></div>'+
     (p.valentine?quoteHtml(p,true):'')+'<div class="order '+f.st+'">'+esc(orderLine(p,f))+'</div>'+(['now','soon','ok'].includes(f.st)?addBtn(p,f):'')+'</div></div>';
-  }).join('')||'<div class="card empty"><div class="ei">'+(FILTER==='soon'?'🎉':FILTER==='now'?'✅':'📭')+'</div><b>'+(FILTER==='soon'||FILTER==='now'?'Nothing to order here - all good':'Nothing here')+'</b><span class="note">Tap <b>All</b> to see every product.</span></div>';
+  }).join('')||(PQ?'<div class="card empty"><div class="ei">🔎</div><b>No product matches "'+esc(PQ)+'"</b><span class="note">Try fewer letters, or <a href="#" id="psclr">clear the search</a>'+(FILTER!=='all'?' and tap <b>All</b>':'')+'.</span></div>':'<div class="card empty"><div class="ei">'+(FILTER==='soon'?'🎉':FILTER==='now'?'✅':'📭')+'</div><b>'+(FILTER==='soon'||FILTER==='now'?'Nothing to order here - all good':'Nothing here')+'</b><span class="note">Tap <b>All</b> to see every product.</span></div>');
+  const pc=$('psclr');if(pc)pc.onclick=e=>{e.preventDefault();$('psx').click()};
+  const gk=L.map(x=>x.p.id).join(',')+'|'+PQ;if(gk!==window._gk){window._gk=gk;$('grid').classList.remove('gfade');void $('grid').offsetWidth;$('grid').classList.add('gfade')}
   $('grid').querySelectorAll('.pc').forEach(x=>x.onclick=()=>openP(x.dataset.id));wireAdd($('grid'));wireQ($('grid'));
 }
 
@@ -746,7 +773,7 @@ function openB(){const g=groups(),d=$('bdr');const T=coTotals(),n=Object.keys(BA
 }
 function orderPrompt(B){B=B||BASKET;const g=groups(B);let t='Hi Claude, Eli here - I clicked "order" in my Zugati portal. Please help me reorder the items below.\n\nWhat I want:\n- Draft ONE email per supplier (cc eli@zelr.co.uk, short professional subject, natural human tone, regular hyphens).\n- Check my Gmail for my last order with each supplier: confirm the right email address, last unit price, packaging, labels and shipping method, and use them in the email.\n- Ask each supplier for a PI and payment link (30% deposit if they agree).\n- Tell me roughly what it will cost in total and when payment is due, and whether it fits my cash (portal says I can safely spend about '+($('cfokpis')?($('cfokpis').querySelectorAll('.v')[3]||{}).textContent||'':'')+' on stock right now).\n- Show me the drafts first. Do NOT send anything until I say yes.\n';
   Object.entries(g).forEach(([s,ps])=>{const em=DATA.suppliers&&DATA.suppliers[s]&&DATA.suppliers[s].email;t+='\nSupplier: '+s+(em?' ('+em+')':' (please find the right supplier in my emails)')+'\n';ps.forEach(p=>{const f=forecast(p);t+='- '+p.name+' - '+n0(B[p.id])+' units'+(()=>{const r=recFor(p),sp=shipPlan(p,B[p.id],r);return sp?', ship by '+sp.pick.m.label.toUpperCase()+' (arrives ~'+fmtD(sp.pick.arr)+(sp.pick.ok?'':', too late for the peak')+')':''})()+(()=>{const Q=quoteFor(p);return Q?' (quoted '+fmtD(new Date(Q.q.date+'T00:00:00'))+': $'+Q.it.unit_usd.toFixed(2)+' each + air $'+n0(Q.it.air_usd)+' per '+n0(Q.it.qty)+')':''})()+' (portal suggests '+n0(recFor(p).sug)+' - tell me if you think different) (ASIN '+p.asin+', EAN '+(p.ean||'-')+', SKU '+p.sku+', for Amazon '+p.market+'). Now: '+n0(p.stock)+' in stock'+(p.inbound?', '+n0(p.inbound)+' on the way':'')+', sells ~'+(p.per_day||0).toFixed(1)+'/day'+(f.run!=null?', runs out ~'+fmtD(addD(today(),f.run)):'')+'.\n'})});
-  Object.entries(g).forEach(([s,ps])=>{if(s==='Supplier not set')return;const fx=FXU();let goods=0,air=0;ps.forEach(p=>{const q=B[p.id]||0,Q=quoteFor(p),u=Q?Q.it.unit_usd:(p.buy||{}).unit_usd,a=Q&&Q.it.air_usd!=null?Q.it.air_usd/Q.it.qty:(p.buy||{}).air_usd;if(u!=null)goods+=u*q;if(a!=null)air+=a*q});if(goods)t+='\nPortal estimate for '+s+': goods $'+n0(goods)+' + air $'+n0(air)+' = $'+n0(goods+air)+' (about £'+n0((goods+air)*fx)+'), 30% deposit about $'+n0((goods+air)*.3)+' (£'+n0((goods+air)*.3*fx)+') - please make it ONE combined order.\n'});
+  Object.entries(g).forEach(([s,ps])=>{if(s==='Supplier not set')return;const fx=FXU();let goods=0,air=0;ps.forEach(p=>{const q=B[p.id]||0,Q=quoteFor(p),u=Q?Q.it.unit_usd:(p.buy||{}).unit_usd,a=Q&&Q.it.air_usd!=null?Q.it.air_usd/Q.it.qty:(p.buy||{}).air_usd;if(u!=null)goods+=u*q;if(a!=null)air+=a*q});if(goods)t+='\nPortal estimate for '+s+': goods $'+n0(goods)+' + air $'+n0(air)+' = $'+n0(goods+air)+' (about £'+n0((goods+air)*fx)+'), '+depP(s)+'% deposit about $'+n0((goods+air)*depP(s)/100)+' (£'+n0((goods+air)*depP(s)/100*fx)+') - please make it ONE combined order.\n'});
   return t;}
 
 
@@ -1105,6 +1132,7 @@ let _dipT;window.addEventListener('resize',()=>{clearTimeout(_dipT);_dipT=setTim
 /* ---------- supplier quotes on Valentine cards (A1) ---------- */
 const FXU=()=>(DATA.shipping&&DATA.shipping.usd_gbp)||(DATA.cfo&&DATA.cfo.usd_gbp)||.79;
 const sFirst=s=>String(s||'').split(/[\s(]/)[0]||'supplier';
+function depP(s){const v=+((DATA.suppliers||{})[s]||{}).deposit_pct;return v>0&&v<100?v:30}
 function quoteFor(p){const S=DATA.suppliers||{};for(const s in S){const q=S[s]&&S[s].quote;if(q&&q.items){const it=q.items.find(x=>x.product===p.id);if(it)return {s,q,it}}}return null}
 function quoteHtml(p,full){const Q=quoteFor(p),B=p.buy||{},fx=FXU();if(!Q&&B.unit_usd==null)return '';
   const u=Q?Q.it.unit_usd:B.unit_usd,a=Q&&Q.it.air_usd!=null?Q.it.air_usd/Q.it.qty:B.air_usd,who=sFirst(Q?Q.s:p.supplier);
@@ -1120,9 +1148,9 @@ function wireQ(root){root.querySelectorAll('[data-qadd]').forEach(b=>b.onclick=e
 function groupSum(s,ps){if(s==='Supplier not set')return '';const fx=FXU();let qty=0,goods=0,ship=0,unk=0,air=true;
   ps.forEach(p=>{const q=BASKET[p.id]||0,Q=quoteFor(p),B=p.buy||{},u=Q?Q.it.unit_usd:B.unit_usd;qty+=q;if(u!=null)goods+=u*q;else unk++;
     const sp=shipPlan(p,q,recFor(p));if(sp){if(sp.pick.k!=='air')air=false;if(sp.pick.k==='air'&&Q&&Q.it.air_usd!=null)ship+=Q.it.air_usd/Q.it.qty*q;else if(sp.pick.cost!=null)ship+=sp.pick.cost;else unk++}});
-  const tot=goods+ship,dep=tot*0.3,who=esc(sFirst(s)),c=(l,v,cl)=>'<div'+(cl?' class="'+cl+'"':'')+'><span>'+l+'</span><b>$'+n0(v)+'</b><small>≈ £'+n0(v*fx)+'</small></div>';
-  return '<div class="gsum"><div class="gs-h">'+who+' order - all in one</div><div class="gs-g"><div><span>Pieces</span><b>'+n0(qty)+'</b><small>'+ps.length+' product'+(ps.length>1?'s':'')+'</small></div>'+c('Goods',goods)+c(air?'Air':'Shipping',ship)+c('30% deposit',dep,'dep')+'</div>'+
-   '<div class="note">Total <b>$'+n0(tot)+'</b> ≈ £'+n0(tot*fx)+'. The other 70% (about £'+n0((tot-dep)*fx)+') is due before it ships.'+(unk?' Some prices still to come from the PI.':'')+'</div>'+
+  const dp=depP(s),tot=goods+ship,dep=tot*dp/100,who=esc(sFirst(s)),c=(l,v,cl)=>'<div'+(cl?' class="'+cl+'"':'')+'><span>'+l+'</span><b>$'+n0(v)+'</b><small>≈ £'+n0(v*fx)+'</small></div>';
+  return '<div class="gsum"><div class="gs-h">'+who+' order - all in one</div><div class="gs-g"><div><span>Pieces</span><b>'+n0(qty)+'</b><small>'+ps.length+' product'+(ps.length>1?'s':'')+'</small></div>'+c('Goods',goods)+c(air?'Air':'Shipping',ship)+c(dp+'% deposit',dep,'dep')+'</div>'+
+   '<div class="note">Total <b>$'+n0(tot)+'</b> ≈ £'+n0(tot*fx)+'. The other '+(100-dp)+'% (about £'+n0((tot-dep)*fx)+') is due before it ships.'+(unk?' Some prices still to come from the PI.':'')+'</div>'+
    '<button class="place gsend" data-gsend="'+esc(s)+'">Send the '+who+' order to Claude</button></div>'}
 
 /* ---------- boot ---------- */
