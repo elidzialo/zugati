@@ -137,12 +137,12 @@ async function boot(){
   try{CUR=localStorage.getItem('hubBiz')}catch(e){}
   if(!BIZ.find(b=>b.id===CUR))CUR=BIZ[0].id;
   render();
-  SB.channel('hub').on('postgres_changes',{event:'*',schema:'public',table:'tasks'},()=>reload()).on('postgres_changes',{event:'INSERT',schema:'public',table:'task_comments'},()=>reload()).subscribe();
+  SB.channel('hub').on('postgres_changes',{event:'*',schema:'public',table:'tasks'},()=>reload()).on('postgres_changes',{event:'INSERT',schema:'public',table:'task_comments'},()=>reload()).on('postgres_changes',{event:'*',schema:'public',table:'zugati_payments'},()=>reload()).subscribe();
 }
 let rt;function reload(){clearTimeout(rt);rt=setTimeout(async()=>{await loadAll();if(TAB==='amazon')navBar();else render()},400)}
 async function loadAll(){
   const uid=(await SB.auth.getUser()).data.user?.id;
-  const [me,biz,props,units,tasks,sum,mm,pays,people,mem,com]=await Promise.all([
+  const [me,biz,props,units,tasks,sum,mm,pays,people,mem,com,zp]=await Promise.all([
     SB.from('profiles').select('*').eq('id',uid).single(),
     SB.from('businesses').select('*').order('sort'),
     SB.from('properties').select('*').eq('archived',false).order('sort'),
@@ -153,9 +153,10 @@ async function loadAll(){
     SB.from('payments').select('*').order('date',{ascending:false}),
     SB.from('profiles').select('id,name,email,role,colour'),
     SB.from('memberships').select('*'),
-    SB.from('task_comments').select('*').order('created_at')]);
+    SB.from('task_comments').select('*').order('created_at'),
+    SB.from('zugati_payments').select('*').order('sort')]);
   ME=me.data;BIZ=biz.data||[];PEOPLE=people.data||[];
-  D={props:props.data||[],units:units.data||[],tasks:tasks.data||[],sum:sum.data||[],mm:mm.data||[],pays:pays.data||[],mem:mem.data||[],com:com.data||[]};
+  D={props:props.data||[],units:units.data||[],tasks:tasks.data||[],sum:sum.data||[],mm:mm.data||[],pays:pays.data||[],mem:mem.data||[],com:com.data||[],zp:zp.data||[]};
 }
 const person=id=>PEOPLE.find(p=>p.id===id);
 const avatar=p=>p?`<span class="av" style="background:${esc(p.colour||'#F07C8C')}">${esc(ini(p.name))}</span>`:'';
@@ -197,7 +198,7 @@ function openProp(id){PROP=id;render();scrollTo({top:0,behavior:'smooth'})}
 function home(s){
   let x='';
   if(s.headline&&!isStaff())x+=`<div class="story"><small>TODAY'S STORY</small><p>${esc(s.headline)}</p></div>`;
-  if(CUR==='zugati'&&!isStaff())x+=`<p><button class="btn dark" style="margin-top:14px" onclick="setTab('amazon')">Open the Amazon dashboard</button></p>`;
+  if(CUR==='zugati'&&!isStaff()){const due=D.zp.filter(p=>['unpaid','overdue','check'].includes(p.status));x+=`<div class="row" style="margin-top:14px"><button class="btn dark" onclick="setTab('amazon')">Open the Amazon dashboard</button>${due.length?`<button class="btn" onclick="setTab('money')">${due.length} payment${due.length===1?'':'s'} to sort</button>`:''}</div>`}
   if(s.top3?.length&&!isStaff())x+=`<h2>Your 3 things today</h2><div class="card">${s.top3.map((t,i)=>`<div class="t3"><div class="num">${i+1}</div><div>${esc(t)}</div></div>`).join('')}</div>`;
   const props=D.props.filter(p=>p.business_id===CUR);
   if(props.length){x+=`<h2>Properties <span class="pill">${props.length}</span></h2><div class="pgrid">`+props.map((p,i)=>{const ts=D.tasks.filter(t=>t.property_id===p.id),o=openN(ts),pc=ts.length?Math.round((ts.length-o)/ts.length*100):100;
@@ -255,7 +256,7 @@ function newTask(){const props=D.props.filter(p=>p.business_id===CUR);
     if(error)toast('Could not add: '+error.message);else{s.remove();toast('Job added');await SB.from('activity').insert({business_id:CUR,user_id:ME.id,action:'added job',detail:f.title.value});reload()}}}
 function moneyView(s){
   const ms=D.mm.filter(m=>m.business_id===CUR),pays=D.pays.filter(p=>p.business_id===CUR);
-  if(CUR==='zugati')return `<h2>Money</h2><div class="card">Amazon money lives on the Amazon dashboard.<br><br><button class="btn dark" onclick="setTab('amazon')">Open it</button></div>${s.watch?.length?`<h2>Payments to watch</h2><div class="card"><ul class="watch">${s.watch.map(w=>`<li>${esc(w)}</li>`).join('')}</ul></div>`:''}`;
+  if(CUR==='zugati')return zugMoney(s);
   const mx=Math.max(1,...ms.map(m=>Math.max(+m.rent,+m.costs)));
   let x=`<h2>Rent vs costs</h2><div class="card"><div class="chart">${ms.map(m=>`<div class="col"><div class="pair"><i class="r" data-h="${Math.round(m.rent/mx*100)}" style="height:0" title="Rent ${gbp(m.rent)}"></i><i class="c" data-h="${Math.round(m.costs/mx*100)}" style="height:0" title="Costs ${gbp(m.costs)}"></i></div><span>${esc(m.month)}${m.partial?'*':''}</span></div>`).join('')}</div>
   <div class="row" style="font-size:13px;margin-top:8px"><span><span class="av" style="background:var(--grn);width:12px;height:12px"></span>Rent ${gbp(s.rent_total)}</span><span><span class="av" style="background:var(--pink);width:12px;height:12px"></span>Costs ${gbp(s.costs_total)}</span><span>Bank ${gbp2(s.bank_balance)}</span></div></div>`;
@@ -268,6 +269,27 @@ function moneyView(s){
   if(s.money_note)x+=`<p style="font-size:13px;color:var(--muted)">${esc(s.money_note)}</p>`;
   return x;
 }
+const ST={unpaid:['To pay','urgent'],overdue:['Overdue','urgent'],check:['Check','high'],planned:['Planned','normal'],later:['Later','normal'],forecast:['Forecast','normal'],paid:['Paid','paid']};
+function money(p){if(p.amount==null)return 'Amount TBC';const sym={GBP:'£',USD:'$',EUR:'€'}[p.cur]||((p.cur||'')+' ');return sym+Number(p.amount).toLocaleString('en-GB',{maximumFractionDigits:0})+(p.cur&&p.cur!=='GBP'&&p.gbp?` (~£${Number(p.gbp).toLocaleString('en-GB',{maximumFractionDigits:0})})`:'')}
+function zugMoney(s){
+  const zp=D.zp;if(!zp.length)return `<h2>Payments</h2><div class="empty">No payments yet.</div>`;
+  const open=zp.filter(p=>p.status!=='paid'),due=open.filter(p=>['unpaid','overdue','check'].includes(p.status));
+  const dueGbp=due.reduce((a,p)=>a+(+p.gbp||(p.cur==='GBP'?+p.amount||0:0)),0);
+  const o={overdue:0,unpaid:1,check:2,planned:3,forecast:4,later:5,paid:6};
+  const rows=[...zp].sort((a,b)=>o[a.status]-o[b.status]||String(a.due).localeCompare(String(b.due)));
+  return `<h2>Payments <span class="pill">${open.length} open</span></h2>
+  <div class="card" style="border-left:6px solid var(--acc)"><div style="font-size:12px;font-weight:800;letter-spacing:.06em;color:var(--muted)">TO PAY NOW</div><div style="font-size:26px;font-weight:800">~${gbp(dueGbp)}</div><div style="font-size:13px;color:var(--muted)">${due.length} payment${due.length===1?'':'s'} marked to pay or check. Cash in the Amazon banks: ${gbp(s.bank_balance)}</div>
+  <button class="btn dark" style="margin-top:10px" onclick="setTab('amazon')">Open the Amazon dashboard</button></div>
+  ${rows.map(p=>{const st=ST[p.status]||[p.status,'normal'],pb=person(p.paid_by);return `<div class="task ${p.status==='paid'?'done':''}"><button class="tick" title="Paid" onclick="payToggle('${p.id}')">${p.status==='paid'?ic('tick',20):''}</button><div class="tb">
+   <div class="tt">${esc(p.to_who||'')}</div><div style="font-weight:600">${esc(p.what||'')}</div><div style="font-weight:800;margin-top:2px">${esc(money(p))}</div>
+   ${p.amount_note?`<div class="td">${esc(p.amount_note)}</div>`:''}${p.why?`<div class="td">${esc(p.why)}</div>`:''}
+   <div class="tags"><span class="lv ${st[1]==='paid'?'normal':st[1]}">${st[0]}${p.status==='paid'&&pb?' by '+esc(pb.name):''}</span>${p.due?`<span class="pill">Due ${dShort(p.due)}</span>`:''}
+   ${p.link?`<a class="mini" style="text-decoration:none" href="${esc(p.link)}" target="_blank" rel="noopener">Pay link</a>`:''}${p.email?`<a class="mini" style="text-decoration:none" href="${esc(p.email)}" target="_blank" rel="noopener">Email</a>`:''}
+   <select class="mini" style="width:auto;min-height:34px;padding:4px 8px" onchange="payStatus('${p.id}',this.value)">${Object.keys(ST).map(k=>`<option value="${k}" ${k===p.status?'selected':''}>${ST[k][0]}</option>`).join('')}</select></div></div></div>`}).join('')}`;
+}
+async function payStatus(id,st){const p=D.zp.find(x=>x.id===id);p.status=st;render();if(st==='paid'){confetti();toast('Paid - nice!')}
+  const {error}=await SB.from('zugati_payments').update({status:st}).eq('id',id);if(error){toast('Could not save');reload()}}
+function payToggle(id){const p=D.zp.find(x=>x.id===id);payStatus(id,p.status==='paid'?'unpaid':'paid')}
 async function loadAct(){const {data}=await SB.from('activity').select('*').order('created_at',{ascending:false}).limit(60);const el=$('actl');if(!el)return;
   el.innerHTML=(data||[]).map(a=>{const p=person(a.user_id),b=BIZ.find(z=>z.id===a.business_id);return `<div class="act">${avatar(p)}<b>${esc(p?.name||'Someone')}</b> ${esc(a.action)} <span style="color:var(--muted)">${esc(a.detail||'')}</span><small>${ago(a.created_at)}${b?' - '+esc(b.name):''}</small></div>`}).join('')||'<div class="empty">Nothing yet. Tick a job to start the story.</div>'}
 function adminView(){
