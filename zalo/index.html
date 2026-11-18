@@ -273,9 +273,12 @@ function saveDone(){try{localStorage.setItem('zaloDone',JSON.stringify(DONE))}ca
 async function deriveKey(pw,salt,iter){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:iter,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt'])}
 async function load(pw){const r=await fetch('data.enc.json?t='+Date.now(),{cache:'no-store'});const e=await r.json();if(!KEY||pw)KEY=await deriveKey(pw,b64(e.salt),e.iter);const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(e.iv)},KEY,b64(e.ct));DATA=JSON.parse(new TextDecoder().decode(p));norm(DATA);render()}
 function norm(d){d.properties=d.properties||[];d.top3=d.top3||[];d.watch=d.watch||[];d.properties.forEach(p=>{p.units=p.units||[];p.tasks=p.tasks||[];p.name=p.name||'Property'});if(d.money){const m=d.money;m.months=m.months||[];m.payments=m.payments||[];m.costs_top=m.costs_top||[];m.expected=m.expected||[]}}
+function remPw(k){try{const o=JSON.parse(localStorage.getItem(k)||'null');if(o&&o.pw&&Date.now()-o.t<6048e5){o.t=Date.now();localStorage.setItem(k,JSON.stringify(o));return o.pw}localStorage.removeItem(k)}catch(e){}return null}
+function savePw(k,pw){try{localStorage.setItem(k,JSON.stringify({pw:pw,t:Date.now()}))}catch(e){}}
+function forgetPw(k){try{localStorage.removeItem(k)}catch(e){}}
 async function go(){const pw=document.getElementById('pw').value;document.getElementById('err').classList.add('hidden');
- try{await load(pw);try{sessionStorage.setItem('zaloPw',pw)}catch(e){}document.getElementById('gate').classList.add('hidden');document.getElementById('app').classList.remove('hidden');document.getElementById('nav').classList.remove('hidden')}
- catch(e){KEY=null;document.getElementById('err').classList.remove('hidden');const g=document.getElementById('pw');g.classList.remove('shake');void g.offsetWidth;g.classList.add('shake')}}
+ try{await load(pw);try{sessionStorage.setItem('zaloPw',pw)}catch(e){}savePw('zaloRemember',pw);document.getElementById('gate').classList.add('hidden');document.getElementById('app').classList.remove('hidden');document.getElementById('nav').classList.remove('hidden')}
+ catch(e){KEY=null;forgetPw('zaloRemember');document.getElementById('err').classList.remove('hidden');const g=document.getElementById('pw');g.classList.remove('shake');void g.offsetWidth;g.classList.add('shake')}}
 function ago(t){const m=Math.round((Date.now()-new Date(t))/60000);if(!isFinite(m))return 'recently';if(m<2)return 'just now';if(m<60)return m+' min ago';const h=Math.round(m/60);if(h<48)return h+'h ago';return Math.round(h/24)+' days ago'}
 function greet(){const h=new Date().getHours();return h<12?'Good morning':h<18?'Good afternoon':'Good evening'}
 const short=n=>String(n).replace(/^[\d\s-]+/,'').replace(/ (Road|Street|Avenue|Lane|Close|Court)( South| North)?$/,'').replace(/ HMO$/,'');
@@ -415,7 +418,7 @@ document.addEventListener('click',e=>{if(e.target.id==='shade')return closeSheet
  if(t.id==='morebtn'){document.getElementById('alerts').innerHTML=DATA.watch.map((w,i)=>alertCard(w,i)).join('');t.remove();return}
  if(t.dataset.tab)setTab(t.dataset.tab)});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
-(async()=>{let pw;try{pw=sessionStorage.getItem('zaloPw')}catch(e){}if(pw){document.getElementById('pw').value=pw;go()}})();
+(async()=>{let pw;try{pw=sessionStorage.getItem('zaloPw')}catch(e){}if(!pw)pw=remPw('zaloRemember');if(pw){document.getElementById('pw').value=pw;go()}})();
 </script>
 </body>
 </html>

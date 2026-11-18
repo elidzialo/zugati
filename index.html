@@ -1126,13 +1126,16 @@ function groupSum(s,ps){if(s==='Supplier not set')return '';const fx=FXU();let q
    '<button class="place gsend" data-gsend="'+esc(s)+'">Send the '+who+' order to Claude</button></div>'}
 
 /* ---------- boot ---------- */
-async function login(){const pw=$('pw').value;$('err').classList.add('hidden');try{await load(pw);$('login').classList.add('hidden');$('app').classList.remove('hidden');try{sessionStorage.setItem('zpw',pw)}catch(e){}}catch(e){console.error(e);KEY=null;$('err').classList.remove('hidden')}}
+function remPw(k){try{const o=JSON.parse(localStorage.getItem(k)||'null');if(o&&o.pw&&Date.now()-o.t<6048e5){o.t=Date.now();localStorage.setItem(k,JSON.stringify(o));return o.pw}localStorage.removeItem(k)}catch(e){}return null}
+function savePw(k,pw){try{localStorage.setItem(k,JSON.stringify({pw:pw,t:Date.now()}))}catch(e){}}
+function forgetPw(k){try{localStorage.removeItem(k)}catch(e){}}
+async function login(){const pw=$('pw').value;$('err').classList.add('hidden');try{await load(pw);$('login').classList.add('hidden');$('app').classList.remove('hidden');try{sessionStorage.setItem('zpw',pw)}catch(e){}savePw('zugatiRemember',pw);}catch(e){console.error(e);KEY=null;forgetPw('zugatiRemember');$('err').classList.remove('hidden')}}
 /* A2: highlight the section you're on in the top bar */
 (function(){const L=[...document.querySelectorAll('.links a')];if(!('IntersectionObserver' in window))return;const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){L.forEach(a=>{const on=a.getAttribute('href')==='#'+e.target.id;a.classList.toggle('on',on);if(on&&a.parentElement.scrollWidth>a.parentElement.clientWidth)a.parentElement.scrollTo({left:a.offsetLeft-12,behavior:'smooth'})})}})},{rootMargin:'-45% 0px -50% 0px'});L.forEach(a=>{const t=document.querySelector(a.getAttribute('href'));if(t)io.observe(t)})})();
 $('go').onclick=login;$('pw').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
 document.querySelectorAll('.acc button').forEach(b=>b.onclick=()=>{ACC=b.dataset.acc;document.querySelectorAll('.acc button').forEach(x=>x.classList.toggle('on',x===b));FILTER='all';render()});
 setInterval(()=>{if(KEY)load().catch(()=>{})},5*60*1000);
-try{const s=sessionStorage.getItem('zpw');if(s){$('pw').value=s;login()}}catch(e){}
+try{const s=sessionStorage.getItem('zpw')||remPw('zugatiRemember');if(s){$('pw').value=s;login()}}catch(e){}
 })();
 </script>
 </body>
