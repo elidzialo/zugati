@@ -324,6 +324,33 @@ body.hasbar .toast{bottom:150px}
 .toast .why input{flex:1;min-width:0;border:0;border-radius:10px;padding:10px 12px;font:inherit;font-size:16px}
 .card.act,.prow{transition:opacity .35s,transform .35s}
 .card.act.gone,.prow.gone{opacity:0;transform:translateX(40px) scale(.97)}
+
+/* A2 18 Nov night: bigger Done / Paid / Not relevant, feedback sheet, supplier question */
+.tact{gap:8px;margin-top:10px;flex-wrap:wrap}
+.tb{padding:9px 16px;font-size:14px;border-radius:20px;min-height:40px;display:inline-flex;align-items:center;transition:transform .12s,background .2s}
+.tb.ok{background:#e8f6f1;border-color:#9fd3c4}.tb:active{transform:scale(.94)}
+.fbs{position:fixed;inset:0;z-index:90;background:rgba(15,20,26,0);display:flex;align-items:flex-end;justify-content:center;transition:background .25s}
+.fbs.on{background:rgba(15,20,26,.45)}
+.fbin{position:relative;background:#fff;width:100%;max-width:480px;border-radius:22px 22px 0 0;padding:22px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.25);transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.9,.3,1.15)}
+.fbs.on .fbin{transform:none}
+@media (min-width:700px){.fbs{align-items:center}.fbin{border-radius:22px}}
+.fbx{position:absolute;right:10px;top:8px;border:0;background:none;font-size:28px;color:#888;cursor:pointer;padding:4px 10px}
+.fbh{font-size:20px;font-weight:800;color:var(--green)}
+.fbt{font-size:14px;color:#555;margin:4px 34px 10px 0;line-height:1.35}
+.fbq{font-weight:700;margin:6px 0 8px}
+.fbc{display:flex;flex-wrap:wrap;gap:8px}
+.fbchip{border:1.5px solid var(--line);background:#f7f9f9;border-radius:22px;padding:10px 14px;font:inherit;font-size:15px;cursor:pointer;transition:all .15s}
+.fbchip.on{background:#fff3e0;border-color:var(--orange);font-weight:700;transform:scale(1.03)}
+.fbi{width:100%;margin:12px 0;border:1px solid #c9c9c9;border-radius:12px;padding:12px;font:inherit;font-size:16px}
+.fbsend{display:block;text-align:center;background:var(--orange);color:#111;font-weight:800;font-size:17px;border-radius:26px;padding:15px;text-decoration:none;box-shadow:0 3px 0 #c7811b}
+.fbsend:active{transform:translateY(2px);box-shadow:0 1px 0 #c7811b}
+.fbn{font-size:13px;color:#666;text-align:center;margin:8px 0 2px}
+.fbskip{display:block;margin:4px auto 0;border:0;background:none;color:var(--teal);font:inherit;font-size:15px;padding:8px 18px;cursor:pointer}
+.prow.paid{background:#f3faf7;border-color:#bfe3d5}.prow.paid .pdate{background:#e3f3ec;color:var(--green)}.pill.p-paid{background:#d6f0e6;color:var(--green)}
+.asksup{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;margin:10px 0 4px;border:1.5px dashed #e3a33b;background:#fff8ec;color:#7a4b00;border-radius:12px;padding:10px 12px;font:inherit;font-size:15px;font-weight:700;cursor:pointer;text-align:left}
+.asksup span{background:var(--orange);color:#111;border-radius:14px;padding:4px 10px;font-size:12px;white-space:nowrap}
+.asksup.sm{font-size:13px;padding:8px 10px;margin:8px 0 0}
+@media (max-width:620px){.pamt{flex-wrap:wrap}.pamt .tact{flex:1 0 100%;justify-content:flex-start!important}}
 img.nofoto{object-fit:contain!important;background:#f3f5f5}
 .yhead{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .yhead .yt{flex:1 1 140px;background:#f7f9f9;border-radius:12px;padding:10px 12px}
@@ -613,7 +640,7 @@ function renderGrid(){
     '<div class="big"><span class="num">'+n0(p.stock)+'</span><span class="u">in stock</span>'+(p.inbound&&p.on_order?'<span class="inb">+'+n0(p.inbound+p.on_order)+' coming</span>':p.inbound?'<span class="inb">+'+n0(p.inbound)+' on the way</span>':p.on_order?'<span class="inb">+'+n0(p.on_order)+' ordered</span>':'')+'</div>'+
     '<div class="run"><i style="width:'+pct+'%;background:'+col+'"></i></div><div class="runl"><span>'+lastsTxt(left,p)+'</span><span>'+(p.per_day?(p.per_day<1?p.per_day.toFixed(1):Math.round(p.per_day))+' sold / day':'')+'</span></div>'+
     '<div class="facts"><div class="fact">'+(p.valentine&&p.val_units?'<div class="k">Need until 14 Feb</div><div class="x">'+n0(f.needVal)+'</div>':'<div class="k">Next 60 days need</div><div class="x">'+n0(f.need60)+'</div>')+'</div><div class="fact"><div class="k">Profit 30 days</div><div class="x" style="color:'+((p.profit30||0)<0?'var(--red)':'var(--green)')+'">'+(p.profit30==null?'-':money(p.profit30,p.cur))+'</div></div></div>'+
-    (p.valentine?quoteHtml(p,true):'')+'<div class="order '+f.st+'">'+esc(orderLine(p,f))+'</div>'+(['now','soon','ok'].includes(f.st)?addBtn(p,f):'')+'</div></div>';
+    (p.valentine?quoteHtml(p,true):'')+(supOf(p)===NOSUP&&['now','soon'].includes(f.st)?'<button class="asksup sm" data-asksup="'+esc(p.id)+'">❓ Ask Eli who supplies this <span>Tap to answer</span></button>':'')+'<div class="order '+f.st+'">'+esc(orderLine(p,f))+'</div>'+(['now','soon','ok'].includes(f.st)?addBtn(p,f):'')+'</div></div>';
   }).join('')||(PQ?'<div class="card empty"><div class="ei">🔎</div><b>No product matches "'+esc(PQ)+'"</b><span class="note">Try fewer letters, or <a href="#" id="psclr">clear the search</a>'+(FILTER!=='all'?' and tap <b>All</b>':'')+'.</span></div>':'<div class="card empty"><div class="ei">'+(FILTER==='soon'?'🎉':FILTER==='now'?'✅':'📭')+'</div><b>'+(FILTER==='soon'||FILTER==='now'?'Nothing to order here - all good':'Nothing here')+'</b><span class="note">Tap <b>All</b> to see every product.</span></div>');
   const pc=$('psclr');if(pc)pc.onclick=e=>{e.preventDefault();$('psx').click()};
   const gk=L.map(x=>x.p.id).join(',')+'|'+PQ;if(gk!==window._gk){window._gk=gk;$('grid').classList.remove('gfade');void $('grid').offsetWidth;$('grid').classList.add('gfade')}
@@ -656,7 +683,7 @@ function openP(id){
   const bars=[{l:'Last Christmas',s:'Dec',v:p.xmas_units,c:'#1d8f5f'},{l:'Last Valentine\'s',s:'15 Jan-14 Feb',v:p.val_units,c:'#e8436a'},{l:'Last 30 days',s:'now',v:p.units30!=null?p.units30:Math.round((p.per_day||0)*30),c:'#ff9900'},{l:'Next 60 days',s:'forecast',v:f.need60,c:'#146eb4'}];
   $('md').innerHTML='<button class="mx" aria-label="Close">×</button>'+
    '<div class="mh"><div class="im"><img src="'+img(p.img,600)+'" alt=""></div><div><span class="rib '+cls+'" style="position:static;display:inline-block;border-radius:12px">'+lab+'</span> <span class="mk" style="position:static">'+esc(p.market)+'</span>'+(p.valentine?' <span class="vtag" style="position:static">♥ Valentine\'s</span>':'')+
-   '<h3>'+esc(p.name)+'</h3><div class="note">ASIN '+esc(p.asin)+' · SKU '+esc(p.sku)+(p.supplier?' · Supplier: '+esc(p.supplier):'')+'</div>'+
+   '<h3>'+esc(p.name)+'</h3><div class="note">ASIN '+esc(p.asin)+' · SKU '+esc(p.sku)+(supOf(p)!==NOSUP?' · Supplier: '+esc(supOf(p)):'')+'</div>'+(supOf(p)===NOSUP?'<button class="asksup" data-asksup="'+esc(p.id)+'">❓ Ask Eli who supplies this <span>Tap to answer</span></button>':'')+
    '<div class="bubbles"><div class="bub"><div class="x">'+n0(p.stock)+'</div><div class="k">In stock</div></div><div class="bub"><div class="x">'+n0((p.inbound||0)+(p.on_order||0))+'</div><div class="k">On the way</div></div><div class="bub"><div class="x">'+(p.per_day?(p.per_day<1?p.per_day.toFixed(1):Math.round(p.per_day)):'0')+'</div><div class="k">Sold / day</div></div><div class="bub"><div class="x" style="color:'+((p.profit30||0)<0?'var(--red)':'var(--green)')+'">'+(p.profit30==null?'-':money(p.profit30,p.cur))+'</div><div class="k">Profit 30d</div></div></div>'+
    '<div class="btns" style="margin-top:12px"><a class="btn ghost" target="_blank" rel="noopener" href="https://www.amazon.'+(p.account==='USA'?'com':p.market.indexOf('DE')===0?'de':p.market==='FR'?'fr':'co.uk')+'/dp/'+esc(p.asin)+'">View on Amazon</a></div></div></div>'+
    '<div class="rec '+f.st+'">'+rec+(['now','soon','ok'].includes(f.st)?'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><div style="min-width:220px">'+addBtn(p,f)+'</div><button class="claude" style="width:auto;padding:7px 16px;font-size:14px" data-ask1="'+esc(p.id)+'">Ask Claude to order this ↗</button></div>':'')+'</div>'+quoteHtml(p,false)+
@@ -675,11 +702,11 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeP()});
 function renderPay(){
   let DISP={};try{DISP=JSON.parse(localStorage.getItem('zdis')||'{}')}catch(e){}
   const P=(DATA.payments||[]).filter(x=>!DISP['p:'+x.id]).slice().sort((a,b)=>a.due<b.due?-1:1);
-  const lab={unpaid:'Not paid',overdue:'Overdue',check:'Check if paid',planned:'Planned',later:'Later',forecast:'Not ordered yet'};
+  const lab={unpaid:'Not paid',overdue:'Overdue',check:'Check if paid',planned:'Planned',later:'Later',forecast:'Not ordered yet',paid:'✓ Paid'};
   $('pay').innerHTML=P.map(x=>{const d=new Date(x.due+'T00:00:00'),late=d<today()&&x.status!=='forecast';
-   return '<div class="prow"><div class="pdate'+(late?' late':'')+'"><div class="dd">'+d.getDate()+'</div><div class="mm">'+d.toLocaleDateString('en-GB',{month:'short'})+'</div></div>'+
+   const pd=x.status==='paid';return '<div class="prow'+(pd?' paid':'')+'"><div class="pdate'+(late&&!pd?' late':'')+'"><div class="dd">'+d.getDate()+'</div><div class="mm">'+d.toLocaleDateString('en-GB',{month:'short'})+'</div></div>'+
    '<div><span class="pill p-'+esc(x.status)+'">'+(lab[x.status]||esc(x.status))+'</span><div class="pw">'+esc(x.what)+'</div><div class="pto">'+esc(x.to)+'</div><div class="pwhy">'+esc(x.why)+'</div></div>'+
-   '<div class="pamt"><div class="a">'+(x.amount!=null?money(x.amount,x.cur):'?')+'</div><div class="an">'+esc(x.amount_note||'')+'</div><div class="btns" style="justify-content:flex-end">'+(x.link?'<a class="btn" target="_blank" rel="noopener" href="'+esc(x.link)+'">Pay</a>':'')+(x.email?'<a class="btn ghost" target="_blank" rel="noopener" href="'+esc(x.email)+'">Email</a>':'')+'</div><div class="tact" style="justify-content:flex-end"><span class="tb ok" data-dis="p:'+esc(x.id)+'" data-st="paid" data-t="'+esc(x.what)+'">✓ Paid</span><span class="tb no" data-dis="p:'+esc(x.id)+'" data-st="not relevant" data-t="'+esc(x.what)+'">✕ Not relevant</span></div></div></div>'}).join('');wireDis($('pay'));
+   '<div class="pamt"><div class="a">'+(x.amount!=null?money(x.amount,x.cur):'?')+'</div><div class="an">'+esc(x.amount_note||'')+'</div>'+(pd?'':'<div class="btns" style="justify-content:flex-end">'+(x.link?'<a class="btn" target="_blank" rel="noopener" href="'+esc(x.link)+'">Pay</a>':'')+(x.email?'<a class="btn ghost" target="_blank" rel="noopener" href="'+esc(x.email)+'">Email</a>':'')+'</div><div class="tact" style="justify-content:flex-end"><span class="tb ok" data-dis="p:'+esc(x.id)+'" data-st="paid" data-t="'+esc(x.what)+'">✓ Paid</span><span class="tb no" data-dis="p:'+esc(x.id)+'" data-st="not relevant" data-t="'+esc(x.what)+'">✕ Not relevant</span></div>')+'</div></div>'}).join('');wireDis($('pay'));
   // cash forecast
   const h=DATA.history;if(!h){$('cashchart').innerHTML='';return}
   const L=h.months.length,cur=h.payout[L-2],ly=h.payout[L-14];const ratio=ly?cur/ly:1;
@@ -701,7 +728,8 @@ function renderBar(){const n=Object.keys(BASKET).length,g=groups();const bar=$('
   bar.classList.remove('hidden');bar.innerHTML='<span>🛒 <b>'+n+'</b> item'+(n>1?'s':'')+' · '+Object.keys(g).length+' supplier'+(Object.keys(g).length>1?'s':'')+'</span><span class="btn" id="openb">Go to checkout</span>';$('openb').onclick=openB}
 let SUPO={},SHIP={};try{SUPO=JSON.parse(localStorage.getItem('zsup')||'{}');SHIP=JSON.parse(localStorage.getItem('zship')||'{}')}catch(e){}
 const saveCo=()=>{try{localStorage.setItem('zsup',JSON.stringify(SUPO));localStorage.setItem('zship',JSON.stringify(SHIP))}catch(e){}};
-const supOf=p=>SUPO[p.id]||p.supplier||'Supplier not set';
+const NOSUP='Who supplies this?';
+const supOf=p=>SUPO[p.id]||p.supplier||NOSUP;
 const r50=v=>Math.max(0,Math.ceil(v/50)*50);
 function recFor(p){const M=p.monthly,t0=today();let ly=0,g=1;
   if(M&&M.units){const N=M.units.length;
@@ -752,7 +780,7 @@ function openB(){const g=groups(),d=$('bdr');const T=coTotals(),n=Object.keys(BA
     (T.last?'<div class="arr">🚚 Everything at Amazon by <b>'+fmtD(T.last)+'</b></div>':'')+'</div>';
   d.innerHTML='<div class="coh"><span class="logo" style="font-size:20px">zugati <small>checkout</small></span><button class="mx" style="position:static;background:none;color:#fff" id="closeb" aria-label="Close">×</button></div>'+
   '<div class="cow"><div class="coL"><h2 class="cot">Your order</h2>'+
-   Object.entries(g).map(([s,ps])=>{const sp=DATA.suppliers&&DATA.suppliers[s];return '<div class="cos"><div class="cosh">📦 From <b>'+esc(s)+'</b>'+(sp?'<span class="note"> · '+esc(sp.email)+' · pays by '+esc(sp.pay)+'</span>':'')+'</div>'+ps.map(coItem).join('')+groupSum(s,ps)+'</div>'}).join('')+
+   Object.entries(g).map(([s,ps])=>{const sp=DATA.suppliers&&DATA.suppliers[s];return '<div class="cos"><div class="cosh">'+(s===NOSUP?'<button class="asksup" data-asksup="'+esc(ps.map(p=>p.id).join(','))+'">❓ Ask Eli who supplies this <span>Tap to answer</span></button>':'📦 From <b>'+esc(s)+'</b>')+(sp?'<span class="note"> · '+esc(sp.email)+' · pays by '+esc(sp.pay)+'</span>':'')+'</div>'+ps.map(coItem).join('')+groupSum(s,ps)+'</div>'}).join('')+
    (more.length?'<div class="more"><h4>Also running low</h4><div class="mrow">'+more.map(p=>'<div class="mc"><img src="'+img(p.img,160)+'" alt=""><div class="mn">'+esc(p.name)+'</div><button class="addb" data-madd="'+esc(p.id)+'">+ Add</button></div>').join('')+'</div></div>':'')+
    '<div class="lessons"><h4>What we learnt last Valentine\'s</h4>'+((DATA.shipping&&DATA.shipping.lessons)||[]).map(x=>'<div>• '+esc(x)+'</div>').join('')+'<div class="note" style="margin-top:6px">Shipping prices are what you paid in your emails. * means a typical price from your other shipments, not this exact product.</div></div>'+
    '<p style="text-align:center"><span class="lnk" id="clearb">Empty the basket</span></p></div>'+
@@ -773,7 +801,7 @@ function openB(){const g=groups(),d=$('bdr');const T=coTotals(),n=Object.keys(BA
 }
 function orderPrompt(B){B=B||BASKET;const g=groups(B);let t='Hi Claude, Eli here - I clicked "order" in my Zugati portal. Please help me reorder the items below.\n\nWhat I want:\n- Draft ONE email per supplier (cc eli@zelr.co.uk, short professional subject, natural human tone, regular hyphens).\n- Check my Gmail for my last order with each supplier: confirm the right email address, last unit price, packaging, labels and shipping method, and use them in the email.\n- Ask each supplier for a PI and payment link (30% deposit if they agree).\n- Tell me roughly what it will cost in total and when payment is due, and whether it fits my cash (portal says I can safely spend about '+($('cfokpis')?($('cfokpis').querySelectorAll('.v')[3]||{}).textContent||'':'')+' on stock right now).\n- Show me the drafts first. Do NOT send anything until I say yes.\n';
   Object.entries(g).forEach(([s,ps])=>{const em=DATA.suppliers&&DATA.suppliers[s]&&DATA.suppliers[s].email;t+='\nSupplier: '+s+(em?' ('+em+')':' (please find the right supplier in my emails)')+'\n';ps.forEach(p=>{const f=forecast(p);t+='- '+p.name+' - '+n0(B[p.id])+' units'+(()=>{const r=recFor(p),sp=shipPlan(p,B[p.id],r);return sp?', ship by '+sp.pick.m.label.toUpperCase()+' (arrives ~'+fmtD(sp.pick.arr)+(sp.pick.ok?'':', too late for the peak')+')':''})()+(()=>{const Q=quoteFor(p);return Q?' (quoted '+fmtD(new Date(Q.q.date+'T00:00:00'))+': $'+Q.it.unit_usd.toFixed(2)+' each + air $'+n0(Q.it.air_usd)+' per '+n0(Q.it.qty)+')':''})()+' (portal suggests '+n0(recFor(p).sug)+' - tell me if you think different) (ASIN '+p.asin+', EAN '+(p.ean||'-')+', SKU '+p.sku+', for Amazon '+p.market+'). Now: '+n0(p.stock)+' in stock'+(p.inbound?', '+n0(p.inbound)+' on the way':'')+', sells ~'+(p.per_day||0).toFixed(1)+'/day'+(f.run!=null?', runs out ~'+fmtD(addD(today(),f.run)):'')+'.\n'})});
-  Object.entries(g).forEach(([s,ps])=>{if(s==='Supplier not set')return;const fx=FXU();let goods=0,air=0;ps.forEach(p=>{const q=B[p.id]||0,Q=quoteFor(p),u=Q?Q.it.unit_usd:(p.buy||{}).unit_usd,a=Q&&Q.it.air_usd!=null?Q.it.air_usd/Q.it.qty:(p.buy||{}).air_usd;if(u!=null)goods+=u*q;if(a!=null)air+=a*q});if(goods)t+='\nPortal estimate for '+s+': goods $'+n0(goods)+' + air $'+n0(air)+' = $'+n0(goods+air)+' (about £'+n0((goods+air)*fx)+'), '+depP(s)+'% deposit about $'+n0((goods+air)*depP(s)/100)+' (£'+n0((goods+air)*depP(s)/100*fx)+') - please make it ONE combined order.\n'});
+  Object.entries(g).forEach(([s,ps])=>{if(s===NOSUP)return;const fx=FXU();let goods=0,air=0;ps.forEach(p=>{const q=B[p.id]||0,Q=quoteFor(p),u=Q?Q.it.unit_usd:(p.buy||{}).unit_usd,a=Q&&Q.it.air_usd!=null?Q.it.air_usd/Q.it.qty:(p.buy||{}).air_usd;if(u!=null)goods+=u*q;if(a!=null)air+=a*q});if(goods)t+='\nPortal estimate for '+s+': goods $'+n0(goods)+' + air $'+n0(air)+' = $'+n0(goods+air)+' (about £'+n0((goods+air)*fx)+'), '+depP(s)+'% deposit about $'+n0((goods+air)*depP(s)/100)+' (£'+n0((goods+air)*depP(s)/100*fx)+') - please make it ONE combined order.\n'});
   return t;}
 
 
@@ -783,7 +811,7 @@ function confetti(){const c=document.createElement('canvas');c.className='confet
   for(let i=0;i<180;i++){const a=Math.random()*Math.PI*2,v=(6+Math.random()*12)*devicePixelRatio;P.push({x:W/2,y:H*0.45,vx:Math.cos(a)*v,vy:Math.sin(a)*v-8*devicePixelRatio,r:(4+Math.random()*6)*devicePixelRatio,c:cols[i%cols.length],s:Math.random()*6,t:Math.random()<.3})}
   let f=0;(function step(){x.clearRect(0,0,W,H);P.forEach(p=>{p.vy+=0.35*devicePixelRatio;p.vx*=.985;p.x+=p.vx;p.y+=p.vy;p.s+=.2;x.save();x.translate(p.x,p.y);x.rotate(p.s);x.fillStyle=p.c;if(p.t){x.beginPath();x.arc(0,0,p.r/1.6,0,7);x.fill()}else x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);x.restore()});
     if(++f<170)requestAnimationFrame(step);else c.remove()})()}
-function supplierMail(s,ps,B){const em=(DATA.suppliers&&DATA.suppliers[s]&&DATA.suppliers[s].email)||'';const first=s==='Supplier not set'?'there':s.split(/[\s(]/)[0];
+function supplierMail(s,ps,B){const em=(DATA.suppliers&&DATA.suppliers[s]&&DATA.suppliers[s].email)||'';const first=s===NOSUP?'there':s.split(/[\s(]/)[0];
   const body='Hi '+first+',\n\nI hope you are well. I would like to place a new order:\n\n'+ps.map(p=>'- '+p.name+': '+n0(B[p.id])+' units (same as last time - packaging, labels and EAN '+(p.ean||'as before')+')').join('\n')+'\n\nPlease send me the PI and the payment link, and let me know the production time.\n\nThank you,\nEli';
   return 'mailto:'+em+'?subject='+encodeURIComponent('New order - Zugati')+'&body='+encodeURIComponent(body)}
 function sendOrder(B){B=B||BASKET;if(!Object.keys(B).length)return;const txt=orderPrompt(B),g=groups(B),n=Object.keys(B).length;
@@ -801,7 +829,7 @@ function sendOrder(B){B=B||BASKET;if(!Object.keys(B).length)return;const txt=ord
     (chat?'<a class="btn ghost" target="_blank" rel="noopener" href="'+esc(fresh)+'">Open a new Claude chat with the order filled in</a>':'')+
     '<span class="btn ghost" id="socopy">Copy the order again</span>'+
     '<div class="note" style="margin:10px 0 4px"><b>Or email the suppliers yourself</b> - a ready email opens, you just press send:</div>'+
-    Object.entries(g).map(([s,ps])=>'<a class="btn mail" href="'+esc(supplierMail(s,ps,B))+'">✉ Email '+esc(s==='Supplier not set'?'the supplier':s)+'</a>').join('')+
+    Object.entries(g).map(([s,ps])=>'<a class="btn mail" href="'+esc(supplierMail(s,ps,B))+'">✉ Email '+esc(s===NOSUP?'the supplier':s)+'</a>').join('')+
    '</details>'+
    '<div class="worked"><span class="note">Did it work?</span><span class="tb ok" id="soyes">👍 Yes</span><span class="tb no" id="sono">👎 No</span></div>'+
    '<button class="mx sx" aria-label="Close">×</button></div>';
@@ -813,7 +841,7 @@ function sendOrder(B){B=B||BASKET;if(!Object.keys(B).length)return;const txt=ord
   const log=(ok)=>{try{localStorage.setItem('zorderway',ok?0:w+1)}catch(e){}};
   $('soyes').onclick=()=>{log(true);confetti();setTimeout(close,900)};
   $('sono').onclick=()=>{log(false);ov.querySelector('.planb').open=true;
-    if(confirm('Sorry! Tell the team so they fix it by next week?'))location.href='mailto:eli@zelr.co.uk?subject='+encodeURIComponent('Zugati portal feedback - ordering')+'&body='+encodeURIComponent('Sending my order to Claude did not work.\nWhat happened: \n\n(Sent from the Zugati portal - the team will try a different way.)')};
+    fbSheet({head:'😕 Sorry it didn\'t work',sub:'Tell the team and they\'ll try a different way by next week.',ask:'What happened? Tap one:',chips:['📋 Nothing copied','💬 Chat did not open','🤷 Claude got it wrong','🐢 Too many steps'],subject:'Zugati portal feedback - ordering',body:w=>'Sending my order to Claude did not work.\nWhat happened: '+w+'\n\n(Sent from the Zugati portal - the team will try a different way.)'})};
 }
 
 /* ---------- feedback on tasks/payments ---------- */
@@ -821,12 +849,26 @@ function wireDis(root){root.querySelectorAll('[data-dis]').forEach(b=>b.onclick=
   D[b.dataset.dis]={st:b.dataset.st,t:b.dataset.t,at:new Date().toISOString()};try{localStorage.setItem('zdis',JSON.stringify(D))}catch(x){}
   const card=b.closest('.card.act,.prow');const go=()=>{renderActs();renderPay();try{renderCfo()}catch(x){}try{renderToday()}catch(x){}};
   if(card){card.classList.add('gone');setTimeout(go,330)}else go();toast(b.dataset.st,b.dataset.t)})}
-function toast(st,t){const old=document.querySelector('.toast');if(old)old.remove();const el=document.createElement('div');el.className='toast';
-  el.innerHTML='<span>✓ Marked <b>'+esc(st)+'</b>. Tell the team why?</span><span style="cursor:pointer;font-size:22px;margin-left:auto;padding:0 6px" id="tx" aria-label="Close">×</span><div class="why"><input id="twhy" placeholder="Why? (optional)" aria-label="Why"><span class="btn" id="tellt">Tell team</span></div>';document.body.append(el);
-  $('tx').onclick=()=>el.remove();let kept=false;$('twhy').onfocus=()=>kept=true;
-  $('tellt').onclick=()=>{const why=($('twhy').value||'').trim();const body='Item: '+t+'\nMarked: '+st+'\nWhy: '+why+'\n\n(Sent from the Zugati portal - the Team Leader agent reads these every morning and remembers them.)';
-    location.href='mailto:eli@zelr.co.uk?subject='+encodeURIComponent('Zugati portal feedback - '+st)+'&body='+encodeURIComponent(body);el.remove()};
-  setTimeout(()=>{if(el.isConnected&&!kept)el.remove()},12000)}
+function toast(st,t){const R={'done':['✓ Done it','👍 Sorted already','🙋 Someone else did it'],'paid':['💷 Paid in full','💳 Paid the deposit','🔁 Paid another way'],'not relevant':['❌ Wrong info','🏷️ Not Zugati','✅ Already sorted','⏳ Not now']}[st]||['👍 OK'];
+  fbSheet({head:'✓ Marked <b>'+esc(st)+'</b>',sub:t,ask:'Tell the team? Tap a reason:',chips:R,subject:'Zugati portal feedback - '+st,body:w=>'Item: '+t+'\nMarked: '+st+'\nWhy: '+w+'\n\n(Sent from the Zugati portal - the Team Leader agent reads these every morning and remembers them.)'})}
+/* A2 18 Nov: one bottom sheet for every 'tell the team' email - big buttons, one-tap reasons, real link so phones open the mail app */
+function fbSheet(o){const old=document.querySelector('.fbs');if(old)old.remove();const el=document.createElement('div');el.className='fbs';el.setAttribute('role','dialog');
+  el.innerHTML='<div class="fbin"><button class="fbx" aria-label="Close">×</button><div class="fbh">'+o.head+'</div>'+(o.sub?'<div class="fbt">'+esc(o.sub)+'</div>':'')+
+   '<div class="fbq">'+esc(o.ask)+'</div><div class="fbc">'+o.chips.map(c=>'<button class="fbchip">'+esc(c)+'</button>').join('')+'</div>'+
+   '<input class="fbi" placeholder="Or type a few words (optional)" aria-label="Why">'+
+   '<a class="fbsend" href="#">✉ Send to the team</a><div class="fbn">Your email app opens with it all filled in - just press <b>Send</b>.</div><button class="fbskip">Skip</button></div>';
+  document.body.append(el);requestAnimationFrame(()=>el.classList.add('on'));
+  const inp=el.querySelector('.fbi'),a=el.querySelector('.fbsend');let picked=[];
+  const upd=()=>{const w=picked.map(x=>x.replace(/^\S+\s/,'')).concat((inp.value||'').trim()?[inp.value.trim()]:[]).join(' - ');a.href='mailto:eli@zelr.co.uk?subject='+encodeURIComponent(o.subject)+'&body='+encodeURIComponent(o.body(w))};upd();
+  el.querySelectorAll('.fbchip').forEach(b=>b.onclick=()=>{b.classList.toggle('on');picked=[...el.querySelectorAll('.fbchip.on')].map(x=>x.textContent);upd()});
+  inp.oninput=upd;const close=()=>{el.classList.remove('on');setTimeout(()=>el.remove(),250)};
+  el.querySelector('.fbx').onclick=close;el.querySelector('.fbskip').onclick=close;el.onclick=e=>{if(e.target===el)close()};
+  a.onclick=()=>{upd();a.textContent='✓ Opening your email…';setTimeout(close,900)}}
+function askSup(ids){ids=String(ids).split(',');const ps=ids.map(i=>DATA.products.find(p=>p.id===i)).filter(Boolean);if(!ps.length)return;
+  const names=ps.map(p=>p.name).join(', '),v=prompt('Who supplies '+names+'?\n(e.g. Jay, Decorline Europe, made in the UK)');if(v===null||!v.trim())return;
+  ps.forEach(p=>SUPO[p.id]=v.trim());saveCo();try{renderGrid();renderBar();if(!$('bdr').classList.contains('hidden'))openB();if(!$('ov').classList.contains('hidden'))openP(ps[0].id)}catch(e){}
+  fbSheet({head:'✓ Saved on this phone',sub:names+' - '+v.trim(),ask:'Send it to the team so every agent knows?',chips:['📦 Same supplier every time','🆕 New supplier'],subject:'Zugati portal feedback - supplier',body:w=>'Supplier for '+ps.map(p=>p.name+' ('+p.asin+')').join(', ')+': '+v.trim()+(w?'\nNote: '+w:'')+'\n\n(Sent from the Zugati portal)'})}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-asksup]');if(!b)return;e.preventDefault();e.stopPropagation();askSup(b.dataset.asksup)},true);
 /* ---------- ask Claude ---------- */
 const CTX='Context: this is Eli from my Zugati portal (https://elidzialo.github.io/zugati). My Amazon business is Zugati UK/EU and USA (Sellerboard), emails in Gmail eli@zelr.co.uk, books in QuickBooks (AS Wholesalebuy Ltd is the Amazon company). Keep answers short and simple - I prefer pictures and plain words to tables of numbers. Never send emails or pay anything without showing me first.\n\nMy question: ';
 function setupAsk(){const S=['What should I order this week?','How is my cash looking?','Draft a chase email to Jay','Which products should I drop?','What sold best last Valentine\'s?','Ideas for new products for Valentine\'s'];
@@ -1145,7 +1187,7 @@ function quoteHtml(p,full){const Q=quoteFor(p),B=p.buy||{},fx=FXU();if(!Q&&B.uni
 function reAll(){saveB();saveCo();renderGrid();renderBar();try{renderVal()}catch(e){}}
 function wireQ(root){root.querySelectorAll('[data-qadd]').forEach(b=>b.onclick=e=>{e.stopPropagation();const id=b.dataset.qadd;if(BASKET[id])delete BASKET[id];else{BASKET[id]=+b.dataset.q||100;SHIP[id]='air';}reAll();if(!$('ov').classList.contains('hidden'))openP(id)});
   root.querySelectorAll('[data-qall]').forEach(b=>b.onclick=e=>{e.stopPropagation();const q=(DATA.suppliers[b.dataset.qall]||{}).quote;if(!q)return;q.items.forEach(it=>{if(DATA.products.find(p=>p.id===it.product)){BASKET[it.product]=it.qty;SHIP[it.product]='air'}});reAll();openB()})}
-function groupSum(s,ps){if(s==='Supplier not set')return '';const fx=FXU();let qty=0,goods=0,ship=0,unk=0,air=true;
+function groupSum(s,ps){if(s===NOSUP)return '';const fx=FXU();let qty=0,goods=0,ship=0,unk=0,air=true;
   ps.forEach(p=>{const q=BASKET[p.id]||0,Q=quoteFor(p),B=p.buy||{},u=Q?Q.it.unit_usd:B.unit_usd;qty+=q;if(u!=null)goods+=u*q;else unk++;
     const sp=shipPlan(p,q,recFor(p));if(sp){if(sp.pick.k!=='air')air=false;if(sp.pick.k==='air'&&Q&&Q.it.air_usd!=null)ship+=Q.it.air_usd/Q.it.qty*q;else if(sp.pick.cost!=null)ship+=sp.pick.cost;else unk++}});
   const dp=depP(s),tot=goods+ship,dep=tot*dp/100,who=esc(sFirst(s)),c=(l,v,cl)=>'<div'+(cl?' class="'+cl+'"':'')+'><span>'+l+'</span><b>$'+n0(v)+'</b><small>≈ £'+n0(v*fx)+'</small></div>';
