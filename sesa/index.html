@@ -76,7 +76,7 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .mt{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:var(--shadow);width:100%;text-align:left}
 .mt .ic{width:46px;height:46px;border-radius:15px;background:var(--grnbg);color:var(--grn);display:flex;align-items:center;justify-content:center;flex:0 0 46px}
 .mt .v{font-size:22px;font-weight:700;color:var(--grn);line-height:1.1}.mt .l{font-size:13px;color:var(--muted)}
-.spark{margin-left:auto;display:flex;gap:4px;align-items:flex-end;height:40px}.spark i{width:10px;border-radius:4px;background:var(--grn);display:block;min-height:3px}
+.spark{margin-left:auto;display:flex;gap:7px;align-items:flex-end;height:52px}.spark span{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;height:100%;font-size:12px;font-weight:600;color:var(--muted)}.spark i{width:16px;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,#5bd68b,var(--grn));display:block;min-height:4px;max-height:34px}.spark .pt i{opacity:.55}
 /* money */
 .mhero{background:linear-gradient(135deg,#1f7a45,#2fa463);color:#fff;border-radius:24px;padding:18px;box-shadow:0 10px 24px rgba(31,122,69,.25)}
 .mhero .l{font-size:13px;opacity:.9;font-weight:500}.mhero .big{font-size:40px;font-weight:800;letter-spacing:-1px;line-height:1.1}
@@ -206,7 +206,7 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .dy{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:600;color:#7a6638}
 .dy i{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:13px;font-weight:800;color:#b07a10;border:2px solid transparent}
 .dy.on i{background:linear-gradient(135deg,#ff9a3c,#F07C8C);color:#fff}
-.dy.today i{border-color:#1d1d1f}.dy.fut i{opacity:.45}
+.dy.today i{border-color:#1d1d1f}.dy.today:not(.on) i{animation:nudgeDot 2s ease-in-out infinite}@keyframes nudgeDot{50%{box-shadow:0 0 0 5px rgba(240,124,140,.35)}}.dy.fut i{opacity:.45}
 .goal{margin-top:14px;position:relative;z-index:1}
 .goal .gt{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:6px}
 .goal .gb{height:14px;border-radius:10px;background:rgba(255,255,255,.75);overflow:hidden}
@@ -296,7 +296,7 @@ function streakStats(){const days={};let wk=0,pts=0;const ws=weekStart();
  const total=allT()+Math.min(3,DATA.top3.length),goal=Math.max(3,Math.min(10,total));return{days,wk,pts,st,goal,ws}}
 const FLAME='<svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 3.5 5.5 6 5.5 11.2A5.5 5.5 0 0 1 12 22a5.5 5.5 0 0 1-5.5-5.6c0-2.7 1.6-4.2 2.6-5.4.4 1.6 1.2 2.6 2.2 3C10.6 10.6 11 6 12 2z" fill="#ff8a3c"/><path d="M12 12.5c.6 1.7 2.7 2.7 2.7 5a2.7 2.7 0 0 1-5.4 0c0-1.3.8-2.1 1.4-2.8.2.8.6 1.2 1 1.4-.3-1.4 0-2.7.3-3.6z" fill="#ffd36b"/></svg>';
 function streakCard(){const s=streakStats(),t=dkey(new Date()),L=['M','T','W','T','F','S','S'];
- const head=s.st?`<div class="sk-n">${s.st} day streak</div><div class="sk-l">${s.wk} cleared this week. Keep it going!</div>`:s.wk?`<div class="sk-n">${s.wk} cleared this week</div><div class="sk-l">Tick one today to light the flame</div>`:`<div class="sk-n">Start a streak</div><div class="sk-l">Tick your first job to light the flame</div>`;
+ const head=s.st?`<div class="sk-n">${s.st} day streak</div><div class="sk-l">${s.wk} cleared this week</div>`:s.wk?`<div class="sk-n">${s.wk} cleared this week</div><div class="sk-l">Tick one today to keep it lit</div>`:`<div class="sk-n">Start a streak</div><div class="sk-l">Tick a job to light it</div>`;
  const wk=L.map((l,i)=>{const d=new Date(s.ws);d.setDate(d.getDate()+i);const k=dkey(d),on=s.days[k],fut=k>t;return `<div class="dy ${on?'on':''} ${k===t?'today':''} ${fut?'fut':''}"><i>${on?'✓':d.getDate()}</i>${l}</div>`}).join('');
  const pc=Math.min(100,Math.round(s.wk/s.goal*100)),won=s.wk>=s.goal;
  return `<div class="sk-top"><div class="flame ${s.st?'lit':'off'}">${FLAME}</div><div>${head}</div><div class="pts"><b>${s.pts}</b><span>pts</span></div></div>
@@ -315,7 +315,7 @@ function home(d){let h='';
    <div class="pmeta"><span class="chip">${ic('check',14,3)} ${dn}/${t} jobs</span>${att?`<span class="chip">${att} need a look</span>`:''}${p.units.length?`<span class="faces">${p.units.map(u=>mini(u.tag)).join('')}</span>`:''}</div></button>`});
   h+=`</div>`}
  if(d.money){const ms=d.money.months,mx=Math.max(...ms.map(x=>x.rent||0),1);
-  h+=`<h2>Money</h2><button class="mt" data-tab="money"><div class="ic">${ic('pound',24,2.4)}</div><div><div class="v">${gbp(d.money.rent_total)}</div><div class="l">Rent in since Sep</div></div><div class="spark">${ms.map(x=>`<i style="height:${Math.max(8,Math.round((x.rent||0)/mx*100))}%"></i>`).join('')}</div></button>`}
+  h+=`<h2>Money</h2><button class="mt" data-tab="money"><div class="ic">${ic('pound',24,2.4)}</div><div><div class="v">${gbp(d.money.rent_total)}</div><div class="l">Rent in since Sep</div></div><div class="spark" aria-hidden="true">${ms.map(x=>`<span class="${x.partial?'pt':''}"><i style="height:${Math.max(4,Math.round((x.rent||0)/mx*34))}px"></i>${esc(String(x.m||'').charAt(0))}</span>`).join('')}</div></button>`}
  if(d.watch.length){const n=d.watch.length;
   h+=`<h2>Watch out <span class="cnt">${n}</span></h2><div class="alerts" id="alerts">${d.watch.slice(0,3).map((w,i)=>alertCard(w,i)).join('')}</div>${n>3?`<button class="more" id="morebtn">Show ${n-3} more</button>`:''}`}
  return h}
