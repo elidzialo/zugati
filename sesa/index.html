@@ -295,6 +295,11 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .nb .nd{position:absolute;top:6px;left:calc(50% - 22px);width:10px;height:10px;border-radius:50%;background:#ffcf5c;box-shadow:0 0 0 2px #1d1d1f}
 .nb.on .nd{box-shadow:0 0 0 2px #fff}
 .chip.nwc{background:#fff;color:#4c3aa0}
+/* O 18 Nov 20:13: What's new shows 3 rows, rest behind a toggle */
+.nwmore{display:contents}.nwmore[hidden]{display:none}
+.nwtog{display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px;border:1px dashed rgba(255,255,255,.45);border-radius:14px;background:none;color:#fff;font:700 13px Poppins,sans-serif;cursor:pointer}
+.nwtog[aria-expanded=true] svg{transform:rotate(-90deg)}.nwtog svg{transform:rotate(90deg);transition:transform .2s}
+@media (min-width:760px){.nwtog{grid-column:1/-1}}
 </style>
 </head>
 <body>
@@ -444,15 +449,15 @@ function newsCard(){const r=DIFF;if(!r)return '';const rows=[],sn=id=>{const p=D
  r.ch.forEach(id=>{const[t,p]=findTask(id);if(t)rows.push(row('#d6e4fb',ic('clock',16,2.6),t.title,'Updated - '+short(p.name),p.id))});
  r.gone.forEach(v=>rows.push(row('#c9f0d6',ic('check',16,3),v[2],'Off the list - '+sn(v[1]),null)));
  const ch=[[r.nw.length,'new','#ffd3da'],[r.ch.length,'updated','#d6e4fb'],[r.gone.length,'off the list','#c9f0d6'],[r.paySum?gbp(r.paySum):0,'rent in','#c9f0d6'],[r.up.length,'better','#c9f0d6'],[r.down.length,'need a look','#ffe2a8']].filter(x=>x[0]);
- const shown=rows.slice(0,5),extra=rows.length-shown.length;
+ const shown=rows.slice(0,3),more=rows.slice(3);
  return `<div class="news" id="news"><div class="nwtop"><div class="nwic"><svg width="26" height="26" viewBox="0 0 24 24" fill="#ffcf5c" aria-hidden="true">${STAR}</svg></div><div><div class="nwn">${r.n} new thing${r.n>1?'s':''}</div><div class="nwl">Since the update ${esc(ago(SEEN.prev.at))}</div></div><button class="gotit" data-gotit="1">Got it</button></div>
  <div class="nwch">${ch.map(x=>`<span style="background:${x[2]}">${typeof x[0]==='number'?x[0]:esc(x[0])} ${x[1]}</span>`).join('')}</div>
- <div class="nwls">${shown.join('')}${extra>0?`<div class="nwl" style="padding:2px 4px">+${extra} more in the property tabs</div>`:''}</div></div>`}
+ <div class="nwls">${shown.join('')}${more.length?`<div class="nwmore" id="nwmore" hidden>${more.join('')}</div><button class="nwtog" data-nwmore="1" aria-expanded="false">Show ${more.length} more ${ic('arrow',14,2.6)}</button>`:''}</div></div>`}
 function gotIt(){const e=document.getElementById('news');SEEN.prev=null;DIFF=null;saveSeen();toast('All caught up');if(e){e.classList.add('bye');setTimeout(render,280)}else render()}
 /* ---------- views ---------- */
 function home(d){let h='';
  h+=`<div class="story"><small>Today's story</small><p>${esc(d.headline||'All quiet. Nice.')}</p></div>`;
- if(DIFF)h+=`<h2>What's new</h2>${newsCard()}`;
+ if(DIFF)h+=`<div style="margin-top:16px">${newsCard()}</div>`;
  if(d.top3.length){h+=`<h2>Your 3 things today <span class="cnt" id="t3c">${t3left()} left</span></h2><div class="moves">${d.top3.slice(0,3).map((x,i)=>{const k=hash(x);return `<div class="move m${i+1} ${DONE[k]?'done':''}"><div class="num">${i+1}</div><p>${esc(x)}</p><button class="chk" data-t3="${k}" aria-label="Mark done">${tickIcon()}</button></div>`}).join('')}</div>`}
  {const cd=comingUp(),cu=cd.length;h+=`<h2>Coming up${cu?` <span class="cnt">${cu} date${cu>1?'s':''}</span>`:''}</h2>${calStrip(cd)}`}
  h+=`<h2>Your week</h2><div class="streak" id="streak">${streakCard()}</div>`;
@@ -506,7 +511,7 @@ function unitCard(u){const tg=tagOf(u),ds=u.note?noteDates(u.note):[];
 function unitMix(us){const c={ok:0,warn:0,bad:0};us.forEach(u=>c[tagOf(u)]++);const L=[['ok','All good','var(--grn)'],['warn','Waiting','#e3a32e'],['bad','Problem','var(--red)']];
  return `<div class="umix"><div class="mixb">${L.filter(x=>c[x[0]]).map(x=>`<i style="flex:${c[x[0]]} 1 0;background:${x[2]}"></i>`).join('')}</div><div class="lg">${L.filter(x=>c[x[0]]).map(x=>`<span><b style="background:${x[2]}"></b>${c[x[0]]} ${x[1].toLowerCase()}</span>`).join('')}</div></div>`}
 function prop(p,i){let h='';const t=p.tasks.length,o=open_(p),att=p.units.filter(u=>u.tag!=='ok').length;
- h+=`<div class="pban ${GR[i%4]}"><div class="t">${esc(p.name)}</div><div class="a">${esc(p.area||'')}</div>${p.status?`<div class="s">${esc(p.status)}</div>`:''}${p.event?`<div class="ev">${ic('cal',16)} ${esc(p.event)}</div>`:''}${DATA.money?(()=>{const x=rentOf(p);return `<div class="rentchip">${ic('pound',14,2.4)} ${x.sum?`${gbp(x.sum)} rent in since Sep`:'No rent in yet'}</div>`})():''}
+ h+=`<div class="pban ${GR[i%4]}"><div class="t">${esc(p.name)}</div><div class="a">${esc(p.area||'')}</div>${p.status?`<div class="s">${esc(p.status)}</div>`:''}${p.event?`<div class="ev">${ic('cal',16)} ${esc(String(p.event).replace(/^([A-Z])([A-Z]{3,})\b/,(m,a,b)=>a+b.toLowerCase()))}</div>`:''}${DATA.money?(()=>{const x=rentOf(p);return `<div class="rentchip">${ic('pound',14,2.4)} ${x.sum?`${gbp(x.sum)} rent in since Sep`:'No rent in yet'}</div>`})():''}
  <div class="pstats"><div><b id="po">${o}</b><span>Jobs left</span></div><div><b>${p.units.length}</b><span>Units</span></div><div><b>${att}</b><span>Need a look</span></div></div></div>`;
  h+=`<h2>Jobs <span class="cnt" id="pc">${t-o}/${t} done</span></h2>`;
  if(!t)h+=`<div class="alldone">Nothing to do here<small>Enjoy it while it lasts</small></div>`;
@@ -566,6 +571,7 @@ function confetti(){if(matchMedia('(prefers-reduced-motion:reduce)').matches)ret
 function countUp(){if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;document.querySelectorAll('[data-count]').forEach(e=>{const to=+e.dataset.count,t0=performance.now();if(!to)return;const st=n=>{const k=Math.min(1,(n-t0)/700),v=to*(1-Math.pow(1-k,3));e.textContent=gbp(v);if(k<1)requestAnimationFrame(st)};requestAnimationFrame(st)})}
 document.addEventListener('click',e=>{if(e.target.id==='shade')return closeSheet();
  if(e.target.closest('[data-gotit]'))return gotIt();
+ {const m=e.target.closest('[data-nwmore]');if(m){const b=document.getElementById('nwmore');if(b){b.hidden=!b.hidden;m.setAttribute('aria-expanded',!b.hidden);m.firstChild.textContent=b.hidden?`Show ${b.children.length} more `:'Show less '}return}}
  const a=e.target.closest('[data-assign],[data-pick],[data-nudge],[data-addp]');if(a){
   if(a.dataset.assign)return openSheet(a.dataset.assign);if(a.dataset.nudge)return nudge(a.dataset.nudge);
   if(a.dataset.addp!==undefined){const n=document.getElementById('onm').value.trim(),em=document.getElementById('oem').value.trim();
