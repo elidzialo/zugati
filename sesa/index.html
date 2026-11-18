@@ -153,6 +153,39 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .tag{margin-left:auto;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap}
 .ok{background:var(--grnbg);color:var(--grn)}.warn{background:var(--ambbg);color:var(--amb)}.bad{background:var(--redbg);color:var(--red)}
 .unote{font-size:13px;margin-top:10px;line-height:1.5;color:var(--ink);background:var(--soft);border-radius:12px;padding:9px 11px}
+/* D 18 Nov 12:47: richer unit cards - status band, mini timeline, fold-out note */
+.umix{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:13px 14px;box-shadow:var(--shadow);margin-bottom:10px}
+.umix .mixb{display:flex;flex-direction:row;height:12px;border-radius:8px;overflow:hidden;gap:3px}.umix .mixb i{display:block;border-radius:8px;transition:flex-grow .6s ease}
+.umix .lg{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:9px;font-size:13px;font-weight:600}.umix .lg span{display:flex;align-items:center;gap:6px}.umix .lg b{width:10px;height:10px;border-radius:50%;display:block}
+.u2{background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.u2 .band{display:flex;gap:12px;align-items:center;padding:13px 14px;position:relative}
+.u2.s-ok .band{background:linear-gradient(135deg,var(--grnbg),var(--card))}.u2.s-warn .band{background:linear-gradient(135deg,var(--ambbg),var(--card))}.u2.s-bad .band{background:linear-gradient(135deg,var(--redbg),var(--card))}
+.u2 .band:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px}
+.u2.s-ok .band:before{background:var(--grn)}.u2.s-warn .band:before{background:#e3a32e}.u2.s-bad .band:before{background:var(--red)}
+.u2 .tag{border:1px solid currentColor}
+.av{width:26px;height:26px;border-radius:50%;background:var(--dark);color:#fff;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-right:6px;flex:0 0 26px}
+@media (prefers-color-scheme:dark){.av{background:#fff;color:#1d1d1f}}
+.ut2{display:flex;align-items:center;font-size:13px;color:var(--muted);margin-top:2px}
+.tl{padding:6px 14px 2px}
+.tl .ln{display:flex;align-items:flex-start;position:relative;gap:4px}
+.tl .ln:before{content:"";position:absolute;left:12px;right:12px;top:6px;height:2px;background:var(--line)}
+.tl .pt{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;min-width:0}
+.tl .pt i{width:14px;height:14px;border-radius:50%;display:block;background:var(--muted);border:3px solid var(--card);box-sizing:content-box;margin-top:-3px}
+.tl .pt.fu i{background:var(--card);box-shadow:inset 0 0 0 3px var(--pink)}
+.tl .pt.td i{background:var(--pink);animation:tdp 1.6s ease-in-out infinite}
+@keyframes tdp{0%,100%{box-shadow:0 0 0 0 rgba(240,124,140,.5)}50%{box-shadow:0 0 0 6px rgba(240,124,140,0)}}
+.tl .pt span{font-size:12px;font-weight:600;color:var(--muted);margin-top:4px;white-space:nowrap}
+.tl .pt.td span,.tl .pt.fu span{color:var(--pink)}
+.nx{display:inline-flex;align-items:center;gap:6px;margin:8px 14px 0;align-self:flex-start;font-size:12px;font-weight:700;background:var(--pinkbg);color:#b8435a;border-radius:20px;padding:4px 10px}
+@media (prefers-color-scheme:dark){.nx{color:var(--pink)}}
+.u2 details{margin:10px 14px 14px}
+.u2 summary{list-style:none;cursor:pointer;font-size:13px;line-height:1.5;background:var(--soft);border-radius:12px;padding:9px 11px;min-height:44px}
+.u2 summary::-webkit-details-marker{display:none}
+.u2 summary .cl{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.u2 summary em{font-style:normal;font-weight:700;color:var(--pink);font-size:12px}
+.u2 details[open] .cl{-webkit-line-clamp:unset;display:block}
+.u2 details[open] em{display:none}
+@media (prefers-reduced-motion:reduce){.tl .pt.td i{animation:none}}
 .pop{animation:pop .35s ease}@keyframes pop{40%{transform:scale(1.03)}}
 /* nav */
 .nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom));z-index:10;background:rgba(29,29,31,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:26px;padding:6px;display:flex;gap:2px;box-shadow:0 10px 30px rgba(0,0,0,.25);width:calc(100% - 24px);max-width:520px}
@@ -341,6 +374,22 @@ function money(m){let h='';const max=Math.max(...m.months.map(x=>Math.max(x.rent
   <div class="dl">${m.costs_top.map((c,i)=>`<div><i style="background:${cols[i%6]}"></i><span>${esc(c[0])}</span><b>${gbp(c[1])}</b></div>`).join('')}</div></div>`}
  h+=`<div class="note">${esc(m.note||'')} Source: ${esc(m.source||'QuickBooks')}${m.as_of?', as of '+esc(m.as_of):''}.</div>`;
  return h}
+const MON=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+function tagOf(u){return ['ok','warn','bad'].includes(u.tag)?u.tag:'warn'}
+function noteDates(n){const base=new Date(DATA.updated_at||Date.now());const out={};const add=d=>{d.setHours(0,0,0,0);out[d.getTime()]=d};
+ const re=/\b(\d{1,2})(?:st|nd|rd|th)?\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b/gi;let m;
+ while((m=re.exec(n))){const d=new Date(base.getFullYear(),MON.indexOf(m[2].toLowerCase()),+m[1]);if(d-base>180*864e5)d.setFullYear(d.getFullYear()-1);else if(base-d>180*864e5)d.setFullYear(d.getFullYear()+1);add(d)}
+ if(/\b(tonight|today)\b/i.test(n))add(new Date(base));
+ return Object.values(out).sort((a,b)=>a-b).slice(-4)}
+function tlHtml(ds){if(ds.length<2)return '';const t0=new Date();t0.setHours(0,0,0,0);
+ return `<div class="tl"><div class="ln">${ds.map(d=>{const c=+d===+t0?'td':d>t0?'fu':'pa';return `<div class="pt ${c}"><i></i><span>${c==='td'?'Today':dShort(d)}</span></div>`}).join('')}</div></div>`}
+function nextUp(ds){const t0=new Date();t0.setHours(0,0,0,0);const f=ds.find(d=>d>=t0);if(!f)return '';const n=Math.round((f-t0)/864e5);
+ return `<span class="nx">${ic('cal',14,2.4)} ${n===0?'Today':n===1?'Tomorrow':`In ${n} days - ${f.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}`}</span>`}
+function initials(s){const w=String(s||'').replace(/\(.*?\)/g,'').trim().split(/\s+/).filter(Boolean);return ((w[0]||'?')[0]+(w[1]?w[1][0]:'')).toUpperCase()}
+function unitCard(u){const tg=tagOf(u),ds=u.note?noteDates(u.note):[];
+ return `<div class="u2 s-${tg}"><div class="band">${face(tg,44)}<div style="min-width:0"><div class="un">${esc(u.name)}</div>${u.tenant?`<div class="ut2"><span class="av">${esc(initials(u.tenant))}</span>${esc(u.tenant)}</div>`:''}</div>${u.label?`<span class="tag ${tg}">${esc(u.label)}</span>`:''}</div>${tlHtml(ds)}${nextUp(ds)}${u.note?`<details><summary><span class="cl">${esc(u.note)}</span>${u.note.length>110?'<em>Tap to read more</em>':''}</summary></details>`:''}</div>`}
+function unitMix(us){const c={ok:0,warn:0,bad:0};us.forEach(u=>c[tagOf(u)]++);const L=[['ok','All good','var(--grn)'],['warn','Waiting','#e3a32e'],['bad','Problem','var(--red)']];
+ return `<div class="umix"><div class="mixb">${L.filter(x=>c[x[0]]).map(x=>`<i style="flex:${c[x[0]]} 1 0;background:${x[2]}"></i>`).join('')}</div><div class="lg">${L.filter(x=>c[x[0]]).map(x=>`<span><b style="background:${x[2]}"></b>${c[x[0]]} ${x[1].toLowerCase()}</span>`).join('')}</div></div>`}
 function prop(p,i){let h='';const t=p.tasks.length,o=open_(p),att=p.units.filter(u=>u.tag!=='ok').length;
  h+=`<div class="pban ${GR[i%4]}"><div class="t">${esc(p.name)}</div><div class="a">${esc(p.area||'')}</div>${p.status?`<div class="s">${esc(p.status)}</div>`:''}${p.event?`<div class="ev">${ic('cal',16)} ${esc(p.event)}</div>`:''}${DATA.money?(()=>{const x=rentOf(p);return `<div class="rentchip">${ic('pound',14,2.4)} ${x.sum?`${gbp(x.sum)} rent in since Sep`:'No rent in yet'}</div>`})():''}
  <div class="pstats"><div><b id="po">${o}</b><span>Jobs left</span></div><div><b>${p.units.length}</b><span>Units</span></div><div><b>${att}</b><span>Need a look</span></div></div></div>`;
@@ -348,7 +397,7 @@ function prop(p,i){let h='';const t=p.tasks.length,o=open_(p),att=p.units.filter
  if(!t)h+=`<div class="alldone">Nothing to do here<small>Enjoy it while it lasts</small></div>`;
  for(const [lv,name,col] of [['urgent','Do now','var(--red)'],['high','This week','#e3a32e'],['normal','When you can','var(--muted)']]){const ts=p.tasks.filter(x=>(['urgent','high'].includes(x.level)?x.level:'normal')===lv);if(!ts.length)continue;
   h+=`<div class="lvl"><i style="background:${col}"></i>${name}</div><div class="tasks">`+ts.map(x=>`<div class="task ${lv} ${DONE[x.id]?'done':''}"><div class="tx"><b>${esc(x.title)}</b>${x.detail?`<span>${esc(x.detail)}</span>`:''}<div class="acts">${acts(x)}</div></div><button class="chk" data-task="${esc(x.id)}" aria-label="Mark done">${tickIcon()}</button></div>`).join('')+`</div>`}
- if(p.units.length)h+=`<h2>Who's who</h2><div class="units">${p.units.map(u=>`<div class="u"><div class="uh">${face(u.tag)}<div><div class="un">${esc(u.name)}</div><div class="ut">${esc(u.tenant)}</div></div>${u.label?`<span class="tag ${['ok','warn','bad'].includes(u.tag)?u.tag:'warn'}">${esc(u.label)}</span>`:''}</div>${u.note?`<div class="unote">${esc(u.note)}</div>`:''}</div>`).join('')}</div>`;
+ if(p.units.length)h+=`<h2>Who's who <span class="cnt">${p.units.length}</span></h2>${unitMix(p.units)}<div class="units">${p.units.map(unitCard).join('')}</div>`;
  return h}
 function acts(x){const o=person(ownerId(x));
  return o?`<button class="own" data-assign="${esc(x.id)}" aria-label="Assigned to ${esc(o.name)} - change">${avatar(o)}${esc(o.me?'Me':o.name)}</button>${o.email&&!DONE[x.id]?`<button class="nudge" data-nudge="${esc(x.id)}">${ic('bell',16)} Nudge</button>`:''}`
