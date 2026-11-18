@@ -247,6 +247,27 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .goal.won .gb i{background:linear-gradient(90deg,#2f9a63,#5bd68b)}
 @media (prefers-color-scheme:dark){.streak{background:linear-gradient(135deg,#3a2a10,#3a1f1c);color:#f3f2ef;box-shadow:none}.streak:after{background:rgba(255,255,255,.05)}
 .flame{background:#2a2a2c}.sk-l,.dy{color:#e3c78a}.dy i{background:rgba(255,255,255,.1);color:#f3c46a}.dy.today i{border-color:#fff}.goal .gb{background:rgba(255,255,255,.12)}.pts{background:#fff;color:#1d1d1f}.pts b{color:#d4800c}}
+
+/* D 18 Nov 15:47: Coming up - calendar strip of dated items */
+.cal{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 16px;margin:0 -16px;padding:2px 16px 10px;scrollbar-width:none}
+.cal::-webkit-scrollbar{display:none}
+.dt{flex:0 0 172px;scroll-snap-align:start;background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+.dt .dh{padding:12px 14px 10px;color:#fff;display:flex;align-items:flex-end;gap:10px;position:relative;overflow:hidden}
+.dt .dh:after{content:"";position:absolute;right:-30px;top:-34px;width:96px;height:96px;border-radius:50%;background:rgba(255,255,255,.14)}
+.dt .dn{font-size:34px;font-weight:800;line-height:.95;letter-spacing:-1px}
+.dt .dw{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;opacity:.92;line-height:1.3}
+.dt .cd{margin-left:auto;font-size:12px;font-weight:700;background:rgba(255,255,255,.25);border-radius:20px;padding:3px 9px;white-space:nowrap;position:relative;z-index:1}
+.dt.now .dh{background:#1D1D1F}.dt.now .cd{background:var(--pink)}
+.dt.now{border-color:var(--pink);box-shadow:0 8px 22px rgba(240,124,140,.25)}
+.dt .its{display:grid;gap:4px;padding:8px}
+.ev2{display:flex;gap:8px;align-items:flex-start;border:0;background:var(--soft);border-radius:14px;padding:8px 9px;text-align:left;font:inherit;font-size:13px;font-weight:600;line-height:1.35;cursor:pointer;min-height:44px;width:100%;color:var(--ink)}
+.ev2 i{width:9px;height:9px;border-radius:50%;flex:0 0 9px;margin-top:5px}
+.ev2 span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.ev2.urg{background:var(--redbg)}
+.calgap{flex:0 0 auto;align-self:center;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:12px;font-weight:600;width:34px}
+.calgap b{width:4px;height:4px;border-radius:50%;background:var(--line);display:block}
+.calempty{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:20px;background:var(--grnbg);color:var(--grn);font-weight:700;font-size:14px}
+@media (min-width:760px){.dt{flex-basis:200px}}
 </style>
 </head>
 <body>
@@ -339,10 +360,41 @@ function streakCard(){const s=streakStats(),t=dkey(new Date()),L=['M','T','W','T
  <div class="week" aria-label="This week">${wk}</div>
  <div class="goal ${won?'won':''}"><div class="gt"><span>${won?'Weekly goal smashed!':'Weekly goal'}</span><span>${Math.min(s.wk,s.goal)}/${s.goal}</span></div><div class="gb"><i data-w="${pc}" style="width:0"></i></div></div>`}
 function refreshStreak(){const e=document.getElementById('streak');if(!e)return;e.innerHTML=streakCard();requestAnimationFrame(()=>e.querySelectorAll('[data-w]').forEach(x=>x.style.width=x.dataset.w+'%'))}
+/* D 18 Nov 15:47: Coming up strip - dates pulled from events, top 3, tasks, units, watch, money */
+const GC=['#F07C8C','#4c7de0','#2f9a63','#d48a1c'],GB=['linear-gradient(135deg,#F07C8C,#f5a07c)','linear-gradient(135deg,#4c7de0,#6a4bc4)','linear-gradient(135deg,#2f9a63,#1f7a45)','linear-gradient(135deg,#d48a1c,#b8641a)'];
+function clauseDates(txt){const base=new Date(DATA.updated_at||Date.now()),out=[];const cls=String(txt||'').split(/\s+-\s+|[.;!?](?:\s+|$)|\s*\|\|\s*/).filter(x=>x.trim());
+ const re=/\b(\d{1,2})(?:st|nd|rd|th)?\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b/gi;
+ for(const c of cls){const seen={};let m;re.lastIndex=0;
+  const put=d=>{d.setHours(0,0,0,0);if(!seen[+d]){seen[+d]=1;out.push({d,c:c.trim()})}};
+  while((m=re.exec(c))){const d=new Date(base.getFullYear(),MON.indexOf(m[2].toLowerCase()),+m[1]);if(d-base>180*864e5)d.setFullYear(d.getFullYear()-1);else if(base-d>180*864e5)d.setFullYear(d.getFullYear()+1);put(d)}
+  if(/\b(tonight|today)\b/i.test(c))put(new Date(base))}
+ return out}
+function comingUp(){const t0=new Date();t0.setHours(0,0,0,0);const lim=new Date(+t0+45*864e5),items=[];
+ const add=(src,txt,label,pi,pr,lvl)=>clauseDates(txt).forEach(({d,c})=>{if(d<t0||d>lim)return;
+  if(+d===+t0&&(!/\b(tonight|today|\d\s*(am|pm))\b/i.test(c)||/\b(sent|chased|emailed|told|agreed|paid|went|moved|landed)\b/i.test(c)))return;
+  items.push({d,pr:pi,tab:pr?pr.id:null,label:typeof label==='function'?label(c):(label||c),src,lvl})});
+ DATA.properties.forEach((p,i)=>{if(p.event)add(0,p.event,p.event,i,p);
+  p.tasks.forEach(t=>{if(!DONE[t.id])add(2,t.title+' || '+(t.detail||''),t.title,i,p,t.level)});
+  p.units.forEach(u=>{if(u.note)add(4,u.note,c=>u.name+': '+c,i,p)});
+  if(DATA.money)DATA.money.expected.forEach(e=>{if(String(e.property||'').toLowerCase().includes(short(p.name).toLowerCase()))add(3,e.note,null,i,p)})});
+ DATA.top3.slice(0,3).forEach(x=>{if(!DONE[hash(x)])add(1,x,x,-1,null)});
+ DATA.watch.forEach(w=>add(5,w,null,-1,null));
+ const days={};items.forEach(x=>{(days[+x.d]=days[+x.d]||[]).push(x)});
+ return Object.keys(days).map(Number).sort((a,b)=>a-b).map(k=>{const xs=days[k].sort((a,b)=>a.src-b.src),keep=[],got={};
+  for(const x of xs){const g=x.pr>=0?'p'+x.pr:'n';if(got[g]||(g==='n'&&keep.length))continue;got[g]=1;keep.push(x)}
+  return{d:new Date(k),xs:keep,more:Math.max(0,xs.length-keep.length)}})}
+function calStrip(){const days=comingUp();if(!days.length)return `<div class="calempty">${ic('cal',20)} No dates coming up. Clear skies.</div>`;
+ const t0=new Date();t0.setHours(0,0,0,0);let prev=null;
+ return `<div class="cal" role="list">${days.slice(0,8).map(x=>{const n=Math.round((x.d-t0)/864e5),now=n===0,pi=x.xs[0].pr;
+  let gap='';if(prev!==null){const g=Math.round((x.d-prev)/864e5)-1;if(g>1)gap=`<div class="calgap" aria-hidden="true"><b></b><b></b><b></b>${g}d</div>`}prev=x.d;
+  const cd=now?'Today':n===1?'Tomorrow':n<7?x.d.toLocaleDateString('en-GB',{weekday:'short'}):`In ${n} days`;
+  return gap+`<div class="dt ${now?'now':''}" role="listitem"><div class="dh" style="background:${now?'#1D1D1F':pi>=0?GB[pi%4]:'linear-gradient(135deg,#6a4bc4,#4c7de0)'}"><div><div class="dw">${x.d.toLocaleDateString('en-GB',{weekday:'short'})} ${x.d.toLocaleDateString('en-GB',{month:'short'})}</div><div class="dn">${x.d.getDate()}</div></div><span class="cd">${cd}</span></div>
+  <div class="its">${x.xs.map(e=>`<button class="ev2 ${e.lvl==='urgent'?'urg':''}" ${e.tab?`data-tab="${esc(e.tab)}"`:''}><i style="background:${e.pr>=0?GC[e.pr%4]:'var(--violet)'}"></i><span>${esc(e.label)}</span></button>`).join('')}</div></div>`}).join('')}</div>`}
 /* ---------- views ---------- */
 function home(d){let h='';
  h+=`<div class="story"><small>Today's story</small><p>${esc(d.headline||'All quiet. Nice.')}</p></div>`;
  if(d.top3.length){h+=`<h2>Your 3 things today <span class="cnt" id="t3c">${t3left()} left</span></h2><div class="moves">${d.top3.slice(0,3).map((x,i)=>{const k=hash(x);return `<div class="move m${i+1} ${DONE[k]?'done':''}"><div class="num">${i+1}</div><p>${esc(x)}</p><button class="chk" data-t3="${k}" aria-label="Mark done">${tickIcon()}</button></div>`}).join('')}</div>`}
+ {const cu=comingUp().length;h+=`<h2>Coming up${cu?` <span class="cnt">${cu} date${cu>1?'s':''}</span>`:''}</h2>${calStrip()}`}
  h+=`<h2>Your week</h2><div class="streak" id="streak">${streakCard()}</div>`;
  if(d.properties.length){h+=`<h2>Properties</h2><div class="props">`;
   d.properties.forEach((p,i)=>{const t=p.tasks.length,dn=t-open_(p),att=p.units.filter(u=>u.tag!=='ok').length;
