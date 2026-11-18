@@ -146,7 +146,7 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .btn.ghost{background:none;color:var(--muted);border:1px solid var(--line)}
 .alldone{text-align:center;padding:22px 16px;border-radius:20px;background:var(--grnbg);color:var(--grn);font-weight:700}
 .alldone small{display:block;font-weight:500;color:var(--muted);margin-top:4px}
-.units{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.units{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;align-items:start}
 .u{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px;box-shadow:var(--shadow)}
 .uh{display:flex;gap:12px;align-items:center}
 .un{font-weight:700;font-size:15px;line-height:1.3}.ut{font-size:13px;color:var(--muted)}
@@ -168,7 +168,7 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .ut2{display:flex;align-items:center;font-size:13px;color:var(--muted);margin-top:2px}
 .tl{padding:6px 14px 2px}
 .tl .ln{display:flex;align-items:flex-start;position:relative;gap:4px}
-.tl .ln:before{content:"";position:absolute;left:12px;right:12px;top:6px;height:2px;background:var(--line)}
+.tl .ln:before{content:"";position:absolute;left:calc(50% / var(--n,2));right:calc(50% / var(--n,2));top:6px;height:2px;background:var(--line)}
 .tl .pt{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;min-width:0}
 .tl .pt i{width:14px;height:14px;border-radius:50%;display:block;background:var(--muted);border:3px solid var(--card);box-sizing:content-box;margin-top:-3px}
 .tl .pt.fu i{background:var(--card);box-shadow:inset 0 0 0 3px var(--pink)}
@@ -381,13 +381,13 @@ function noteDates(n){const base=new Date(DATA.updated_at||Date.now());const out
  while((m=re.exec(n))){const d=new Date(base.getFullYear(),MON.indexOf(m[2].toLowerCase()),+m[1]);if(d-base>180*864e5)d.setFullYear(d.getFullYear()-1);else if(base-d>180*864e5)d.setFullYear(d.getFullYear()+1);add(d)}
  if(/\b(tonight|today)\b/i.test(n))add(new Date(base));
  return Object.values(out).sort((a,b)=>a-b).slice(-4)}
-function tlHtml(ds){if(ds.length<2)return '';const t0=new Date();t0.setHours(0,0,0,0);
- return `<div class="tl"><div class="ln">${ds.map(d=>{const c=+d===+t0?'td':d>t0?'fu':'pa';return `<div class="pt ${c}"><i></i><span>${c==='td'?'Today':dShort(d)}</span></div>`}).join('')}</div></div>`}
-function nextUp(ds){const t0=new Date();t0.setHours(0,0,0,0);const f=ds.find(d=>d>=t0);if(!f)return '';const n=Math.round((f-t0)/864e5);
+function tlHtml(ds){const t0=new Date();t0.setHours(0,0,0,0);if(ds.length<2||!ds.some(d=>d>=t0))return '';
+ return `<div class="tl"><div class="ln" style="--n:${ds.length}">${ds.map(d=>{const c=+d===+t0?'td':d>t0?'fu':'pa';return `<div class="pt ${c}"><i></i><span>${c==='td'?'Today':dShort(d)}</span></div>`}).join('')}</div></div>`}
+function nextUp(ds,tl){const t0=new Date();t0.setHours(0,0,0,0);const f=ds.find(d=>tl?d>t0:d>=t0);if(!f)return '';const n=Math.round((f-t0)/864e5);
  return `<span class="nx">${ic('cal',14,2.4)} ${n===0?'Today':n===1?'Tomorrow':`In ${n} days - ${f.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}`}</span>`}
 function initials(s){const w=String(s||'').replace(/\(.*?\)/g,'').trim().split(/\s+/).filter(Boolean);return ((w[0]||'?')[0]+(w[1]?w[1][0]:'')).toUpperCase()}
 function unitCard(u){const tg=tagOf(u),ds=u.note?noteDates(u.note):[];
- return `<div class="u2 s-${tg}"><div class="band">${face(tg,44)}<div style="min-width:0"><div class="un">${esc(u.name)}</div>${u.tenant?`<div class="ut2"><span class="av">${esc(initials(u.tenant))}</span>${esc(u.tenant)}</div>`:''}</div>${u.label?`<span class="tag ${tg}">${esc(u.label)}</span>`:''}</div>${tlHtml(ds)}${nextUp(ds)}${u.note?`<details><summary><span class="cl">${esc(u.note)}</span>${u.note.length>110?'<em>Tap to read more</em>':''}</summary></details>`:''}</div>`}
+ return `<div class="u2 s-${tg}"><div class="band">${face(tg,44)}<div style="min-width:0"><div class="un">${esc(u.name)}</div>${u.tenant?`<div class="ut2"><span class="av">${esc(initials(u.tenant))}</span>${esc(u.tenant)}</div>`:''}</div>${u.label?`<span class="tag ${tg}">${esc(u.label)}</span>`:''}</div>${(()=>{const t=tlHtml(ds);return t+nextUp(ds,!!t)})()}${u.note?`<details><summary><span class="cl">${esc(u.note)}</span>${u.note.length>110?'<em>Tap to read more</em>':''}</summary></details>`:''}</div>`}
 function unitMix(us){const c={ok:0,warn:0,bad:0};us.forEach(u=>c[tagOf(u)]++);const L=[['ok','All good','var(--grn)'],['warn','Waiting','#e3a32e'],['bad','Problem','var(--red)']];
  return `<div class="umix"><div class="mixb">${L.filter(x=>c[x[0]]).map(x=>`<i style="flex:${c[x[0]]} 1 0;background:${x[2]}"></i>`).join('')}</div><div class="lg">${L.filter(x=>c[x[0]]).map(x=>`<span><b style="background:${x[2]}"></b>${c[x[0]]} ${x[1].toLowerCase()}</span>`).join('')}</div></div>`}
 function prop(p,i){let h='';const t=p.tasks.length,o=open_(p),att=p.units.filter(u=>u.tag!=='ok').length;
