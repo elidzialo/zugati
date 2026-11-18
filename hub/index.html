@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#1D1D1F">
+<title>Eli Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#f3f1ed;--card:#fff;--ink:#1d1d1f;--muted:#6f6d68;--line:#e7e3dc;--soft:#f7f5f1;--pink:#F07C8C;--pinkbg:#fde8eb;--dark:#1D1D1F;
+--red:#c2412d;--redbg:#fbe6e1;--amb:#9a5f00;--ambbg:#fdf0d6;--grn:#1f7a45;--grnbg:#e0f3e7;--blue:#2a63b0;--bluebg:#e4eefb;--shadow:0 1px 2px rgba(0,0,0,.04),0 6px 18px rgba(0,0,0,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#111;--card:#1c1c1e;--ink:#f3f2ef;--muted:#a19f99;--line:#2c2b29;--soft:#242426;--pinkbg:#3a1e23;--redbg:#3a1d17;--ambbg:#3a2c12;--grnbg:#16301f;--bluebg:#172338;--shadow:none}}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Poppins,system-ui,sans-serif;padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+button,input,select,textarea{font:inherit;color:inherit}
+.hidden{display:none!important}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+.hero{background:var(--dark);color:#fff;border-radius:0 0 28px 28px;padding:calc(18px + env(safe-area-inset-top)) 0 22px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-80px;top:-80px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(240,124,140,.45),transparent 70%)}
+.logo{font-weight:800;letter-spacing:.32em;font-size:22px}.logo i{color:var(--pink);font-style:normal}
+.sub{color:#bdbdc2;letter-spacing:.3em;font-size:11px;margin-top:2px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;position:relative;z-index:1}
+.me{display:flex;align-items:center;background:rgba(255,255,255,.1);border:0;color:#fff;border-radius:20px;padding:8px 12px;font-size:13px;cursor:pointer;min-height:40px}
+.hi{font-size:24px;font-weight:700;margin:18px 0 2px;position:relative;z-index:1}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-top:14px;position:relative;z-index:1;padding-bottom:2px}.chips::-webkit-scrollbar{display:none}
+.chip{border:0;border-radius:20px;padding:9px 15px;background:rgba(255,255,255,.1);color:#ddd;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap;min-height:40px}
+.chip.on{background:#fff;color:var(--dark)}
+.chip .d{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;position:relative;z-index:1}
+.stat{border-radius:18px;padding:12px 13px;color:var(--dark)}.stat b{display:block;font-size:20px;font-weight:800;line-height:1.2}.stat span{font-size:13px}
+.s1{background:#c9eed6}.s2{background:#fdd5db}.s3{background:#d6e4fb}
+h2{font-size:19px;margin:24px 0 10px;display:flex;align-items:center;gap:8px}
+.pill{font-size:12px;font-weight:600;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:2px 9px;color:var(--muted)}
+.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:16px;margin-bottom:12px}
+.story{background:linear-gradient(135deg,#f07c8c,#f4a07c);color:#fff;border-radius:22px;padding:18px 18px 20px;margin-top:18px;box-shadow:0 10px 24px rgba(240,124,140,.3)}
+.story small{letter-spacing:.18em;font-weight:700;font-size:12px;opacity:.9}.story p{font-size:19px;font-weight:700;margin:6px 0 0;line-height:1.3}
+.t3{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line)}.t3:first-child{border-top:0;padding-top:0}
+.num{flex:0 0 32px;height:32px;border-radius:10px;background:var(--pink);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center}
+.watch li{margin:0 0 8px}.watch{padding-left:18px;margin:0}
+.pgrid{display:grid;grid-template-columns:1fr;gap:12px}@media(min-width:620px){.pgrid{grid-template-columns:1fr 1fr}}
+.pc{border:0;text-align:left;width:100%;cursor:pointer;border-radius:22px;padding:16px;color:#fff;position:relative;overflow:hidden;min-height:132px}
+.g0{background:linear-gradient(135deg,#1D1D1F,#3b3b40)}.g1{background:linear-gradient(135deg,#f07c8c,#e0566c)}.g2{background:linear-gradient(135deg,#6a4bc4,#8f6ee0)}.g3{background:linear-gradient(135deg,#1f7a45,#3aa36a)}
+.pc .pn{font-weight:700;font-size:17px}.pc .pa{font-size:13px;opacity:.8}.pc .ev{font-size:13px;margin-top:10px;background:rgba(255,255,255,.16);border-radius:12px;padding:6px 10px;display:inline-block}
+.bar{height:7px;border-radius:5px;background:rgba(255,255,255,.25);margin-top:12px;overflow:hidden}.bar i{display:block;height:100%;background:#fff;border-radius:5px;transition:width .6s}
+.pc .cnt{position:absolute;right:14px;top:14px;background:#fff;color:var(--dark);border-radius:12px;font-weight:800;font-size:13px;padding:2px 9px}
+.back{border:0;background:var(--card);border-radius:14px;padding:9px 14px;margin-top:16px;cursor:pointer;box-shadow:var(--shadow);min-height:44px}
+.units{display:grid;grid-template-columns:1fr;gap:10px}@media(min-width:620px){.units{grid-template-columns:1fr 1fr}}
+.unit{border-radius:16px;padding:12px 14px;border-left:5px solid}.unit.ok{background:var(--grnbg);border-color:var(--grn)}.unit.warn{background:var(--ambbg);border-color:#e0a32e}.unit.bad{background:var(--redbg);border-color:var(--red)}
+.unit .un{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.unit .up{font-weight:700}.unit .ul{font-size:12px;font-weight:700;float:right;border-radius:10px;padding:2px 8px;background:var(--card)}.unit .nt{font-size:13px;margin-top:4px}
+.task{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:12px 12px 12px 10px;margin-bottom:10px;display:flex;gap:10px;align-items:flex-start}
+.task.done{opacity:.55}.task.done .tt{text-decoration:line-through}
+.tick{flex:0 0 44px;height:44px;border-radius:50%;border:2.5px solid var(--line);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.task.done .tick{background:var(--grn);border-color:var(--grn);color:#fff}
+.tb{flex:1;min-width:0}.tt{font-weight:600}.td{font-size:13px;color:var(--muted);margin-top:2px;white-space:pre-wrap;word-break:break-word}.td a{color:var(--blue)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
+.lv{font-size:12px;font-weight:700;border-radius:10px;padding:2px 8px}.lv.urgent{background:var(--redbg);color:var(--red)}.lv.high{background:var(--ambbg);color:var(--amb)}.lv.normal{background:var(--soft);color:var(--muted)}
+.mini{border:1px solid var(--line);background:var(--soft);border-radius:12px;padding:5px 10px;font-size:13px;cursor:pointer;min-height:34px}
+.av{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;color:#fff;font-size:11px;font-weight:700;margin-right:5px;vertical-align:-5px}
+.cm{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}.cm p{margin:0 0 6px;font-size:13px}.cm form{display:flex;gap:6px}
+input,select,textarea{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 12px;width:100%;min-height:44px}
+.btn{border:0;border-radius:14px;padding:11px 16px;background:var(--pink);color:#fff;font-weight:600;cursor:pointer;min-height:44px}.btn.dark{background:var(--dark)}.btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chart{display:flex;gap:14px;align-items:flex-end;height:150px;padding:8px 4px 0}
+.col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}.pair{display:flex;gap:4px;align-items:flex-end;height:100%;width:100%;justify-content:center}
+.pair i{width:38%;border-radius:8px 8px 3px 3px;min-height:3px;transition:height .6s}.pair .r{background:var(--grn)}.pair .c{background:var(--pink)}
+.col span{font-size:12px;color:var(--muted)}
+.list{list-style:none;padding:0;margin:0}.list li{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}.list li:first-child{border-top:0}
+.amt{font-weight:700;white-space:nowrap}
+.act{font-size:14px;padding:10px 0;border-top:1px solid var(--line)}.act:first-child{border-top:0}.act small{color:var(--muted);display:block}
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom));z-index:10;background:rgba(29,29,31,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:26px;padding:6px;display:flex;gap:2px;box-shadow:0 10px 30px rgba(0,0,0,.25);width:calc(100% - 24px);max-width:520px;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nb{flex:1 0 64px;min-height:54px;border:0;background:none;color:#a9a9ad;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;font-weight:600;cursor:pointer;position:relative}
+.nb.on{background:#fff;color:#1d1d1f}.nb .n{position:absolute;top:4px;right:calc(50% - 22px);background:var(--pink);color:#fff;border-radius:10px;font-size:11px;line-height:16px;padding:0 5px}
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,16px);background:var(--dark);color:#fff;border-radius:24px;padding:11px 18px;font-weight:600;font-size:14px;opacity:0;transition:all .25s;pointer-events:none;z-index:30;white-space:nowrap}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.cf{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;z-index:40;pointer-events:none;animation:fall 1.6s cubic-bezier(.25,.6,.4,1) forwards}
+@keyframes fall{to{transform:translate(var(--x),105vh) rotate(var(--r));opacity:.9}}
+#gate{max-width:400px;margin:12vh auto 0;padding:0 18px}
+#gate .hero{border-radius:24px;padding:24px 20px;margin-bottom:16px}
+#gate form{display:grid;gap:10px}
+#err{color:var(--red);font-size:14px;text-align:center;min-height:20px}
+.empty{text-align:center;color:var(--muted);padding:26px 10px}
+.seg{display:flex;background:var(--card);border-radius:14px;padding:4px;gap:4px;box-shadow:var(--shadow);margin-top:16px}.seg button{flex:1;border:0;background:none;border-radius:10px;padding:9px;font-weight:600;cursor:pointer;min-height:40px}.seg .on{background:var(--dark);color:#fff}
+.user{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}.user:first-child{border-top:0}
+.grid2{display:grid;gap:10px}@media(min-width:560px){.grid2{grid-template-columns:1fr 1fr}}
+label.ck{display:inline-flex;gap:6px;align-items:center;margin-right:12px;font-size:14px}label.ck input{width:auto;min-height:0}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheet .in{background:var(--bg);width:100%;max-width:560px;border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto}
+</style>
+</head>
+<body>
+<div id="gate" class="hidden">
+  <div class="hero"><div class="logo">ELI HUB<i>.</i></div><div class="sub">ZALO - SESA - ZUGATI</div></div>
+  <form id="loginf" class="card">
+    <input id="em" type="email" autocomplete="username" placeholder="Email" required>
+    <input id="pw" type="password" autocomplete="current-password" placeholder="Password" required>
+    <button class="btn dark" type="submit">Log in</button>
+    <div id="err"></div>
+  </form>
+</div>
+<div id="app" class="hidden"></div>
+<nav id="nav" class="nav hidden"></nav>
+<div id="toast" class="toast"></div>
+<script>
+const SB=supabase.createClient('https://kddhkuwnkkjcnbjegsmc.supabase.co','sb_publishable_zASd1ua4ZuknbOatR4MnTA_nVwqRZlR',{auth:{persistSession:true,autoRefreshToken:true}});
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const link=s=>esc(s).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">open link</a>');
+const gbp=n=>n==null?'-':'£'+Number(n).toLocaleString('en-GB',{maximumFractionDigits:0});
+const gbp2=n=>n==null?'-':'£'+Number(n).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
+const dShort=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';
+const ago=t=>{const m=Math.round((Date.now()-new Date(t))/60000);if(m<2)return 'just now';if(m<60)return m+' min ago';const h=Math.round(m/60);if(h<48)return h+'h ago';return Math.round(h/24)+' days ago'};
+const ini=n=>String(n||'?').split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase();
+const IC={home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',jobs:'<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/>',pound:'<path d="M17 20H7c2-2 2-5 1-8h7M6 12h9M16 7a4 4 0 0 0-7 1"/>',act:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',admin:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>',tick:'<path d="M5 12l5 5 9-10"/>'};
+const ic=(n,s=20)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${IC[n]}</svg>`;
+let ME=null,BIZ=[],CUR=null,TAB='home',PROP=null,D={},PEOPLE=[],OPEN={},JOBF='mine';
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2200)}
+function confetti(){const c=['#F07C8C','#1f7a45','#2a63b0','#e0a32e','#6a4bc4'];for(let i=0;i<40;i++){const e=document.createElement('i');e.className='cf';e.style.left=Math.random()*100+'vw';e.style.background=c[i%5];e.style.setProperty('--x',(Math.random()*160-80)+'px');e.style.setProperty('--r',(Math.random()*720)+'deg');e.style.animationDelay=Math.random()*.3+'s';document.body.appendChild(e);setTimeout(()=>e.remove(),2200)}}
+
+async function boot(){
+  const {data:{session}}=await SB.auth.getSession();
+  if(!session){$('gate').classList.remove('hidden');$('app').classList.add('hidden');$('nav').classList.add('hidden');return}
+  $('gate').classList.add('hidden');$('app').classList.remove('hidden');$('nav').classList.remove('hidden');
+  await loadAll();
+  if(!BIZ.length){$('app').innerHTML=`<div class="wrap"><div class="card" style="margin-top:20vh"><h2>Nearly there</h2><p>You are logged in, but Eli hasn't given you access to a business yet.</p><button class="btn ghost" onclick="logout()">Log out</button></div></div>`;$('nav').classList.add('hidden');return}
+  try{CUR=localStorage.getItem('hubBiz')}catch(e){}
+  if(!BIZ.find(b=>b.id===CUR))CUR=BIZ[0].id;
+  render();
+  SB.channel('hub').on('postgres_changes',{event:'*',schema:'public',table:'tasks'},()=>reload()).on('postgres_changes',{event:'INSERT',schema:'public',table:'task_comments'},()=>reload()).subscribe();
+}
+let rt;function reload(){clearTimeout(rt);rt=setTimeout(async()=>{await loadAll();render()},400)}
+async function loadAll(){
+  const uid=(await SB.auth.getUser()).data.user?.id;
+  const [me,biz,props,units,tasks,sum,mm,pays,people,mem,com]=await Promise.all([
+    SB.from('profiles').select('*').eq('id',uid).single(),
+    SB.from('businesses').select('*').order('sort'),
+    SB.from('properties').select('*').eq('archived',false).order('sort'),
+    SB.from('units').select('*').order('sort'),
+    SB.from('tasks').select('*').order('sort'),
+    SB.from('summary').select('*'),
+    SB.from('money_months').select('*').order('sort'),
+    SB.from('payments').select('*').order('date',{ascending:false}),
+    SB.from('profiles').select('id,name,email,role,colour'),
+    SB.from('memberships').select('*'),
+    SB.from('task_comments').select('*').order('created_at')]);
+  ME=me.data;BIZ=biz.data||[];PEOPLE=people.data||[];
+  D={props:props.data||[],units:units.data||[],tasks:tasks.data||[],sum:sum.data||[],mm:mm.data||[],pays:pays.data||[],mem:mem.data||[],com:com.data||[]};
+}
+const person=id=>PEOPLE.find(p=>p.id===id);
+const avatar=p=>p?`<span class="av" style="background:${esc(p.colour||'#F07C8C')}">${esc(ini(p.name))}</span>`:'';
+const isAdmin=()=>ME?.role==='admin', isStaff=()=>ME?.role==='staff';
+const bizTasks=b=>D.tasks.filter(t=>t.business_id===b);
+const openN=ts=>ts.filter(t=>t.status==='open').length;
+function render(){
+  const b=BIZ.find(x=>x.id===CUR),s=D.sum.find(x=>x.business_id===CUR)||{};
+  const ts=bizTasks(CUR),open=openN(ts),done=ts.length-open;
+  const h=new Date().getHours(),greet=h<12?'Good morning':h<18?'Good afternoon':'Good evening';
+  let x=`<header class="hero"><div class="wrap"><div class="top"><div><div class="logo">ELI HUB<i>.</i></div><div class="sub">${esc((b?.name||'').toUpperCase())}</div></div><button class="me" onclick="meSheet()">${avatar(ME)}${esc(ME?.name||'Me')}</button></div>
+  <div class="hi">${greet}, ${esc((ME?.name||'').split(' ')[0])}</div><div style="color:#bdbdc2;position:relative;z-index:1">${open} job${open===1?'':'s'} to go${s.updated_at?' - updated '+ago(s.updated_at):''}</div>
+  <div class="chips">${BIZ.map(z=>`<button class="chip ${z.id===CUR?'on':''}" onclick="setBiz('${z.id}')"><span class="d" style="background:${esc(z.colour)}"></span>${esc(z.name)}</button>`).join('')}</div>
+  ${isStaff()?'':`<div class="stats"><div class="stat s1"><b>${CUR==='zugati'?gbp(s.bank_balance):gbp(s.rent_total)}</b><span>${CUR==='zugati'?'Cash':'Rent in'}</span></div><div class="stat s2"><b>${open}</b><span>Jobs open</span></div><div class="stat s3"><b>${CUR==='zugati'?(done):gbp(s.bank_balance)}</b><span>${CUR==='zugati'?'Jobs done':'Bank'}</span></div></div>`}
+  </div></header><div class="wrap">`;
+  if(TAB==='home')x+=PROP?propView(PROP):home(s);
+  else if(TAB==='jobs')x+=jobsView();
+  else if(TAB==='money')x+=moneyView(s);
+  else if(TAB==='act')x+=`<h2>Activity</h2><div class="card" id="actl"><div class="empty">Loading...</div></div>`;
+  else if(TAB==='admin')x+=adminView();
+  x+='</div>';
+  $('app').innerHTML=x;
+  const mine=D.tasks.filter(t=>t.status==='open'&&t.assigned_to===ME.id).length;
+  const tabs=[['home','Today','home',0],['jobs','Jobs','jobs',mine],...(isStaff()?[]:[['money','Money','pound',0]]),['act','Activity','act',0],...(isAdmin()?[['admin','Admin','admin',0]]:[])];
+  $('nav').innerHTML=tabs.map(([id,l,i,n])=>`<button class="nb ${TAB===id?'on':''}" onclick="setTab('${id}')">${ic(i)}<span>${l}</span>${n?`<b class="n">${n}</b>`:''}</button>`).join('');
+  if(TAB==='act')loadAct();
+  requestAnimationFrame(()=>setTimeout(()=>document.querySelectorAll('[data-w]').forEach(e=>e.style.width=e.dataset.w+'%'),40));
+  requestAnimationFrame(()=>setTimeout(()=>document.querySelectorAll('[data-h]').forEach(e=>e.style.height=e.dataset.h+'%'),40));
+}
+function setBiz(id){CUR=id;PROP=null;try{localStorage.setItem('hubBiz',id)}catch(e){}render()}
+function setTab(t){TAB=t;PROP=null;render();scrollTo({top:0,behavior:'smooth'})}
+function openProp(id){PROP=id;render();scrollTo({top:0,behavior:'smooth'})}
+function home(s){
+  let x='';
+  if(s.headline&&!isStaff())x+=`<div class="story"><small>TODAY'S STORY</small><p>${esc(s.headline)}</p></div>`;
+  if(s.extra?.link)x+=`<p><a class="btn dark" style="display:inline-block;text-decoration:none;margin-top:14px" href="${esc(s.extra.link)}" target="_blank" rel="noopener">Open the Amazon dashboard</a></p>`;
+  if(s.top3?.length&&!isStaff())x+=`<h2>Your 3 things today</h2><div class="card">${s.top3.map((t,i)=>`<div class="t3"><div class="num">${i+1}</div><div>${esc(t)}</div></div>`).join('')}</div>`;
+  const props=D.props.filter(p=>p.business_id===CUR);
+  if(props.length){x+=`<h2>Properties <span class="pill">${props.length}</span></h2><div class="pgrid">`+props.map((p,i)=>{const ts=D.tasks.filter(t=>t.property_id===p.id),o=openN(ts),pc=ts.length?Math.round((ts.length-o)/ts.length*100):100;
+    return `<button class="pc g${i%4}" onclick="openProp('${esc(p.id)}')">${o?`<span class="cnt">${o}</span>`:''}<div class="pn">${esc(p.name)}</div><div class="pa">${esc(p.area||'')}</div>${p.next_event?`<div class="ev">${esc(p.next_event)}</div>`:''}<div class="bar"><i data-w="${pc}" style="width:0"></i></div></button>`}).join('')+'</div>'}
+  const loose=bizTasks(CUR).filter(t=>!t.property_id);
+  if(loose.length)x+=`<h2>Jobs <span class="pill">${openN(loose)} open</span></h2>`+taskList(loose);
+  if(s.watch?.length&&!isStaff())x+=`<h2>Watch out</h2><div class="card"><ul class="watch">${s.watch.map(w=>`<li>${esc(w)}</li>`).join('')}</ul></div>`;
+  if(!props.length&&!loose.length)x+=`<div class="empty">Nothing here yet.</div>`;
+  return x;
+}
+function propView(id){
+  const p=D.props.find(x=>x.id===id);if(!p){PROP=null;return home({})}
+  const us=D.units.filter(u=>u.property_id===id),ts=D.tasks.filter(t=>t.property_id===id);
+  let x=`<button class="back" onclick="PROP=null;render()">&larr; Back</button><h2>${esc(p.name)}</h2><div class="card"><div style="color:var(--muted);font-size:13px">${esc(p.area||'')}</div><div style="margin-top:6px">${esc(p.status||'')}</div>${p.next_event?`<div class="tags"><span class="lv high">Next: ${esc(p.next_event)}</span></div>`:''}</div>`;
+  if(us.length)x+=`<h2>People and things <span class="pill">${us.length}</span></h2><div class="units">`+us.map(u=>`<div class="unit ${esc(u.tag)}"><span class="ul">${esc(u.label||'')}</span><div class="un">${esc(u.name||'')}</div><div class="up">${esc(u.person||'')}</div><div class="nt">${esc(u.note||'')}</div></div>`).join('')+'</div>';
+  x+=`<h2>Jobs <span class="pill">${openN(ts)} open</span></h2>`+taskList(ts);
+  return x;
+}
+function taskList(ts){
+  if(!ts.length)return `<div class="empty">No jobs - lovely.</div>`;
+  const o={urgent:0,high:1,normal:2};
+  ts=[...ts].sort((a,b)=>(a.status!=='open')-(b.status!=='open')||o[a.level]-o[b.level]||a.sort-b.sort);
+  return ts.map(t=>{const a=person(t.assigned_to),cs=D.com.filter(c=>c.task_id===t.id),db=person(t.done_by),pr=D.props.find(p=>p.id===t.property_id);
+    return `<div class="task ${t.status!=='open'?'done':''}"><button class="tick" title="Tick" onclick="tick('${t.id}')">${t.status==='done'?ic('tick',20):''}</button><div class="tb">
+    <div class="tt">${esc(t.title)}</div>${t.detail?`<div class="td">${link(t.detail)}</div>`:''}
+    <div class="tags"><span class="lv ${t.level}">${t.level}</span>${TAB==='jobs'&&pr?`<span class="pill">${esc(pr.name)}</span>`:''}${t.due?`<span class="pill">Due ${dShort(t.due)}</span>`:''}
+    ${t.status==='open'?`<button class="mini" onclick="assign('${t.id}')">${a?avatar(a)+esc(a.name):'Assign'}</button>`:`<span class="pill">${t.status==='done'?'Done':'Not relevant'}${db?' by '+esc(db.name):''}${t.done_at?' '+dShort(t.done_at):''}</span>`}
+    <button class="mini" onclick="toggleCm('${t.id}')">Chat${cs.length?' ('+cs.length+')':''}</button>
+    ${t.status==='open'?`<button class="mini" onclick="setStatus('${t.id}','not_relevant')">Not relevant</button>`:''}${isAdmin()?`<button class="mini" onclick="delTask('${t.id}')">Delete</button>`:''}</div>
+    ${OPEN[t.id]?`<div class="cm">${cs.map(c=>{const p=person(c.user_id);return `<p>${avatar(p)}<b>${esc(p?.name||'Someone')}</b> <span style="color:var(--muted)">${ago(c.created_at)}</span><br>${esc(c.body)}</p>`}).join('')||'<p style="color:var(--muted)">No messages yet.</p>'}<form onsubmit="addCm(event,'${t.id}')"><input name="b" placeholder="Write a message" autocomplete="off"><button class="btn">Send</button></form></div>`:''}
+    </div></div>`}).join('');
+}
+async function tick(id){const t=D.tasks.find(x=>x.id===id);const ns=t.status==='open'?'done':'open';t.status=ns;render();if(ns==='done'){confetti();toast('Nice one!')}
+  const {error}=await SB.from('tasks').update({status:ns}).eq('id',id);if(error){toast('Could not save');reload()}}
+async function setStatus(id,s){const {error}=await SB.from('tasks').update({status:s}).eq('id',id);if(error)toast('Could not save');else{toast('Marked not relevant');reload()}}
+async function delTask(id){if(!confirm('Delete this job for everyone?'))return;const {error}=await SB.from('tasks').delete().eq('id',id);if(error)toast('Could not delete');reload()}
+function toggleCm(id){OPEN[id]=!OPEN[id];render()}
+async function addCm(e,id){e.preventDefault();const b=e.target.b.value.trim();if(!b)return;const {error}=await SB.from('task_comments').insert({task_id:id,user_id:ME.id,body:b});if(error)toast('Could not send');else{OPEN[id]=true;reload()}}
+function sheet(html){const s=document.createElement('div');s.className='sheet';s.innerHTML=`<div class="in">${html}</div>`;s.onclick=e=>{if(e.target===s)s.remove()};document.body.appendChild(s);return s}
+function assign(id){const t=D.tasks.find(x=>x.id===id);const ids=new Set(D.mem.filter(m=>m.business_id===t.business_id).map(m=>m.user_id));PEOPLE.filter(p=>p.role==='admin').forEach(p=>ids.add(p.id));
+  const ps=PEOPLE.filter(p=>ids.has(p.id));
+  const s=sheet(`<h2 style="margin-top:0">Who's on it?</h2><div class="card">${ps.map(p=>`<div class="user"><div>${avatar(p)}${esc(p.name)} <span class="pill">${p.role}</span></div><button class="btn ${t.assigned_to===p.id?'dark':'ghost'}" data-p="${p.id}">${t.assigned_to===p.id?'On it':'Give'}</button></div>`).join('')}</div><button class="btn ghost" data-p="">Nobody</button>`);
+  s.querySelectorAll('[data-p]').forEach(b=>b.onclick=async()=>{const {error}=await SB.from('tasks').update({assigned_to:b.dataset.p||null}).eq('id',id);s.remove();if(error)toast('Could not save');else{toast('Saved');reload()}})}
+function jobsView(){
+  const all=D.tasks.filter(t=>BIZ.some(b=>b.id===t.business_id));
+  const ts=JOBF==='mine'?all.filter(t=>t.assigned_to===ME.id):all.filter(t=>t.business_id===CUR);
+  return `<div class="seg"><button class="${JOBF==='mine'?'on':''}" onclick="JOBF='mine';render()">My jobs</button><button class="${JOBF==='all'?'on':''}" onclick="JOBF='all';render()">All ${esc(BIZ.find(b=>b.id===CUR)?.name||'')}</button></div><h2>${JOBF==='mine'?'Given to me':'Everything'} <span class="pill">${openN(ts)} open</span></h2>`+(isStaff()||isAdmin()||ME.role==='partner'?addTaskBtn():'')+taskList(ts);
+}
+function addTaskBtn(){return isStaff()?'':`<button class="btn ghost" style="margin-bottom:12px" onclick="newTask()">+ New job</button>`}
+function newTask(){const props=D.props.filter(p=>p.business_id===CUR);
+  const s=sheet(`<h2 style="margin-top:0">New job - ${esc(BIZ.find(b=>b.id===CUR)?.name)}</h2><form class="grid2" id="ntf"><input name="title" placeholder="What needs doing?" required style="grid-column:1/-1"><textarea name="detail" placeholder="Details (optional)" style="grid-column:1/-1"></textarea>
+  <select name="prop"><option value="">No property</option>${props.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('')}</select><select name="level"><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select>
+  <input name="due" type="date"><button class="btn">Add job</button></form>`);
+  s.querySelector('form').onsubmit=async e=>{e.preventDefault();const f=e.target;const {error}=await SB.from('tasks').insert({business_id:CUR,property_id:f.prop.value||null,title:f.title.value,detail:f.detail.value||null,level:f.level.value,due:f.due.value||null,source:'manual'});
+    if(error)toast('Could not add: '+error.message);else{s.remove();toast('Job added');await SB.from('activity').insert({business_id:CUR,user_id:ME.id,action:'added job',detail:f.title.value});reload()}}}
+function moneyView(s){
+  const ms=D.mm.filter(m=>m.business_id===CUR),pays=D.pays.filter(p=>p.business_id===CUR);
+  if(CUR==='zugati')return `<h2>Money</h2><div class="card">Amazon money lives on the Zugati dashboard.<br><br><a class="btn dark" style="text-decoration:none;display:inline-block" href="https://elidzialo.github.io/zugati/" target="_blank" rel="noopener">Open it</a></div>${s.watch?.length?`<h2>Payments to watch</h2><div class="card"><ul class="watch">${s.watch.map(w=>`<li>${esc(w)}</li>`).join('')}</ul></div>`:''}`;
+  const mx=Math.max(1,...ms.map(m=>Math.max(+m.rent,+m.costs)));
+  let x=`<h2>Rent vs costs</h2><div class="card"><div class="chart">${ms.map(m=>`<div class="col"><div class="pair"><i class="r" data-h="${Math.round(m.rent/mx*100)}" style="height:0" title="Rent ${gbp(m.rent)}"></i><i class="c" data-h="${Math.round(m.costs/mx*100)}" style="height:0" title="Costs ${gbp(m.costs)}"></i></div><span>${esc(m.month)}${m.partial?'*':''}</span></div>`).join('')}</div>
+  <div class="row" style="font-size:13px;margin-top:8px"><span><span class="av" style="background:var(--grn);width:12px;height:12px"></span>Rent ${gbp(s.rent_total)}</span><span><span class="av" style="background:var(--pink);width:12px;height:12px"></span>Costs ${gbp(s.costs_total)}</span><span>Bank ${gbp2(s.bank_balance)}</span></div></div>`;
+  const props=D.props.filter(p=>p.business_id===CUR);
+  const by=props.map(p=>[p,pays.filter(x=>x.property_id===p.id).reduce((a,b)=>a+ +b.amount,0)]).filter(z=>z[1]>0);
+  if(by.length){const m2=Math.max(...by.map(z=>z[1]));x+=`<h2>Rent by property</h2><div class="card">${by.map(([p,v])=>`<div style="margin-bottom:10px"><div class="row" style="justify-content:space-between"><b>${esc(p.name)}</b><span class="amt">${gbp(v)}</span></div><div class="bar" style="background:var(--soft)"><i data-w="${Math.round(v/m2*100)}" style="width:0;background:var(--grn)"></i></div></div>`).join('')}</div>`}
+  if(s.expected?.length)x+=`<h2>What's next</h2><div class="card"><ul class="list">${s.expected.map(e=>`<li><b>${esc(e.property)}</b><span style="text-align:right">${esc(e.note)}</span></li>`).join('')}</ul></div>`;
+  x+=`<h2>Payments in <span class="pill">${pays.length}</span></h2><div class="card">${pays.length?`<ul class="list">${pays.map(p=>`<li><span>${dShort(p.date)} - ${esc(p.from_who)}</span><span class="amt">${gbp2(p.amount)}</span></li>`).join('')}</ul>`:'<div class="empty">None yet</div>'}</div>`;
+  if(s.costs_top?.length)x+=`<h2>Biggest costs</h2><div class="card"><ul class="list">${s.costs_top.map(c=>`<li><span>${esc(c[0])}</span><span class="amt">${gbp(c[1])}</span></li>`).join('')}</ul></div>`;
+  if(s.money_note)x+=`<p style="font-size:13px;color:var(--muted)">${esc(s.money_note)}</p>`;
+  return x;
+}
+async function loadAct(){const {data}=await SB.from('activity').select('*').order('created_at',{ascending:false}).limit(60);const el=$('actl');if(!el)return;
+  el.innerHTML=(data||[]).map(a=>{const p=person(a.user_id),b=BIZ.find(z=>z.id===a.business_id);return `<div class="act">${avatar(p)}<b>${esc(p?.name||'Someone')}</b> ${esc(a.action)} <span style="color:var(--muted)">${esc(a.detail||'')}</span><small>${ago(a.created_at)}${b?' - '+esc(b.name):''}</small></div>`}).join('')||'<div class="empty">Nothing yet. Tick a job to start the story.</div>'}
+function adminView(){
+  return `<h2>People <span class="pill">${PEOPLE.length}</span></h2><div class="card">${PEOPLE.map(p=>{const bz=D.mem.filter(m=>m.user_id===p.id).map(m=>BIZ.find(b=>b.id===m.business_id)?.name||m.business_id);
+    return `<div class="user"><div>${avatar(p)}<b>${esc(p.name)}</b> <span class="pill">${p.role}</span><div style="font-size:13px;color:var(--muted)">${esc(p.email)} - ${p.role==='admin'?'Everything':esc(bz.join(', ')||'No access yet')}</div></div><button class="btn ghost" onclick="editUser('${p.id}')">Edit</button></div>`}).join('')}</div>
+  <button class="btn" onclick="editUser()">+ Add a person</button>
+  <h2>Jobs</h2><button class="btn ghost" onclick="newTask()">+ New job for ${esc(BIZ.find(b=>b.id===CUR)?.name)}</button>
+  <p style="font-size:13px;color:var(--muted);margin-top:16px">Partners see everything in their businesses. Staff only see jobs given to them. Only admins see this page.</p>`;
+}
+async function adminCall(body){const {data:{session}}=await SB.auth.getSession();
+  const r=await fetch('https://kddhkuwnkkjcnbjegsmc.supabase.co/functions/v1/admin-users',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+session.access_token,apikey:'sb_publishable_zASd1ua4ZuknbOatR4MnTA_nVwqRZlR'},body:JSON.stringify(body)});
+  const j=await r.json().catch(()=>({error:'No reply'}));if(!r.ok||j.error)throw new Error(j.error||'Failed');return j}
+function editUser(id){const p=id?PEOPLE.find(x=>x.id===id):null;const mine=new Set(D.mem.filter(m=>m.user_id===id).map(m=>m.business_id));
+  const s=sheet(`<h2 style="margin-top:0">${p?'Edit '+esc(p.name):'Add a person'}</h2><form class="grid2"><input name="name" placeholder="Name" value="${esc(p?.name||'')}" required>
+  ${p?`<input value="${esc(p.email)}" disabled>`:'<input name="email" type="email" placeholder="Email" required>'}
+  <select name="role">${['partner','staff','admin'].map(r=>`<option ${p?.role===r?'selected':''}>${r}</option>`).join('')}</select>
+  <input name="password" type="text" placeholder="${p?'New password (leave blank to keep)':'Password (8+ characters)'}" ${p?'':'required minlength="8"'}>
+  <div style="grid-column:1/-1">${BIZ.map(b=>`<label class="ck"><input type="checkbox" name="biz" value="${b.id}" ${mine.has(b.id)?'checked':''}>${esc(b.name)}</label>`).join('')}</div>
+  <button class="btn">${p?'Save':'Add person'}</button>${p&&p.id!==ME.id?'<button type="button" class="btn ghost" id="rm">Remove</button>':''}</form>
+  <p style="font-size:13px;color:var(--muted)">Send them the link elidzialo.github.io/zugati/hub, their email and the password. They can change it after logging in.</p>`);
+  const f=s.querySelector('form');
+  f.onsubmit=async e=>{e.preventDefault();const biz=[...f.querySelectorAll('[name=biz]:checked')].map(x=>x.value);
+    try{if(p)await adminCall({action:'update',id:p.id,name:f.name.value,role:f.role.value,password:f.password.value||undefined,businesses:biz});
+      else await adminCall({action:'create',name:f.name.value,email:f.email.value,role:f.role.value,password:f.password.value,businesses:biz,colour:['#F07C8C','#6a4bc4','#1f7a45','#2a63b0','#e0a32e'][PEOPLE.length%5]});
+      s.remove();toast('Saved');await loadAll();render()}catch(err){toast(err.message)}};
+  const rm=s.querySelector('#rm');if(rm)rm.onclick=async()=>{if(!confirm('Remove '+p.name+'? They will lose access.'))return;try{await adminCall({action:'delete',id:p.id});s.remove();toast('Removed');await loadAll();render()}catch(err){toast(err.message)}}}
+function meSheet(){const s=sheet(`<h2 style="margin-top:0">${avatar(ME)}${esc(ME.name)}</h2><div class="card"><div style="color:var(--muted);font-size:13px">${esc(ME.email)} - ${ME.role}</div></div>
+  <form class="card" id="pwf"><b>Change my password</b><input name="p" type="password" minlength="8" placeholder="New password (8+ characters)" required style="margin:10px 0"><button class="btn dark">Save password</button></form><button class="btn ghost" onclick="logout()">Log out</button>`);
+  s.querySelector('#pwf').onsubmit=async e=>{e.preventDefault();const {error}=await SB.auth.updateUser({password:e.target.p.value});toast(error?error.message:'Password changed');if(!error)s.remove()}}
+async function logout(){await SB.auth.signOut();location.reload()}
+$('loginf').onsubmit=async e=>{e.preventDefault();$('err').textContent='';const {error}=await SB.auth.signInWithPassword({email:$('em').value.trim(),password:$('pw').value});if(error){$('err').textContent='Wrong email or password';return}boot()};
+boot();
+</script>
+</body>
+</html>
