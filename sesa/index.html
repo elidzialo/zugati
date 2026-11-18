@@ -191,6 +191,29 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .rpc .tr{grid-column:1/-1;height:8px;border-radius:6px;background:rgba(255,255,255,.3);overflow:hidden}.rpc .tr i{display:block;height:100%;background:#fff;border-radius:6px;transition:width .9s cubic-bezier(.2,.8,.2,1)}
 .rpc.zero{background:var(--card)!important;color:var(--ink);border:2px dashed var(--red)}.rpc.zero .v{color:var(--red)}.rpc.zero .tr{background:var(--redbg)}
 .rentchip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.22);border-radius:12px;padding:5px 10px;font-size:13px;font-weight:600;margin-top:8px}
+
+/* D 18 Nov: weekly streak + points */
+.streak{border-radius:24px;padding:16px;background:linear-gradient(135deg,#fff3d6,#ffe1c2);color:#1d1d1f;position:relative;overflow:hidden;box-shadow:0 8px 22px rgba(227,163,46,.18)}
+.streak:after{content:"";position:absolute;right:-50px;top:-60px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,.45)}
+.sk-top{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
+.flame{width:52px;height:52px;border-radius:17px;background:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 52px;box-shadow:0 4px 12px rgba(227,100,46,.18)}
+.flame.off{filter:grayscale(1);opacity:.55}
+.flame.lit svg{animation:flick 1.6s ease-in-out infinite;transform-origin:50% 90%}@keyframes flick{50%{transform:scale(1.08) rotate(-3deg)}}
+.sk-n{font-size:22px;font-weight:800;line-height:1.1}.sk-l{font-size:13px;font-weight:500;color:#6b5320}
+.pts{margin-left:auto;background:#1d1d1f;color:#fff;border-radius:16px;padding:7px 12px;text-align:center;line-height:1.1}
+.pts b{display:block;font-size:18px;font-weight:800;color:#ffcf5c}.pts span{font-size:12px;font-weight:600;opacity:.8}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:14px;position:relative;z-index:1;max-width:440px}
+.dy{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:600;color:#7a6638}
+.dy i{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:13px;font-weight:800;color:#b07a10;border:2px solid transparent}
+.dy.on i{background:linear-gradient(135deg,#ff9a3c,#F07C8C);color:#fff}
+.dy.today i{border-color:#1d1d1f}.dy.fut i{opacity:.45}
+.goal{margin-top:14px;position:relative;z-index:1}
+.goal .gt{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:6px}
+.goal .gb{height:14px;border-radius:10px;background:rgba(255,255,255,.75);overflow:hidden}
+.goal .gb i{display:block;height:100%;border-radius:10px;background:linear-gradient(90deg,#ff9a3c,#F07C8C);transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.goal.won .gb i{background:linear-gradient(90deg,#2f9a63,#5bd68b)}
+@media (prefers-color-scheme:dark){.streak{background:linear-gradient(135deg,#3a2a10,#3a1f1c);color:#f3f2ef;box-shadow:none}.streak:after{background:rgba(255,255,255,.05)}
+.flame{background:#2a2a2c}.sk-l,.dy{color:#e3c78a}.dy i{background:rgba(255,255,255,.1);color:#f3c46a}.dy.today i{border-color:#fff}.goal .gb{background:rgba(255,255,255,.12)}.pts{background:#fff;color:#1d1d1f}.pts b{color:#d4800c}}
 </style>
 </head>
 <body>
@@ -261,10 +284,30 @@ function heroRing(){const t=allT(),d=t-allO(),s=78;return ring(d,t,s,8,'#F07C8C'
 function setTab(t){TAB=t;render();window.scrollTo({top:0,behavior:'smooth'})}
 function hash(s){let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))|0;return 't3_'+(h>>>0).toString(36)}
 const tickIcon=()=>ic('check',20,3,'#fff');
+/* D 18 Nov: streak + points. Tick times per device in localStorage 'sesaLog' */
+let LOG={};try{LOG=JSON.parse(localStorage.getItem('sesaLog')||'{}')}catch(e){}
+function saveLog(){try{localStorage.setItem('sesaLog',JSON.stringify(LOG))}catch(e){}}
+const dkey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function ptsFor(k){if(String(k).startsWith('t3_'))return 15;const[t]=findTask(k);return t?(t.level==='urgent'?30:t.level==='high'?20:10):10}
+function weekStart(){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d}
+function streakStats(){const days={};let wk=0,pts=0;const ws=weekStart();
+ for(const[k,ts]of Object.entries(LOG)){if(!DONE[k])continue;const d=new Date(ts);if(isNaN(d))continue;days[dkey(d)]=1;if(d>=ws){wk++;pts+=ptsFor(k)}}
+ const c=new Date();c.setHours(0,0,0,0);if(!days[dkey(c)])c.setDate(c.getDate()-1);let st=0;while(days[dkey(c)]){st++;c.setDate(c.getDate()-1)}
+ const total=allT()+Math.min(3,DATA.top3.length),goal=Math.max(3,Math.min(10,total));return{days,wk,pts,st,goal,ws}}
+const FLAME='<svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 3.5 5.5 6 5.5 11.2A5.5 5.5 0 0 1 12 22a5.5 5.5 0 0 1-5.5-5.6c0-2.7 1.6-4.2 2.6-5.4.4 1.6 1.2 2.6 2.2 3C10.6 10.6 11 6 12 2z" fill="#ff8a3c"/><path d="M12 12.5c.6 1.7 2.7 2.7 2.7 5a2.7 2.7 0 0 1-5.4 0c0-1.3.8-2.1 1.4-2.8.2.8.6 1.2 1 1.4-.3-1.4 0-2.7.3-3.6z" fill="#ffd36b"/></svg>';
+function streakCard(){const s=streakStats(),t=dkey(new Date()),L=['M','T','W','T','F','S','S'];
+ const head=s.st?`<div class="sk-n">${s.st} day streak</div><div class="sk-l">${s.wk} cleared this week. Keep it going!</div>`:s.wk?`<div class="sk-n">${s.wk} cleared this week</div><div class="sk-l">Tick one today to light the flame</div>`:`<div class="sk-n">Start a streak</div><div class="sk-l">Tick your first job to light the flame</div>`;
+ const wk=L.map((l,i)=>{const d=new Date(s.ws);d.setDate(d.getDate()+i);const k=dkey(d),on=s.days[k],fut=k>t;return `<div class="dy ${on?'on':''} ${k===t?'today':''} ${fut?'fut':''}"><i>${on?'✓':d.getDate()}</i>${l}</div>`}).join('');
+ const pc=Math.min(100,Math.round(s.wk/s.goal*100)),won=s.wk>=s.goal;
+ return `<div class="sk-top"><div class="flame ${s.st?'lit':'off'}">${FLAME}</div><div>${head}</div><div class="pts"><b>${s.pts}</b><span>pts</span></div></div>
+ <div class="week" aria-label="This week">${wk}</div>
+ <div class="goal ${won?'won':''}"><div class="gt"><span>${won?'Weekly goal smashed!':'Weekly goal'}</span><span>${Math.min(s.wk,s.goal)}/${s.goal}</span></div><div class="gb"><i data-w="${pc}" style="width:0"></i></div></div>`}
+function refreshStreak(){const e=document.getElementById('streak');if(!e)return;e.innerHTML=streakCard();requestAnimationFrame(()=>e.querySelectorAll('[data-w]').forEach(x=>x.style.width=x.dataset.w+'%'))}
 /* ---------- views ---------- */
 function home(d){let h='';
  h+=`<div class="story"><small>Today's story</small><p>${esc(d.headline||'All quiet. Nice.')}</p></div>`;
  if(d.top3.length){h+=`<h2>Your 3 things today <span class="cnt" id="t3c">${t3left()} left</span></h2><div class="moves">${d.top3.slice(0,3).map((x,i)=>{const k=hash(x);return `<div class="move m${i+1} ${DONE[k]?'done':''}"><div class="num">${i+1}</div><p>${esc(x)}</p><button class="chk" data-t3="${k}" aria-label="Mark done">${tickIcon()}</button></div>`}).join('')}</div>`}
+ h+=`<h2>Your week</h2><div class="streak" id="streak">${streakCard()}</div>`;
  if(d.properties.length){h+=`<h2>Properties</h2><div class="props">`;
   d.properties.forEach((p,i)=>{const t=p.tasks.length,dn=t-open_(p),att=p.units.filter(u=>u.tag!=='ok').length;
    h+=`<button class="pc ${GR[i%4]}" data-tab="${esc(p.id)}"><div class="row"><div><div class="pn">${esc(p.name)}</div><div class="pa">${esc(p.area||'')}</div></div><div class="go">${ic('arrow',18,2.6)}</div></div>
@@ -341,11 +384,12 @@ function refresh(){const o=allO(),$=id=>document.getElementById(id);
  if($('openN'))$('openN').textContent=o;if($('hring'))$('hring').innerHTML=heroRing();if($('hisub'))$('hisub').textContent=subline(o);if($('t3c'))$('t3c').textContent=t3left()+' left';
  document.querySelectorAll('[data-n]').forEach(n=>{const p=DATA.properties.find(x=>x.id===n.dataset.n);if(p){const k=open_(p);n.textContent=k;n.style.display=k?'':'none'}});
  const p=DATA.properties.find(x=>x.id===TAB);if(p){if($('po'))$('po').textContent=open_(p);if($('pc'))$('pc').textContent=`${p.tasks.length-open_(p)}/${p.tasks.length} done`}}
-function tick(key,el,kind){DONE[key]=!DONE[key];if(!DONE[key])delete DONE[key];saveDone();const row=el.closest(kind==='t3'?'.move':'.task');row.classList.toggle('done',!!DONE[key]);row.classList.remove('pop');void row.offsetWidth;row.classList.add('pop');refresh();
+function tick(key,el,kind){const wk0=streakStats().wk;DONE[key]=!DONE[key];if(!DONE[key]){delete DONE[key];delete LOG[key]}else LOG[key]=new Date().toISOString();saveDone();saveLog();refreshStreak();const row=el.closest(kind==='t3'?'.move':'.task');row.classList.toggle('done',!!DONE[key]);row.classList.remove('pop');void row.offsetWidth;row.classList.add('pop');refresh();
  if(!DONE[key])return;try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}
- if(kind==='t3'){const left=t3left();if(!left){confetti();toast('All 3 done. Brilliant!')}else toast(`Nice one - ${left} to go`);return}
+ const ss=streakStats();if(wk0<ss.goal&&ss.wk>=ss.goal){confetti();toast(`Weekly goal hit! +${ptsFor(key)} pts`);return}
+ if(kind==='t3'){const left=t3left();if(!left){confetti();toast('All 3 done. Brilliant!')}else toast(`+${ptsFor(key)} pts - ${left} to go`);return}
  const p=DATA.properties.find(p=>p.tasks.some(t=>t.id===key));if(!p)return;const left=open_(p);
- if(!left){confetti();toast(`${short(p.name)} all clear!`)}else toast(`Nice one - ${left} left at ${short(p.name)}`)}
+ if(!left){confetti();toast(`${short(p.name)} all clear!`)}else toast(`+${ptsFor(key)} pts - ${left} left at ${short(p.name)}`)}
 let TT;function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('on');clearTimeout(TT);TT=setTimeout(()=>e.classList.remove('on'),2200)}
 function confetti(){if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;const cols=['#F07C8C','#4c7de0','#6a4bc4','#e3a32e','#2f9a63','#1D1D1F'];
  for(let i=0;i<60;i++){const c=document.createElement('i');c.className='cf';c.style.left=Math.random()*100+'vw';c.style.background=cols[i%6];c.style.setProperty('--x',(Math.random()*160-80)+'px');c.style.setProperty('--r',(Math.random()*720-360)+'deg');c.style.animationDelay=Math.random()*.3+'s';document.body.appendChild(c);setTimeout(()=>c.remove(),2200)}}
