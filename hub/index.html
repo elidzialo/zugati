@@ -86,6 +86,7 @@ input,select,textarea{border:1px solid var(--line);background:var(--card);border
 .user{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}.user:first-child{border-top:0}
 .grid2{display:grid;gap:10px}@media(min-width:560px){.grid2{grid-template-columns:1fr 1fr}}
 label.ck{display:inline-flex;gap:6px;align-items:center;margin-right:12px;font-size:14px}label.ck input{width:auto;min-height:0}
+.amz{position:fixed;left:0;right:0;top:0;bottom:0;z-index:5;background:var(--bg);padding-bottom:calc(84px + env(safe-area-inset-bottom))}.amz iframe{border:0;width:100%;height:100%;display:block;background:#eaeded}
 .sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
 .sheet .in{background:var(--bg);width:100%;max-width:560px;border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto}
 </style>
@@ -113,7 +114,7 @@ const gbp2=n=>n==null?'-':'£'+Number(n).toLocaleString('en-GB',{minimumFraction
 const dShort=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';
 const ago=t=>{const m=Math.round((Date.now()-new Date(t))/60000);if(m<2)return 'just now';if(m<60)return m+' min ago';const h=Math.round(m/60);if(h<48)return h+'h ago';return Math.round(h/24)+' days ago'};
 const ini=n=>String(n||'?').split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase();
-const IC={home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',jobs:'<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/>',pound:'<path d="M17 20H7c2-2 2-5 1-8h7M6 12h9M16 7a4 4 0 0 0-7 1"/>',act:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',admin:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>',tick:'<path d="M5 12l5 5 9-10"/>'};
+const IC={home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',jobs:'<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/>',pound:'<path d="M17 20H7c2-2 2-5 1-8h7M6 12h9M16 7a4 4 0 0 0-7 1"/>',act:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',admin:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>',tick:'<path d="M5 12l5 5 9-10"/>',box:'<path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>'};
 const ic=(n,s=20)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${IC[n]}</svg>`;
 let ME=null,BIZ=[],CUR=null,TAB='home',PROP=null,D={},PEOPLE=[],OPEN={},JOBF='mine';
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2200)}
@@ -130,7 +131,7 @@ async function boot(){
   render();
   SB.channel('hub').on('postgres_changes',{event:'*',schema:'public',table:'tasks'},()=>reload()).on('postgres_changes',{event:'INSERT',schema:'public',table:'task_comments'},()=>reload()).subscribe();
 }
-let rt;function reload(){clearTimeout(rt);rt=setTimeout(async()=>{await loadAll();render()},400)}
+let rt;function reload(){clearTimeout(rt);rt=setTimeout(async()=>{await loadAll();if(TAB==='amazon')navBar();else render()},400)}
 async function loadAll(){
   const uid=(await SB.auth.getUser()).data.user?.id;
   const [me,biz,props,units,tasks,sum,mm,pays,people,mem,com]=await Promise.all([
@@ -167,14 +168,20 @@ function render(){
   else if(TAB==='money')x+=moneyView(s);
   else if(TAB==='act')x+=`<h2>Activity</h2><div class="card" id="actl"><div class="empty">Loading...</div></div>`;
   else if(TAB==='admin')x+=adminView();
+  if(TAB==='amazon'){$('app').innerHTML=`<div class="amz"><iframe src="../" title="Zugati Amazon dashboard"></iframe></div>`;navBar();return}
   x+='</div>';
   $('app').innerHTML=x;
-  const mine=D.tasks.filter(t=>t.status==='open'&&t.assigned_to===ME.id).length;
-  const tabs=[['home','Today','home',0],['jobs','Jobs','jobs',mine],...(isStaff()?[]:[['money','Money','pound',0]]),['act','Activity','act',0],...(isAdmin()?[['admin','Admin','admin',0]]:[])];
-  $('nav').innerHTML=tabs.map(([id,l,i,n])=>`<button class="nb ${TAB===id?'on':''}" onclick="setTab('${id}')">${ic(i)}<span>${l}</span>${n?`<b class="n">${n}</b>`:''}</button>`).join('');
+  navBar();
   if(TAB==='act')loadAct();
   requestAnimationFrame(()=>setTimeout(()=>document.querySelectorAll('[data-w]').forEach(e=>e.style.width=e.dataset.w+'%'),40));
   requestAnimationFrame(()=>setTimeout(()=>document.querySelectorAll('[data-h]').forEach(e=>e.style.height=e.dataset.h+'%'),40));
+}
+function navBar(){
+  const mine=D.tasks.filter(t=>t.status==='open'&&t.assigned_to===ME.id).length;
+  const amz=!isStaff()&&BIZ.some(b=>b.id==='zugati');
+  const tabs=[['home','Today','home',0],['jobs','Jobs','jobs',mine],...(isStaff()?[]:[['money','Money','pound',0]]),...(amz?[['amazon','Amazon','box',0]]:[]),['act','Activity','act',0],...(isAdmin()?[['admin','Admin','admin',0]]:[])];
+  $('nav').innerHTML=tabs.map(([id,l,i,n])=>`<button class="nb ${TAB===id?'on':''}" onclick="setTab('${id}')">${ic(i)}<span>${l}</span>${n?`<b class="n">${n}</b>`:''}</button>`).join('');
+  const on=$('nav').querySelector('.nb.on');if(on&&$('nav').scrollWidth>$('nav').clientWidth)$('nav').scrollLeft=on.offsetLeft-($('nav').clientWidth-on.offsetWidth)/2;
 }
 function setBiz(id){CUR=id;PROP=null;try{localStorage.setItem('hubBiz',id)}catch(e){}render()}
 function setTab(t){TAB=t;PROP=null;render();scrollTo({top:0,behavior:'smooth'})}
@@ -182,7 +189,7 @@ function openProp(id){PROP=id;render();scrollTo({top:0,behavior:'smooth'})}
 function home(s){
   let x='';
   if(s.headline&&!isStaff())x+=`<div class="story"><small>TODAY'S STORY</small><p>${esc(s.headline)}</p></div>`;
-  if(s.extra?.link)x+=`<p><a class="btn dark" style="display:inline-block;text-decoration:none;margin-top:14px" href="${esc(s.extra.link)}" target="_blank" rel="noopener">Open the Amazon dashboard</a></p>`;
+  if(CUR==='zugati'&&!isStaff())x+=`<p><button class="btn dark" style="margin-top:14px" onclick="setTab('amazon')">Open the Amazon dashboard</button></p>`;
   if(s.top3?.length&&!isStaff())x+=`<h2>Your 3 things today</h2><div class="card">${s.top3.map((t,i)=>`<div class="t3"><div class="num">${i+1}</div><div>${esc(t)}</div></div>`).join('')}</div>`;
   const props=D.props.filter(p=>p.business_id===CUR);
   if(props.length){x+=`<h2>Properties <span class="pill">${props.length}</span></h2><div class="pgrid">`+props.map((p,i)=>{const ts=D.tasks.filter(t=>t.property_id===p.id),o=openN(ts),pc=ts.length?Math.round((ts.length-o)/ts.length*100):100;
@@ -240,7 +247,7 @@ function newTask(){const props=D.props.filter(p=>p.business_id===CUR);
     if(error)toast('Could not add: '+error.message);else{s.remove();toast('Job added');await SB.from('activity').insert({business_id:CUR,user_id:ME.id,action:'added job',detail:f.title.value});reload()}}}
 function moneyView(s){
   const ms=D.mm.filter(m=>m.business_id===CUR),pays=D.pays.filter(p=>p.business_id===CUR);
-  if(CUR==='zugati')return `<h2>Money</h2><div class="card">Amazon money lives on the Zugati dashboard.<br><br><a class="btn dark" style="text-decoration:none;display:inline-block" href="https://elidzialo.github.io/zugati/" target="_blank" rel="noopener">Open it</a></div>${s.watch?.length?`<h2>Payments to watch</h2><div class="card"><ul class="watch">${s.watch.map(w=>`<li>${esc(w)}</li>`).join('')}</ul></div>`:''}`;
+  if(CUR==='zugati')return `<h2>Money</h2><div class="card">Amazon money lives on the Amazon dashboard.<br><br><button class="btn dark" onclick="setTab('amazon')">Open it</button></div>${s.watch?.length?`<h2>Payments to watch</h2><div class="card"><ul class="watch">${s.watch.map(w=>`<li>${esc(w)}</li>`).join('')}</ul></div>`:''}`;
   const mx=Math.max(1,...ms.map(m=>Math.max(+m.rent,+m.costs)));
   let x=`<h2>Rent vs costs</h2><div class="card"><div class="chart">${ms.map(m=>`<div class="col"><div class="pair"><i class="r" data-h="${Math.round(m.rent/mx*100)}" style="height:0" title="Rent ${gbp(m.rent)}"></i><i class="c" data-h="${Math.round(m.costs/mx*100)}" style="height:0" title="Costs ${gbp(m.costs)}"></i></div><span>${esc(m.month)}${m.partial?'*':''}</span></div>`).join('')}</div>
   <div class="row" style="font-size:13px;margin-top:8px"><span><span class="av" style="background:var(--grn);width:12px;height:12px"></span>Rent ${gbp(s.rent_total)}</span><span><span class="av" style="background:var(--pink);width:12px;height:12px"></span>Costs ${gbp(s.costs_total)}</span><span>Bank ${gbp2(s.bank_balance)}</span></div></div>`;
