@@ -255,6 +255,7 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .dt .dh{padding:12px 14px 10px;color:#fff;display:flex;align-items:flex-end;gap:10px;position:relative;overflow:hidden}
 .dt .dh:after{content:"";position:absolute;right:-30px;top:-34px;width:96px;height:96px;border-radius:50%;background:rgba(255,255,255,.14)}
 .dt .dn{font-size:34px;font-weight:800;line-height:.95;letter-spacing:-1px}
+.dt .dn small{font-size:14px;font-weight:700;letter-spacing:.5px;margin-left:5px;text-transform:uppercase;opacity:.9}
 .dt .dw{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;opacity:.92;line-height:1.3}
 .dt .cd{margin-left:auto;font-size:12px;font-weight:700;background:rgba(255,255,255,.25);border-radius:20px;padding:3px 9px;white-space:nowrap;position:relative;z-index:1}
 .dt.now .dh{background:#1D1D1F}.dt.now .cd{background:var(--pink)}
@@ -376,25 +377,27 @@ function comingUp(){const t0=new Date();t0.setHours(0,0,0,0);const lim=new Date(
  DATA.properties.forEach((p,i)=>{if(p.event)add(0,p.event,p.event,i,p);
   p.tasks.forEach(t=>{if(!DONE[t.id])add(2,t.title+' || '+(t.detail||''),t.title,i,p,t.level)});
   p.units.forEach(u=>{if(u.note)add(4,u.note,c=>u.name+': '+c,i,p)});
-  if(DATA.money)DATA.money.expected.forEach(e=>{if(String(e.property||'').toLowerCase().includes(short(p.name).toLowerCase()))add(3,e.note,null,i,p)})});
+  if(DATA.money)DATA.money.expected.forEach(e=>{if(String(e.property||'').toLowerCase().includes(short(p.name).toLowerCase()))add(3,e.note,c=>short(p.name)+' money: '+c,i,p)})});
  DATA.top3.slice(0,3).forEach(x=>{if(!DONE[hash(x)])add(1,x,x,-1,null)});
  DATA.watch.forEach(w=>add(5,w,null,-1,null));
  const days={};items.forEach(x=>{(days[+x.d]=days[+x.d]||[]).push(x)});
  return Object.keys(days).map(Number).sort((a,b)=>a-b).map(k=>{const xs=days[k].sort((a,b)=>a.src-b.src),keep=[],got={};
   for(const x of xs){const g=x.pr>=0?'p'+x.pr:'n';if(got[g]||(g==='n'&&keep.length))continue;got[g]=1;keep.push(x)}
   return{d:new Date(k),xs:keep,more:Math.max(0,xs.length-keep.length)}})}
-function calStrip(){const days=comingUp();if(!days.length)return `<div class="calempty">${ic('cal',20)} No dates coming up. Clear skies.</div>`;
+function calStrip(days){days=days||comingUp();if(!days.length)return `<div class="calempty">${ic('cal',20)} No dates coming up. Clear skies.</div>`;
  const t0=new Date();t0.setHours(0,0,0,0);let prev=null;
  return `<div class="cal" role="list">${days.slice(0,8).map(x=>{const n=Math.round((x.d-t0)/864e5),now=n===0,pi=x.xs[0].pr;
   let gap='';if(prev!==null){const g=Math.round((x.d-prev)/864e5)-1;if(g>1)gap=`<div class="calgap" aria-hidden="true"><b></b><b></b><b></b>${g}d</div>`}prev=x.d;
-  const cd=now?'Today':n===1?'Tomorrow':n<7?x.d.toLocaleDateString('en-GB',{weekday:'short'}):`In ${n} days`;
-  return gap+`<div class="dt ${now?'now':''}" role="listitem"><div class="dh" style="background:${now?'#1D1D1F':pi>=0?GB[pi%4]:'linear-gradient(135deg,#6a4bc4,#4c7de0)'}"><div><div class="dw">${x.d.toLocaleDateString('en-GB',{weekday:'short'})} ${x.d.toLocaleDateString('en-GB',{month:'short'})}</div><div class="dn">${x.d.getDate()}</div></div><span class="cd">${cd}</span></div>
-  <div class="its">${x.xs.map(e=>`<button class="ev2 ${e.lvl==='urgent'?'urg':''}" ${e.tab?`data-tab="${esc(e.tab)}"`:''}><i style="background:${e.pr>=0?GC[e.pr%4]:'var(--violet)'}"></i><span>${esc(e.label)}</span></button>`).join('')}</div></div>`}).join('')}</div>`}
+  const cd=now?'Today':n===1?'Tomorrow':`In ${n} days`;
+  return gap+`<div class="dt ${now?'now':''}" role="listitem"><div class="dh" style="background:${now?'#1D1D1F':pi>=0?GB[pi%4]:'linear-gradient(135deg,#6a4bc4,#4c7de0)'}"><div><div class="dw">${x.d.toLocaleDateString('en-GB',{weekday:'short'})}</div><div class="dn">${x.d.getDate()}<small>${x.d.toLocaleDateString('en-GB',{month:'short'})}</small></div></div><span class="cd">${cd}</span></div>
+  <div class="its">${x.xs.map(e=>`<button class="ev2 ${e.lvl==='urgent'?'urg':''}" ${e.tab?`data-tab="${esc(e.tab)}"`:''}><i style="background:${e.pr>=0?GC[e.pr%4]:'var(--violet)'}"></i><span>${esc(calLabel(e.label))}</span></button>`).join('')}</div></div>`}).join('')}</div>`}
+/* O 18 Nov 17:13: drop the leading date from strip labels - the tile header already says it */
+function calLabel(s){s=String(s).replace(/^((tonight|today)\b[\s:,]*)?(mon|tue|wed|thu|fri|sat|sun)[a-z]*\.?\s+\d{1,2}(st|nd|rd|th)?\s+[a-z]{3,9}\b[\s,:-]*/i,(m,a)=>a?a.replace(/[\s:,]+$/,' '):'').trim();if(/^[A-Z]{4,}\b/.test(s))s=s.replace(/^([A-Z])([A-Z]+)/,(m,a,b)=>a+b.toLowerCase());return s.charAt(0).toUpperCase()+s.slice(1)}
 /* ---------- views ---------- */
 function home(d){let h='';
  h+=`<div class="story"><small>Today's story</small><p>${esc(d.headline||'All quiet. Nice.')}</p></div>`;
  if(d.top3.length){h+=`<h2>Your 3 things today <span class="cnt" id="t3c">${t3left()} left</span></h2><div class="moves">${d.top3.slice(0,3).map((x,i)=>{const k=hash(x);return `<div class="move m${i+1} ${DONE[k]?'done':''}"><div class="num">${i+1}</div><p>${esc(x)}</p><button class="chk" data-t3="${k}" aria-label="Mark done">${tickIcon()}</button></div>`}).join('')}</div>`}
- {const cu=comingUp().length;h+=`<h2>Coming up${cu?` <span class="cnt">${cu} date${cu>1?'s':''}</span>`:''}</h2>${calStrip()}`}
+ {const cd=comingUp(),cu=cd.length;h+=`<h2>Coming up${cu?` <span class="cnt">${cu} date${cu>1?'s':''}</span>`:''}</h2>${calStrip(cd)}`}
  h+=`<h2>Your week</h2><div class="streak" id="streak">${streakCard()}</div>`;
  if(d.properties.length){h+=`<h2>Properties</h2><div class="props">`;
   d.properties.forEach((p,i)=>{const t=p.tasks.length,dn=t-open_(p),att=p.units.filter(u=>u.tag!=='ok').length;
