@@ -361,6 +361,35 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .sdq.m1 b{background:var(--pink)}.sdq.m2 b{background:var(--blue)}.sdq.m3 b{background:var(--violet)}
 @media (min-width:760px){.sdn{display:block}.stkw{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);align-items:start;gap:20px}.sc{min-height:200px}.sc p{font-size:20px}}
 @media (prefers-reduced-motion:reduce){.sc{transition:none}.sc.win .big{animation:none}}
+/* D 19 Nov pm: Team - who's on it */
+.team{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media (min-width:640px){.team{grid-template-columns:repeat(4,1fr)}}
+.tm{--c:var(--pink);position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;min-height:150px;padding:14px 10px 12px;border-radius:22px;border:1px solid color-mix(in srgb,var(--c) 30%,var(--line));background:linear-gradient(170deg,color-mix(in srgb,var(--c) 18%,var(--card)),var(--card) 75%);box-shadow:var(--shadow);cursor:pointer;transition:transform .15s}
+.tm:active{transform:scale(.97)}
+.tm .rg{position:relative;width:70px;height:70px}.tm .rg>svg{position:absolute;inset:0}
+.tm .rg .big{position:absolute;inset:9px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;background:var(--c);box-shadow:0 4px 12px color-mix(in srgb,var(--c) 40%,transparent)}
+.tm .nm{font-weight:700;font-size:15px;line-height:1.2}
+.tm .sb{font-size:12px;color:var(--muted);font-weight:600}
+.tm .pill{font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;background:color-mix(in srgb,var(--c) 82%,#000);color:#fff}
+.tm .pill.ok{background:var(--grn);color:#fff}
+@media (prefers-color-scheme:dark){.tm .pill.ok{color:#10251a}}
+.tm.me:before{content:"You";position:absolute;top:10px;left:10px;font-size:12px;font-weight:700;color:var(--c)}
+.tm.grab{--c:var(--muted);background:var(--card);border:2px dashed var(--line)}
+.tm.grab .rg .big{background:var(--soft);color:var(--ink);box-shadow:none;font-size:22px}
+.tm.grab .pill{background:#c8455a;color:#fff}
+.tm .hot{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:var(--red);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+@media (prefers-color-scheme:dark){.tm .hot{color:#2a0f0a}}
+.tjl{max-height:58vh;overflow:auto;margin:0 -4px;padding:0 4px}
+.tjr{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:16px;margin-bottom:8px;transition:opacity .3s,transform .3s}
+.tjr.gone{opacity:0;transform:translateX(40px)}
+.tjr .tico{width:38px;height:38px;flex:0 0 38px;border-radius:12px;align-self:center}
+.tjr .tt{flex:1;min-width:0;font-size:14px;font-weight:600;line-height:1.3}.tjr .tt small{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-top:2px}
+.tjr .lv{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.tjr button{flex:0 0 auto;min-height:44px;min-width:44px;border-radius:999px;border:0;font-weight:700;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+.tjr .cl{background:#c8455a;color:#fff;padding:0 16px}.tjr .gt{background:var(--soft);color:var(--ink)}
+.shd{display:flex;align-items:center;gap:12px;margin-bottom:12px}.shd .av{width:46px;height:46px;flex:0 0 46px;font-size:16px;margin:0}
+.shd h3{margin:0}.shd .sub{margin:0}
+.tjempty{text-align:center;padding:20px;border-radius:18px;background:var(--grnbg);color:var(--grn);font-weight:700}
 </style>
 </head>
 <body>
@@ -561,11 +590,36 @@ function bindSwipe(){const c=document.querySelector('.sc.p0');if(!c)return;let x
   if(lock&&dx<-90&&stkItems().open.length>1){c.style.transform='';later(k);return}
   c.style.transform='';if(tl)tl.style.opacity=0;if(tr)tr.style.opacity=0};
  c.addEventListener('pointerup',end);c.addEventListener('pointercancel',end)}
+/* D 19 Nov pm: Team card - who's on it, tap a face to see their jobs, claim jobs nobody has */
+const LVC={urgent:'var(--red)',high:'#e3a32e'};
+function teamData(){const ps=people(),by={},free=[];ps.forEach(p=>by[p.id]={p,open:[],done:0});
+ DATA.properties.forEach(pr=>pr.tasks.forEach(t=>{const o=ownerId(t),b=o&&by[o];if(b){DONE[t.id]?b.done++:b.open.push([t,pr])}else if(!DONE[t.id])free.push([t,pr])}));
+ const core=(DATA.people||[]).map(p=>p.id);return{rows:Object.values(by).filter(b=>core.includes(b.p.id)||b.open.length||b.done),free}}
+function teamCard(){const{rows,free}=teamData();
+ return rows.map(b=>{const n=b.open.length,tot=n+b.done,u=b.open.filter(([t])=>t.level==='urgent').length,c=pcol(b.p.id);
+  return `<button class="tm ${b.p.me?'me':''}" style="--c:${c}" data-team="${esc(b.p.id)}" aria-label="${esc(b.p.name)}: ${n} to do">${u?`<span class="hot" title="Urgent">${u}</span>`:''}<div class="rg">${ring(b.done,tot||1,70,6,c,'var(--line)')}<span class="big">${esc(inits(b.p.name))}</span></div><div class="nm">${esc(b.p.me?'Me':first(b.p.name))}</div>${n?`<span class="pill">${n} to do</span>`:`<span class="pill ok">${tot?'All clear':'Free'}</span>`}<div class="sb">${tot?`${b.done} of ${tot} done`:'Nothing assigned'}</div></button>`}).join('')
+ +`<button class="tm grab" data-team="" aria-label="${free.length} jobs nobody has claimed"><div class="rg"><span class="big">${free.length?ic('user',24,2.2):ic('check',24,3)}</span></div><div class="nm">Up for grabs</div>${free.length?`<span class="pill">${free.length} to claim</span>`:`<span class="pill ok">All claimed</span>`}<div class="sb">${free.length?'Tap to claim one':'Everyone has a job'}</div></button>`}
+function refreshTeam(){const e=document.getElementById('team');if(e)e.innerHTML=teamCard();const c=document.getElementById('tmc');if(c){const n=teamData().free.length;c.textContent=n+' up for grabs';c.hidden=!n}}
+function jobRow([t,pr],claim){const tp=topic(t.title+' '+(t.detail||''));
+ return `<div class="tjr" data-row="${esc(t.id)}"><div class="tico ${tp.c}">${ic(tp.i,18,2.1)}</div><div class="tt">${esc(t.title)}<small>${LVC[t.level]?`<i class="lv" style="background:${LVC[t.level]}"></i>`:''}${esc(short(pr.name))} - ${esc(tp.l)}</small></div>${claim?`<button class="cl" data-claim="${esc(t.id)}">Claim</button>`:''}<button class="gt" data-goto="${esc(t.id)}" aria-label="Open this job">${ic('arrow',18,2.6)}</button></div>`}
+function teamSheet(pid){const{rows,free}=teamData(),b=pid?rows.find(r=>r.p.id===pid):null,sh=document.getElementById('shade');if(pid&&!b)return;
+ const list=pid?b.open:free,rank={urgent:0,high:1};list.sort((a,c)=>(rank[a[0].level]??2)-(rank[c[0].level]??2));
+ sh.innerHTML=`<div class="sheet" role="dialog" aria-label="${pid?'Jobs for '+esc(b.p.name):'Jobs up for grabs'}"><div class="grab"></div><div class="shd">${pid?avatar(b.p):`<span class="av" style="background:var(--pink)">${ic('user',22,2.2,'#fff')}</span>`}<div><h3>${pid?(b.p.me?'Your jobs':esc(first(b.p.name))+"'s jobs"):'Up for grabs'}</h3><div class="sub">${pid?`${list.length} to do, ${b.done} done`:list.length?'Nobody has these yet. Claim one and it is yours.':'Every job has someone on it.'}</div></div></div>
+ <div class="tjl" id="tjl">${list.length?list.map(x=>jobRow(x,!pid&&me())).join(''):`<div class="tjempty">${pid?'Nothing on their plate':'All claimed!'}</div>`}</div></div>`;
+ sh.classList.remove('hidden')}
+function claim(id){const m=me();if(!m)return;OWN[id]=m.id;saveOwn();refreshTeam();const r=document.querySelector(`[data-row="${CSS.escape(id)}"]`);
+ try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}
+ if(r){r.classList.add('gone');setTimeout(()=>{r.remove();const l=document.getElementById('tjl');if(l&&!l.children.length){l.innerHTML='<div class="tjempty">All claimed!</div>';confetti()}},300)}
+ const row=document.querySelector(`[data-assign="${CSS.escape(id)}"]`);if(row){const[t]=findTask(id);row.closest('.acts').innerHTML=acts(t)}
+ toast('Yours now - nice one')}
+function gotoTask(id){const[t,pr]=findTask(id);if(!t)return;closeSheet();if(TAB!==pr.id){TAB=pr.id;render()}
+ setTimeout(()=>{const c=document.querySelector(`.task [data-task="${CSS.escape(id)}"]`),e=c&&c.closest('.task');if(e){e.scrollIntoView({behavior:'smooth',block:'center'});e.classList.remove('flash');void e.offsetWidth;e.classList.add('flash')}},80)}
 function home(d){let h='';
  h+=`<div class="story"><small>Today's story</small><p>${esc(d.headline||'All quiet. Nice.')}</p></div>`;
  if(DIFF)h+=`<div style="margin-top:16px">${newsCard()}</div>`;
  if(d.top3.length){h+=`<h2>Your 3 things today <span class="cnt" id="t3c">${t3left()} left</span></h2><div id="stkw">${stackHtml()}</div>`}
  {const cd=comingUp(),cu=cd.length;h+=`<h2>Coming up${cu?` <span class="cnt">${cu} date${cu>1?'s':''}</span>`:''}</h2>${calStrip(cd)}`}
+ {const fr=teamData().free.length;h+=`<h2>Who's on it <span class="cnt" id="tmc"${fr?'':' hidden'}>${fr} up for grabs</span></h2><div class="team" id="team">${teamCard()}</div>`}
  h+=`<h2>Your week</h2><div class="streak" id="streak">${streakCard()}</div>`;
  if(d.properties.length){h+=`<h2>Properties</h2><div class="props">`;
   d.properties.forEach((p,i)=>{const t=p.tasks.length,dn=t-open_(p),att=p.units.filter(u=>u.tag!=='ok').length;
@@ -636,7 +690,7 @@ function openSheet(id){const[t]=findTask(id);if(!t)return;const cur=ownerId(t),s
  ${cur?`<button class="btn ghost" data-pick="" data-for="${esc(id)}">Unassign</button>`:''}</div></div>`;
  sh.classList.remove('hidden')}
 function closeSheet(){const sh=document.getElementById('shade');sh.classList.add('hidden');sh.innerHTML=''}
-function assign(id,pid){OWN[id]=pid||null;saveOwn();closeSheet();const[t]=findTask(id);const row=document.querySelector(`[data-assign="${CSS.escape(id)}"]`);if(row)row.closest('.acts').innerHTML=acts(t);
+function assign(id,pid){OWN[id]=pid||null;saveOwn();closeSheet();refreshTeam();const[t]=findTask(id);const row=document.querySelector(`[data-assign="${CSS.escape(id)}"]`);if(row)row.closest('.acts').innerHTML=acts(t);
  const p=person(pid);toast(p?`Assigned to ${p.me?'you':first(p.name)}`:'Unassigned')}
 function nudgeUrl(id){const[t,pr]=findTask(id);const o=t&&person(ownerId(t));if(!o||!o.email)return null;const m=me();
  const verb=/\bpay|paid|£/i.test(t.title)?'gets paid':'gets done';
@@ -661,7 +715,7 @@ function render(){const d=DATA,o=allO();let h='';
  const tabs=[['home','Today','home',0],...(d.money?[['money','Money','pound',0]]:[]),...d.properties.map(p=>[p.id,short(p.name),'bld',open_(p)])];
  document.getElementById('nav').innerHTML=tabs.map(([id,l,icn,n])=>`<button class="nb ${TAB===id?'on':''}" data-tab="${esc(id)}" ${TAB===id?'aria-current="page"':''}>${ic(icn,20)}<span>${esc(l)}</span>${n?`<b class="n" data-n="${esc(id)}">${n}</b>`:''}${propNews(id)?'<i class="nd" aria-label="Something new"></i>':''}</button>`).join('');
  requestAnimationFrame(()=>setTimeout(()=>{document.querySelectorAll('.bpair i').forEach(e=>e.style.height=e.dataset.h+'%');document.querySelectorAll('[data-w]').forEach(e=>e.style.width=e.dataset.w+'%')},40));countUp()}
-function refresh(){const o=allO(),$=id=>document.getElementById(id);
+function refresh(){const o=allO(),$=id=>document.getElementById(id);refreshTeam();
  if($('openN'))$('openN').textContent=o;if($('hring'))$('hring').innerHTML=heroRing();if($('hisub'))$('hisub').textContent=subline(o);if($('t3c'))$('t3c').textContent=t3left()+' left';
  document.querySelectorAll('[data-n]').forEach(n=>{const p=DATA.properties.find(x=>x.id===n.dataset.n);if(p){const k=open_(p);n.textContent=k;n.style.display=k?'':'none'}});
  const p=DATA.properties.find(x=>x.id===TAB);if(p){if($('po'))$('po').textContent=open_(p);if($('pc'))$('pc').textContent=`${p.tasks.length-open_(p)}/${p.tasks.length} done`}}
@@ -686,6 +740,7 @@ document.addEventListener('click',e=>{if(e.target.id==='shade')return closeSheet
    const pid='x_'+em.toLowerCase();if(!people().some(p=>p.id===pid))EXTRA.push({id:pid,name:n,email:em});return assign(a.dataset.addp,pid)}
   return assign(a.dataset.for,a.dataset.pick)}
  {const l=e.target.closest('[data-later]');if(l)return later(l.dataset.later)}
+ {const m=e.target.closest('[data-team],[data-claim],[data-goto]');if(m){if(m.dataset.claim)return claim(m.dataset.claim);if(m.dataset.goto)return gotoTask(m.dataset.goto);return teamSheet(m.dataset.team)}}
  {const c=e.target.closest('[data-topic]');if(c){const ts=[...document.querySelectorAll(`.task[data-tp="${c.dataset.topic}"]`)];const t=ts.find(x=>!x.classList.contains('done'))||ts[0];if(t){t.scrollIntoView({behavior:'smooth',block:'center'});t.classList.remove('flash');void t.offsetWidth;t.classList.add('flash')}return}}
  const t=e.target.closest('[data-tab],[data-task],[data-t3],#morebtn');if(!t)return;
  if(t.dataset.task)return tick(t.dataset.task,t,'task');if(t.dataset.t3)return tick(t.dataset.t3,t,'t3');
