@@ -368,6 +368,26 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
  .yswipe{display:block}
 }
 
+/* A1: must do today + other company cash */
+.tmust{background:linear-gradient(135deg,#cc0c39,#a10a2d);color:#fff;border-radius:12px;padding:14px 16px;margin-bottom:12px;box-shadow:0 6px 18px rgba(204,12,57,.35);animation:tsin .4s ease}
+.tmust .tmh{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#ffd6de}
+.tmust .tmh .bell{font-size:20px;animation:wob 1.2s ease 2}
+.tmust .tmi{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.18)}
+.tmust .tmh+.tmi{border-top:0;padding-top:0}
+.tmust .tmt{flex:1 1 240px;min-width:0}.tmust .tmt>b{display:block;font-size:19px;line-height:1.25}
+.tmust .tmt>span{display:block;font-size:13.5px;color:#ffe3e9;margin-top:3px}
+.tmust .tmr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tmust .clk{background:#fff;color:#cc0c39;font-weight:800;border-radius:20px;padding:6px 12px;font-size:14px;white-space:nowrap}
+.tmust .clk.past{background:#ffd6de}
+.tmust .tma{font-size:26px;font-weight:800;white-space:nowrap}
+.tmust .tmok{background:#fff;color:#067d62;font-weight:800;border-radius:20px;padding:10px 16px;font-size:14px;cursor:pointer;min-height:20px;transition:opacity .35s}
+.tmust .tmi.gone{opacity:0;transform:scale(.97);transition:.35s}
+@media (max-width:620px){.tmust .tmr{width:100%;gap:8px}.tmust .tma{font-size:22px}.tmust .tmok{margin-left:auto}.tmust .clk{font-size:13px;padding:6px 10px}}
+.ocash{display:flex;align-items:center;gap:14px;margin-top:14px;background:#fff;border-radius:10px;padding:12px 16px;border-left:6px solid var(--grey)}
+.ocash .oci{font-size:26px}.ocash .oct{flex:1;min-width:0}.ocash .ocl{font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700}
+.ocash .ocn{font-weight:700;font-size:15px}.ocash .ocd{font-size:12.5px;color:var(--muted)}
+.ocash .ocv{font-size:24px;font-weight:800;white-space:nowrap}.ocash.low{border-left-color:var(--red)}.ocash.low .ocv{color:var(--red)}
+.dlow{font-size:12px;font-weight:800}
 /* A1: December dip + quotes */
 .dip h4{margin:0;font-size:18px}.dhd{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .dlg{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;flex-wrap:wrap}.dlg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-left:6px}
@@ -447,6 +467,7 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
       <h2>Your money - CFO view</h2>
       <p class="h2sub">Where the cash is, what's coming in, what's going out, and how much you can safely spend on stock.</p>
       <div class="kpis" id="cfokpis"></div>
+      <div id="othercash"></div>
       <div class="card dip" id="dip" style="margin-top:14px"></div>
       <div class="card" style="margin-top:14px"><h4 style="margin:0 0 2px;font-size:18px">Money in and out - next 16 weeks</h4><div class="cfsay" id="cfsay"></div><div id="cashline"></div></div>
       <div class="two" style="margin-top:14px">
@@ -971,23 +992,43 @@ function renderToday(){const el=$('tstrip');if(!el)return;const c=DATA.cfo;if(!c
   const t0=today(),wk=addD(t0,7),{start}=cashWeeks(),safe=safeSpend();
   const due=(DATA.payments||[]).filter(x=>['unpaid','overdue'].includes(x.status)&&!DIS['p:'+x.id]&&new Date(x.due+'T00:00:00')<=wk).sort((a,b)=>a.due<b.due?-1:1);
   const dueSum=due.reduce((s,x)=>s+payGbp(x),0);
+  const must=mustDo(DIS),mustIds=must.map(x=>x.id);
   const inc=(DATA.payments||[]).filter(x=>/^in/.test(x.id)&&x.status!=='paid'&&!DIS['p:'+x.id]&&new Date(x.due+'T00:00:00')<=wk);
   const whenTxt=x=>{const d=daysTo(x.due);return d<0?'Late by '+(-d)+' day'+(d<-1?'s':''):d===0?'Due today':d===1?'Due tomorrow':'Due '+new Date(x.due+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long'})};
   const draft=x=>x.draft||('https://mail.google.com/mail/?authuser=eli@zelr.co.uk#search/'+encodeURIComponent('in:draft '+String(x.to||'').split(/[\s(-]/)[0]));
-  let h='<div class="tst">'+
+  let h=mustHtml(must)+'<div class="tst">'+
    '<div class="tsv cash"><div class="ic">🏦</div><div class="l">Cash in the bank now</div><div class="v">'+money(start,'GBP')+'</div><div class="d">All your Amazon bank accounts together</div></div>'+
    '<div class="tsv due"><div class="ic">🧾</div><div class="l">To pay this week</div><div class="v">'+(due.length?money(dueSum,'GBP'):'£0')+'</div><div class="d">'+(due.length?due.length+' payment'+(due.length>1?'s':'')+' - see below':'Nothing due')+'</div></div>'+
    '<div class="tsv safe'+(safe<=0?' zero':'')+'"><div class="ic">'+(safe>0?'✅':'✋')+'</div><div class="l">Safe to spend</div><div class="v">'+money(safe,'GBP')+'</div><div class="d">'+(safe>0?'Extra on new stock, on top of the plan':'Stick to the plan - nothing extra')+'</div></div></div>';
   inc.forEach(x=>{h+='<div class="tsin"><span style="font-size:20px">💷</span><span><b>'+money(x.amount,x.cur||'GBP')+' coming in</b> '+(daysTo(x.due)<=0?'today':'by '+fmtD(new Date(x.due+'T00:00:00')))+' '+esc(String(x.to||'').replace(/^From/,'from'))+'. Pay the cards below once it lands.</span></div>'});
   h+='<div class="tsh">Pay this week</div>';
-  h+=due.length?'<div class="tpays">'+due.map(x=>{const late=daysTo(x.due)<0;return '<div class="tpay'+(late?' late':'')+'" data-pid="'+esc(x.id)+'"><div class="top"><div><span class="when">'+whenTxt(x)+'</span><div class="who" style="margin-top:5px">'+esc(x.to)+'</div><div class="wh">'+esc(x.what)+'</div></div><div class="amt">'+money(payGbp(x),'GBP')+(x.cur&&x.cur!=='GBP'&&x.amount?'<small>'+money(x.amount,x.cur)+'</small>':'')+'</div></div>'+
+  const dueL=due.filter(x=>!mustIds.includes(x.id));
+  h+=dueL.length?'<div class="tpays">'+dueL.map(x=>{const late=daysTo(x.due)<0;return '<div class="tpay'+(late?' late':'')+'" data-pid="'+esc(x.id)+'"><div class="top"><div><span class="when">'+whenTxt(x)+'</span><div class="who" style="margin-top:5px">'+esc(x.to)+'</div><div class="wh">'+esc(x.what)+'</div></div><div class="amt">'+money(payGbp(x),'GBP')+(x.cur&&x.cur!=='GBP'&&x.amount?'<small>'+money(x.amount,x.cur)+'</small>':'')+'</div></div>'+
     '<div class="bt">'+(x.link?'<a class="bpay" target="_blank" rel="noopener" href="'+esc(x.link)+'">Pay now ↗</a>':'')+'<a class="tbdr" target="_blank" rel="noopener" href="'+esc(draft(x))+'">✉ Gmail draft</a><span class="bok" data-dis="p:'+esc(x.id)+'" data-st="paid" data-t="'+esc(x.what)+'" title="Mark as paid">✓ Paid</span></div></div>'}).join('')+'</div>'
-   :'<div class="tnone">🎉 Nothing to pay this week. Let the cash build.</div>';
+   :'<div class="tnone">'+(must.length?'☝️ Just the red one at the top for now.':'🎉 Nothing to pay this week. Let the cash build.')+'</div>';
   const u=DATA.team&&DATA.team.update;if(u&&u.text){const L=String(u.text).split('\n').filter(Boolean),tm=new Date(String(u.time).replace(/Z?$/,'Z'));
     h+='<div class="tupd'+(L.length>2?' cl':'')+'"><div class="h">Team update · '+(isNaN(tm)?'':esc(tm.toLocaleString('en-GB',{timeZone:'Europe/London',weekday:'short',hour:'2-digit',minute:'2-digit'})))+'</div><ul>'+L.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>'+(L.length>2?'<span class="tmore">Show all ▾</span>':'')+'</div>'}
   el.innerHTML=h;
   const m=el.querySelector('.tupd .tmore');if(m)m.onclick=()=>{const b=el.querySelector('.tupd'),cl=b.classList.toggle('cl');m.textContent=cl?'Show all ▾':'Show less ▴'};
-  wireDis(el);el.querySelectorAll('.tpay [data-dis]').forEach(b=>{const card=b.closest('.tpay'),h=b.onclick;b.onclick=e=>{e.stopPropagation();card.classList.add('gone');setTimeout(()=>h.call(b,e),350)}})}
+  wireDis(el);el.querySelectorAll('.tmust [data-dis]').forEach(b=>{const card=b.closest('.tmi'),h=b.onclick;b.onclick=e=>{e.stopPropagation();card.classList.add('gone');setTimeout(()=>h.call(b,e),350)}});
+  clearInterval(window._mustT);if(must.length)window._mustT=setInterval(()=>{el.querySelectorAll('.tmust .clk[data-dl]').forEach(c=>{const r=clockTxt(+c.dataset.dl);c.textContent=r.t;c.classList.toggle('past',r.past)})},30000);
+  el.querySelectorAll('.tpay [data-dis]').forEach(b=>{const card=b.closest('.tpay'),h=b.onclick;b.onclick=e=>{e.stopPropagation();card.classList.add('gone');setTimeout(()=>h.call(b,e),350)}})}
+/* ---------- must do today (A1) ---------- */
+function londonDate(ymd,h,m){const g=new Date(ymd+'T'+String(h).padStart(2,'0')+':'+String(m||0).padStart(2,'0')+':00Z');
+  const lo=new Date(g.toLocaleString('en-US',{timeZone:'Europe/London'})),ut=new Date(g.toLocaleString('en-US',{timeZone:'UTC'}));return new Date(g.getTime()-(lo-ut))}
+function deadlineOf(x){const t=[x.amount_note,x.what,x.why].filter(Boolean).join(' ');const m=t.match(/by\s+(\d{1,2})(?:[:.](\d\d))?\s*(am|pm)/i);if(!m)return null;let h=+m[1]%12;if(/pm/i.test(m[3]))h+=12;return {d:londonDate(x.due,h,+m[2]||0),lab:m[1]+(m[2]?':'+m[2]:'')+m[3].toLowerCase()}}
+function clockTxt(ms){const r=ms-Date.now();if(r<=0)return {t:'Deadline passed - check it went through',past:true};const mi=Math.round(r/6e4),h=Math.floor(mi/60);return {t:'⏱ '+(h?h+' h '+(mi%60)+' min':mi+' min')+' left',past:false}}
+function acctFor(x){const c=DATA.cfo||{},A=(c.cash||[]).map(a=>Object.assign({mine:1},a)).concat((c.other_cash||[]).map(a=>Object.assign({other:1},a)));const t=[x.what,x.amount_note,x.to].join(' ').toLowerCase();
+  return A.find(a=>{const n=String(a.name).split('(')[0].trim().toLowerCase();return n.length>3&&t.includes(n)})||null}
+function mustDo(DIS){const t=today().getTime();return (DATA.payments||[]).filter(x=>['unpaid','overdue'].includes(x.status)&&x.due&&!DIS['p:'+x.id]&&(new Date(x.due+'T00:00:00').getTime()===t||(x.status==='overdue'&&new Date(x.due+'T00:00:00').getTime()<=t)))}
+function mustHtml(L){if(!L.length)return '';
+  return '<div class="tmust" role="alert"><div class="tmh"><span class="bell">⏰</span>Must do today</div>'+L.map(x=>{const dl=deadlineOf(x),a=acctFor(x),acn=a?String(a.name).split('(')[0].trim():'';
+    const sub=[dl?'Must be in by <b>'+dl.lab+'</b>'+(acn?' - into <b>'+esc(acn)+'</b>':''):'',a?'That account has <b>'+money(a.gbp,'GBP',a.gbp<10?2:0)+'</b>'+(a.other?' (your other company)':''):'',x.why?esc(x.why):''].filter(Boolean).join(' · ');
+    const ck=dl?clockTxt(dl.d.getTime()):null;
+    return '<div class="tmi" data-pid="'+esc(x.id)+'"><div class="tmt"><b>'+esc(x.to)+'</b><span>'+sub+'</span></div><div class="tmr">'+(ck?'<span class="clk'+(ck.past?' past':'')+'" data-dl="'+dl.d.getTime()+'">'+ck.t+'</span>':'')+'<span class="tma">'+(x.cur==='GBP'&&x.amount?money(x.amount,'GBP',x.amount%1?2:0):money(payGbp(x),'GBP'))+'</span><span class="tmok" data-dis="p:'+esc(x.id)+'" data-st="paid" data-t="'+esc(x.what)+'">✓ Done</span></div></div>'}).join('')+'</div>'}
+function renderOther(){const el=$('othercash');if(!el)return;const O=(DATA.cfo||{}).other_cash||[];if(!O.length){el.innerHTML='';return}
+  el.innerHTML=O.map(a=>{const nm=String(a.name).split('(')[0].trim(),nt=(String(a.name).match(/\((.*)\)/)||[])[1]||'';const at=a.at?new Date(a.at):null;
+    return '<div class="ocash'+(a.gbp<50?' low':'')+'"><div class="oci">🏢</div><div class="oct"><div class="ocl">Your other company - not in the cash above</div><div class="ocn">'+esc(nm)+'</div><div class="ocd">'+(nt?esc(nt.charAt(0).toUpperCase()+nt.slice(1))+' · ':'')+(at&&!isNaN(at)?'checked '+fmtD(at):'')+'</div></div><div class="ocv">'+money(a.gbp,'GBP',a.gbp<100?2:0)+'</div></div>'}).join('')}
 /* ---------- cash flow chart ---------- */
 function renderCashFlow(){const el=$('cashline');if(!el)return;const c=DATA.cfo,{W,start}=cashWeeks();
   const sm=window.innerWidth<640,Wd=sm?420:900,H=sm?300:320,pl=sm?36:50,pr=sm?8:14,pt=34,pb=sm?44:40,N=W.length-1;
@@ -1048,7 +1089,7 @@ function renderCfo(){
    (()=>{const nx=W.slice(1,3).find(x=>x.pay);return '<div class="card kpi" style="border:2px solid var(--orange)"><div class="l">Pay next</div><div class="v" style="font-size:20px;line-height:1.25;margin:6px 0">'+(nx?esc(nx.pay):'Nothing - let cash build')+'</div><div class="d">'+(nx?'Week of '+fmtD(nx.d)+' · only once that week\'s Amazon money has landed':'Keep at least '+money(c.floor,'GBP')+' in the bank')+'</div></div>'})()
   ].join('');
   const uc=$('updcash');if(uc)uc.onclick=e=>{e.preventDefault();const v=prompt('How much is in the bank right now? (£)');if(v===null)return;const n=parseFloat(String(v).replace(/[£,\s]/g,''));if(isNaN(n))return;try{localStorage.setItem('zcash',JSON.stringify({v:n,at:new Date().toISOString()}))}catch(x){}renderCfo();if(confirm('Saved on this phone. Tell the team too, so the agents use it?'))location.href='mailto:eli@zelr.co.uk?subject='+encodeURIComponent('Zugati portal feedback - bank balance')+'&body='+encodeURIComponent('Cash in the bank today: £'+n+'\n(Sent from the Zugati portal)')};
-  renderCashFlow();try{renderDip()}catch(e){console.error(e)}
+  renderCashFlow();try{renderDip()}catch(e){console.error(e)}try{renderOther()}catch(e){console.error(e)}
   // big months
   const sm=c.seasons||[],bm=Math.max(...sm.map(x=>x.profit));
   $('bigmonths').innerHTML=sm.map(x=>{const v=x.label.indexOf('Valentine')===0;return '<div style="margin:10px 0"><div class="nm" style="display:flex;justify-content:space-between;font-size:14px;font-weight:600"><span>'+(v?'♥ ':'★ ')+esc(x.label)+'</span><b>'+money(x.profit,'GBP')+' profit</b></div><div style="height:16px;border-radius:5px;margin-top:4px;width:'+(x.profit/bm*100)+'%;background:'+(v?'#e8436a':'#1d8f5f')+'"></div><div class="note">'+money(x.sales,'GBP')+' sales</div></div>'}).join('')+'<div class="note" style="margin-top:6px">Valentine\'s is your strongest month every year. Christmas 2025 was weaker than 2024 - more stock earlier would have helped.</div>';
@@ -1112,21 +1153,26 @@ function renderVal(){
 
 /* ---------- December dip + fixes (A1) ---------- */
 let DIPP={};try{DIPP=JSON.parse(localStorage.getItem('zdip')||'{}')||{}}catch(e){}
-function dipOpts(){const c=DATA.cfo||{},pl=(c.plan||[]).find(x=>/a\)/.test(x.d||'')&&/b\)/.test(x.d||''));if(!pl)return [];
+function dipOpts(){const c=DATA.cfo||{},ab=x=>/a\)/.test(x.d||'')&&/b\)/.test(x.d||''),pl=(c.plan||[]).find(x=>ab(x)&&/close|gap|ways to/i.test(x.t||''))||(c.plan||[]).find(ab);if(!pl)return [];
   return pl.d.split(/\s+(?=[a-f]\)\s)/).map(s=>s.trim()).filter(s=>/^[a-f]\)/.test(s)).map(s=>{const k=s[0],txt=s.slice(2).trim();let fx=null,ic='💡';
     const m=txt.match(/saves?\s*~?£([\d,]+)/i);
-    if(m){fx={type:'save',v:+m[1].replace(/,/g,'')};ic='📦'}
+    if(/january|jan\b/i.test(txt)&&/balance/i.test(txt)){const jp=janPay(txt);if(jp)fx={type:'jan',v:jp.v,who:jp.who};ic='🗓️'}
+    else if(m){fx={type:'save',v:+m[1].replace(/,/g,'')};ic='📦'}
     else if(/black friday|clear/i.test(txt)){fx={type:'sell',v:1000};ic='🏷️'}
     else if(/30 days|more time|on the balance/i.test(txt)){fx={type:'delay'};ic='🗓️'}
     else if(/top-up|loan|borrow/i.test(txt)){fx={type:'topup'};ic='🤝'}
     let cut=-1;[': ',' (',' - ',', '].forEach(sep=>{const i=txt.indexOf(sep,8);if(i>0&&(cut<0||i<cut))cut=i});
     const t=cut>0?txt.slice(0,cut):txt,d=cut>0?txt.slice(cut).replace(/^(:|,|\s-)\s*/,'').trim().replace(/\.$/,''):'';
     return {k,t:t.replace(/\.$/,''),d:d?d.charAt(0).toUpperCase()+d.slice(1):'',fx,ic}})}
+function janPay(txt){const P=(DATA.payments||[]).filter(x=>x.status!=='paid'&&/balance/i.test(x.what||'')&&x.due&&new Date(x.due+'T00:00:00').getMonth()===11);
+  const who=(String(txt).match(/ask\s+(\w+)/i)||[])[1]||'';const Q=P.filter(p=>who&&new RegExp(who,'i').test(p.to)),x=(Q.length?Q:P).sort((a,b)=>payGbp(b)-payGbp(a))[0];return x?{v:Math.round(payGbp(x)),who:who||String(x.to).split(/[\s(]/)[0],id:x.id,due:x.due}:null}
 function dipSim(W,picks){const R=W.map(x=>Object.assign({},x)),n=R.length;const bal=()=>{for(let i=1;i<n;i++)R[i].b=R[i-1].b+R[i].in-R[i].out};bal();
   const lowI=()=>{let j=1;for(let i=1;i<n;i++)if(R[i].b<R[j].b)j=i;return j};
   const base=Math.min(...R.slice(1).map(x=>x.out).filter(v=>v>0),700);
   picks.forEach(o=>{if(!o.fx)return;const L=lowI();
     if(o.fx.type==='save'){let j=L;for(let i=L;i>=1;i--)if(R[i].pay&&/jay/i.test(R[i].pay)){j=i;break}R[j].out=Math.max(0,R[j].out-o.fx.v)}
+    else if(o.fx.type==='jan'){const re=new RegExp(o.fx.who,'i');let j=-1;for(let i=1;i<n;i++)if(R[i].pay&&re.test(R[i].pay)&&/balance/i.test(R[i].pay)&&R[i].d.getMonth()===11&&R[i].out>=o.fx.v*0.8)j=i;
+      const t=R.findIndex((x,i)=>i&&x.d.getMonth()===0&&x.d.getDate()<=7);if(j>0&&t>j){R[j].out-=o.fx.v;R[t].out+=o.fx.v;R[j].pay=R[j].pay.replace(/[^,]*balance[^,]*/i,'').replace(/^[\s,+-]+|[\s,+-]+$/g,'');R[t].pay=(R[t].pay?R[t].pay+' + ':'')+o.fx.who+' balance (moved to January)';o.tw=R[t].d}}
     else if(o.fx.type==='sell'){let j=R.findIndex((x,i)=>i&&x.d>=new Date('2026-12-04T00:00:00'));if(j<1||j>L)j=Math.max(1,L-1);R[j].in+=o.fx.v}
     else if(o.fx.type==='delay'){const amt=Math.max(0,R[L].out-base),t=Math.min(n-1,L+4);R[L].out-=amt;R[t].out+=amt}
     else if(o.fx.type==='topup'){bal();const mn=Math.min(...R.slice(1).map(x=>x.b));if(mn>=0)return;const amt=Math.ceil((-mn+500)/500)*500;const f=R.findIndex((x,i)=>i&&x.b<0);const j=Math.max(1,f-1);R[j].in+=amt;let r=R.findIndex((x,i)=>i>L&&x.pay&&/pay back|repay/i.test(x.pay));if(r<0)r=n-1;R[r].out+=amt;o.amt=amt}
@@ -1138,7 +1184,7 @@ function renderDip(){const el=$('dip');if(!el)return;const c=DATA.cfo;if(!c||!c.
   const restA=A.slice(1),lowA=restA.reduce((m,x)=>x.b<m.b?x:m,restA[0]);
   const k=v=>(v<0?'-':'')+'£'+(Math.abs(v)/1000).toFixed(1).replace(/\.0$/,'')+'k';
   // chart
-  const sm=window.innerWidth<640,Wd=sm?400:900,H=sm?230:250,pl=sm?34:46,pr=8,pt=40,pb=30,N=n-1;
+  const sm=window.innerWidth<640,Wd=sm?400:900,H=sm?250:260,pl=sm?34:46,pr=8,pt=60,pb=30,N=n-1;
   const all=B.concat(A).slice(1).map(x=>x.b);const mx=Math.max(...all,c.floor||0,1000)*1.08,mn=Math.min(...all,0)*1.25-200;
   const slot=(Wd-pl-pr)/N,X=i=>pl+slot*(i-0.5),Y=v=>pt+(mx-v)/(mx-mn)*(H-pt-pb),bw=Math.min(slot*0.7,34);let g='';
   const step=mx-mn>12000?4000:2000;for(let v=Math.ceil(mn/step)*step;v<=mx;v+=step)if(v)g+='<line x1="'+pl+'" x2="'+(Wd-pr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#eef0f0"/><text x="'+(pl-5)+'" y="'+(Y(v)+4)+'" font-size="11" fill="#888" text-anchor="end">'+k(v)+'</text>';
@@ -1151,17 +1197,23 @@ function renderDip(){const el=$('dip');if(!el)return;const c=DATA.cfo;if(!c||!c.
     g+='<rect class="dbar" style="animation-delay:'+(i*40)+'ms" x="'+(cx-bw/2)+'" y="'+yy+'" width="'+bw+'" height="'+Math.max(hh,2)+'" rx="4" fill="'+col(v)+'"><title>Week of '+fmtD(A[i].d)+': £'+n0(v)+' left in the bank'+(A[i].pay?' - '+esc(A[i].pay):'')+'</title></rect>';
     if(sm?(i%3===1):(i%2===1))g+='<text x="'+cx+'" y="'+(H-pb+17)+'" font-size="11" fill="#666" text-anchor="middle">'+fmtD(A[i].d)+'</text>'}
   g+='<line x1="'+pl+'" x2="'+(Wd-pr)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="#0f1111" stroke-width="1.5"/><text x="'+(pl-5)+'" y="'+(Y(0)+4)+'" font-size="11" font-weight="700" fill="#0f1111" text-anchor="end">£0</text>';
-  const li=A.indexOf(lowA),lx=Math.min(Math.max(X(li),pl+46),Wd-pr-46),ly=lowA.b<0?Y(0)-12:Y(lowA.b)-14;
-  g+='<g><rect x="'+(lx-44)+'" y="'+(ly-14)+'" width="88" height="20" rx="10" fill="'+col(lowA.b)+'"/><text x="'+lx+'" y="'+(ly+1)+'" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">'+(lowA.b<0?'Short '+k(-lowA.b):'Low '+k(lowA.b))+'</text></g>';
+  const dips=dipLows(A);let lastX=-999,row=0;
+  (dips.length?dips:[A.indexOf(lowA)]).forEach(li=>{const v=A[li].b,txt=v<0?(sm?fmtD(A[li].d)+' -'+k(-v).slice(0):fmtD(A[li].d)+': '+k(-v)+' short'):'Low '+k(v),w=txt.length*6.6+18;
+    const lx=Math.min(Math.max(X(li),pl+w/2),Wd-pr-w/2);row=Math.abs(lx-lastX)<w+6?row+1:0;lastX=lx;
+    const ly=(v<0?Y(0)-12:Y(v)-14)-row*24;
+    if(v<0)g+='<line x1="'+X(li)+'" x2="'+X(li)+'" y1="'+(ly+6)+'" y2="'+(Y(0)-1)+'" stroke="'+col(v)+'" stroke-width="1.5"/>';
+    g+='<g class="dlow"><rect x="'+(lx-w/2)+'" y="'+(ly-14)+'" width="'+w+'" height="20" rx="10" fill="'+col(v)+'"/><text x="'+lx+'" y="'+(ly+1)+'" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">'+txt+'</text></g>'});
   const svg='<svg viewBox="0 0 '+Wd+' '+H+'" width="100%" role="img" aria-label="Cash left at the end of each week">'+g+'</svg>';
   // sentence
   let say;if(low.b>=0)say='Good news - your cash stays <b>above zero</b> every week. Lowest point is about <b>'+k(low.b)+'</b> in the week of '+fmtD(low.d)+'.';
-  else{say='Your cash dips <b class="dneg">below zero</b> for '+(neg>1?neg+' weeks':'a week')+' around Christmas - about <b class="dneg">'+k(-low.b)+' short</b> in the week of '+fmtD(low.d)+', when big supplier balances are due before Christmas money lands.';
+  else{const bl=dipLows(B),lastNeg=rest.filter(x=>x.b<0).pop();
+    if(bl.length>1)say='Your cash dips <b class="dneg">below zero</b> twice: about <b class="dneg">'+k(-B[bl[0]].b)+' short</b> in the week of '+fmtD(B[bl[0]].d)+', then about <b class="dneg">'+k(-B[bl[1]].b)+' short</b> in the week of '+fmtD(B[bl[1]].d)+'. It stays below zero until '+(lastNeg.d.getMonth()===0&&lastNeg.d.getDate()>=18?'late January':'the week of '+fmtD(lastNeg.d))+' - big supplier balances land before Christmas money does.';
+    else say='Your cash dips <b class="dneg">below zero</b> for '+(neg>1?neg+' weeks':'a week')+' around Christmas - about <b class="dneg">'+k(-low.b)+' short</b> in the week of '+fmtD(low.d)+', when big supplier balances are due before Christmas money lands.';
     if(!picks.length)say+=' <span class="dhint">Tap one or two fixes below to see the gap close.</span>';
     else if(lowA.b>=0)say+=' <span class="dok">✓ With '+(picks.length>1?'these fixes':'this fix')+' the gap closes - your lowest week is about '+k(lowA.b)+'.</span>';
     else say+=' <span class="dhint">With '+(picks.length>1?'these fixes':'this fix')+' you are still about '+k(-lowA.b)+' short - add another.</span>'}
   const cards=O.map(o=>{const on=!!DIPP[o.k];const one=dipSim(W,[o]),lo1=Math.min(...one.slice(1).map(x=>x.b)),gain=Math.round((lo1-low.b)/100)*100;
-    const eff=o.fx?(o.fx.type==='topup'?'Covers the gap - borrow about '+k(o.amt||0)+', repay in February':gain>0?'Lifts your lowest week by about '+k(gain)+(o.fx.type==='sell'?' (per £1k sold)':''):'Moves the gap later'):'';
+    const eff=o.fx?(o.fx.type==='jan'?'Moves '+o.fx.who+'\'s ~'+k(o.fx.v)+' to the week of '+(o.tw?fmtD(o.tw):'4 Jan')+(gain>0?' - lifts your lowest week by about '+k(gain):''):o.fx.type==='topup'?'Covers the gap - borrow about '+k(o.amt||0)+', repay in February':gain>0?'Lifts your lowest week by about '+k(gain)+(o.fx.type==='sell'?' (per £1k sold)':''):'Moves the gap later'):'';
     return '<button class="dopt'+(on?' on':'')+'" data-dip="'+o.k+'" aria-pressed="'+on+'"><span class="dic">'+o.ic+'</span><span class="dtx"><b>'+esc(o.t)+'</b>'+(o.d?'<span>'+esc(o.d)+'</span>':'')+(eff?'<em>'+eff+'</em>':'')+'</span><span class="dck">'+(on?'✓':'+')+'</span></button>'}).join('');
   el.innerHTML='<div class="dhd"><h4>The December dip</h4><span class="dlg"><i style="background:#1d8f5f"></i>Safe <i style="background:#ff9900"></i>Under £'+n0(c.floor||0)+' <i style="background:#cc0c39"></i>Below zero</span></div><div class="dsay">'+say+'</div>'+svg+'<div class="note" style="margin:2px 0 10px">Each bar is the cash left at the end of that week.'+(picks.length?' Dotted outline = before your fixes.':'')+'</div>'+
     (O.length?'<div class="dh2">Ways to close the gap - pick one or two</div><div class="dopts">'+cards+'</div>'+(picks.length?'<div class="dfoot"><a class="btn ghost" id="diptell" href="#">Tell the team what I picked</a><span class="lnk" id="dipclr">Clear</span></div>':''):'');
@@ -1169,6 +1221,8 @@ function renderDip(){const el=$('dip');if(!el)return;const c=DATA.cfo;if(!c||!c.
   const cl=$('dipclr');if(cl)cl.onclick=()=>{DIPP={};try{localStorage.setItem('zdip','{}')}catch(e){}renderDip()};
   const tl=$('diptell');if(tl)tl.onclick=e=>{e.preventDefault();location.href='mailto:eli@zelr.co.uk?subject='+encodeURIComponent('Zugati portal feedback - December gap')+'&body='+encodeURIComponent('To close the December gap I want to:\n'+picks.map(o=>'- '+o.t+(o.d?' ('+o.d+')':'')).join('\n')+'\n\n(Sent from the Zugati portal)')};
 }
+function dipLows(R){const L=[];for(let i=1;i<R.length;i++){const v=R[i].b;if(v>=0)continue;const p=i>1?R[i-1].b:Infinity,nx=i<R.length-1?R[i+1].b:Infinity;if(v<=p&&v<nx)L.push(i)}
+  return L.sort((a,b)=>R[a].b-R[b].b).slice(0,3).sort((a,b)=>a-b)}
 let _dipT;window.addEventListener('resize',()=>{clearTimeout(_dipT);_dipT=setTimeout(()=>{try{DATA&&renderDip()}catch(e){}},250)});
 
 /* ---------- supplier quotes on Valentine cards (A1) ---------- */
