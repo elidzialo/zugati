@@ -99,7 +99,20 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .tile b{font-size:20px;font-weight:700;line-height:1.2}.tile span{font-size:12px;font-weight:500;opacity:.8}
 .tb{background:var(--bluebg);color:var(--blue)}.tp{background:var(--pinkbg);color:#b34657}
 @media (prefers-color-scheme:dark){.tp{color:var(--pink)}.tile .ic{background:rgba(255,255,255,.08)}}
-.wait{display:grid;gap:8px}
+.wait{display:grid;gap:10px}
+.rch{cursor:pointer}.rc{background:var(--card);border-radius:22px;padding:14px;box-shadow:var(--shadow);border:1px solid var(--line);position:relative;overflow:hidden}
+.rc:before{content:"";position:absolute;inset:0 0 auto 0;height:5px;background:var(--grn)}.rc.k-warn:before{background:var(--amb)}.rc.k-bad:before{background:var(--red)}
+.rch{display:flex;gap:14px;align-items:center}.rcd{flex:0 0 92px}.rca{transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)}
+.rci{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px}.rcn{font-weight:700;font-size:16px}
+.rcs{font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--grnbg);color:var(--grn)}.rcs.warn{background:var(--ambbg);color:var(--amb)}.rcs.bad{background:var(--redbg);color:var(--red)}
+.rci .nx{white-space:nowrap}.rcsub{font-size:13px;color:var(--muted);line-height:1.35}
+.rtr{display:grid;grid-template-columns:1fr 1fr;margin:14px 2px 4px;position:relative}.rtr.three{grid-template-columns:1fr 1fr 1fr}
+.rtr:before{content:"";position:absolute;left:8px;right:8px;top:6px;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--line),var(--pink))}
+.rp1{display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;font-size:12px;color:var(--muted)}.rp1:first-child{align-items:flex-start;text-align:left}.rp1:last-child{align-items:flex-end;text-align:right}
+.rp1 i{width:15px;height:15px;border-radius:50%;background:var(--card);border:3px solid var(--muted);margin-bottom:5px}.rp1 b{color:var(--ink);font-weight:600}
+.rp1.pa i{background:var(--grn);border-color:var(--grn)}.rp1.no i{border-color:var(--red);border-style:dashed}.rp1.td i{background:var(--pink);border-color:var(--pink);animation:tdp 1.8s infinite}.rp1.fu i{border-color:var(--pink)}
+.rcd2{margin-top:10px;background:var(--soft);border-radius:14px;padding:10px 12px;font-size:13px;line-height:1.45}.rcd2 summary{list-style:none;cursor:pointer}.rcd2 summary::-webkit-details-marker{display:none}
+.rcd2 .cl{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.rcd2[open] .cl{-webkit-line-clamp:unset;display:block}
 .wc{display:flex;gap:12px;background:var(--ambbg);color:var(--ink);border-radius:18px;padding:12px 14px;font-size:14px;line-height:1.45}
 .wc .ic{width:34px;height:34px;flex:0 0 34px;border-radius:11px;background:rgba(255,255,255,.6);color:var(--amb);display:flex;align-items:center;justify-content:center}
 @media (prefers-color-scheme:dark){.wc .ic{background:rgba(255,255,255,.08)}}
@@ -637,6 +650,19 @@ function alertCard(w,i){const tp=topic(w);return `<div class="alert ${i===0?'r':
 function rentOf(p){const m=DATA.money;if(!m||!m.payments)return{sum:0,n:0,last:null};const k=short(p.name).toLowerCase();const ps=m.payments.filter(x=>String(x.property||'').toLowerCase().includes(k));
  return{sum:ps.reduce((a,x)=>a+(+x.amount||0),0),n:ps.length,last:ps.map(x=>x.date).sort().pop()||null}}
 function dShort(d){return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
+function nextRentDate(n,t0){const re=/\b(\d{1,2})(?:st|nd|rd|th)?\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b/gi;let m;
+ while((m=re.exec(n))){const pre=n.slice(Math.max(0,m.index-16),m.index).toLowerCase();if(!/(next|about|due|expect|around|by)\W*\s*$/.test(pre)&&!/next (one|rent|payout)/.test(pre))continue;
+  const d=new Date(t0.getFullYear(),MON.indexOf(m[2].toLowerCase()),+m[1]);if(t0-d>180*864e5)d.setFullYear(d.getFullYear()+1);if(d>t0)return d}return null}
+/* Rent clock: days since each property's last rent, from real payments only */
+function rentClock(e){const k=String(e.property||'').toLowerCase(),p=DATA.properties.find(q=>{const n=short(q.name).toLowerCase();return k.includes(n)||n.includes(k)||k.includes(String(q.id).toLowerCase())});
+ const t0=new Date();t0.setHours(0,0,0,0);const r=p?rentOf(p):{sum:0,n:0,last:null};let days=null;if(r.last){const l=new Date(r.last);l.setHours(0,0,0,0);days=Math.max(0,Math.round((t0-l)/864e5))}
+ const nx=nextRentDate(e.note||'',t0),inN=nx?Math.round((nx-t0)/864e5):null;
+ const st=days===null?{c:'bad',l:'No rent yet',s:'Worth a chase'}:days<=31?{c:'ok',l:'On track',s:'Paid within a month'}:days<=45?{c:'warn',l:'Due now',s:'Over a month since rent'}:{c:'bad',l:'Late',s:'Well over a month'};
+ const col={ok:'var(--grn)',warn:'var(--amb)',bad:'var(--red)'}[st.c],S=92,W=9,R=(S-W)/2,C=2*Math.PI*R,f=days===null?1:Math.min(days/31,1);
+ const dial=`<svg class="rcd" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" role="img" aria-label="${days===null?'No rent received yet':days+' days since last rent'}"><circle cx="${S/2}" cy="${S/2}" r="${R}" fill="none" stroke="var(--line)" stroke-width="${W}"/><circle class="rca" cx="${S/2}" cy="${S/2}" r="${R}" fill="none" stroke="${col}" stroke-width="${W}" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}" data-off="${C*(1-f)}" transform="rotate(-90 ${S/2} ${S/2})"/>${days===null?`<text x="${S/2}" y="${S/2+7}" text-anchor="middle" font-size="22" font-weight="700" fill="${col}">?</text>`:`<text x="${S/2}" y="${S/2+4}" text-anchor="middle" font-size="24" font-weight="700" fill="var(--ink)">${days}</text><text x="${S/2}" y="${S/2+20}" text-anchor="middle" font-size="12" fill="var(--muted)">${days===1?'day':'days'}</text>`}</svg>`;
+ const pts=[r.last?`<div class="rp1 pa"><i></i><b>Last rent</b><span>${esc(dShort(r.last))}</span></div>`:`<div class="rp1 no"><i></i><b>Last rent</b><span>None yet</span></div>`,`<div class="rp1 td"><i></i><b>Today</b><span>${esc(dShort(t0))}</span></div>`,nx?`<div class="rp1 fu"><i></i><b>Next</b><span>${esc(dShort(nx))}</span></div>`:''].join('');
+ return `<div class="rc k-${st.c}"><div class="rch"${p?` data-tab="${esc(p.id)}" role="button" aria-label="Open ${esc(short(p.name))}"`:''}>${dial}<div class="rci"><div class="rcn">${esc(e.property)}</div><span class="rcs ${st.c}">${st.l}</span><div class="rcsub">${days===null?st.s:`Since rent last landed`}</div>${inN!==null?`<span class="nx">${ic('cal',14,2.4)} ${inN===1?'Next rent tomorrow':`Next in about ${inN} days`}</span>`:''}</div></div>
+ <div class="rtr${nx?' three':''}">${pts}</div><details class="rcd2"><summary><span class="cl">${esc(e.note)}</span></summary></details></div>`}
 function money(m){let h='';const max=Math.max(...m.months.map(x=>Math.max(x.rent||0,x.costs||0)),1);
  h+=`<div class="mhero"><div class="l">Rent received since Sep</div><div class="big" data-count="${Number(m.rent_total)||0}">${gbp(m.rent_total)}</div>
  ${m.months.length?`<div class="bars">${m.months.map(x=>`<div class="bar"><b>${gbp(x.rent)}</b><div class="bpair"><i class="r" data-h="${Math.round((x.rent||0)/max*100)}"></i><i class="c" data-h="${Math.round((x.costs||0)/max*100)}"></i></div><span>${esc(x.m)}${x.partial?' so far':''}</span>${(()=>{const n=(+x.rent||0)-(+x.costs||0);return `<em class="net ${n<0?'neg':'pos'}" title="Rent ${gbp(x.rent)} - costs ${gbp(x.costs)}">${n<0?'-':'+'}${gbp(Math.abs(n))}</em>`})()}</div>`).join('')}</div><div class="netkey">Pill = what was left after costs that month</div>
@@ -647,7 +673,7 @@ function money(m){let h='';const max=Math.max(...m.months.map(x=>Math.max(x.rent
  <div class="lg"><span><b>${gbp(r)}</b> in</span><span><b>${gbp(c)}</b> out</span></div><div class="say">${net>=0?`You are <b style="color:var(--grn)">${gbp(net)} up</b> - rent covers the costs.`:`Costs are <b style="color:var(--red)">${gbp(-net)} more</b> than rent so far - mostly set-up and repairs, so this should turn round once all rents come in.`}</div></div>`;}
  if(DATA.properties.length){const rs=DATA.properties.map(p=>[p,rentOf(p)]),mx=Math.max(...rs.map(x=>x[1].sum),1);
  h+=`<h2>Rent by property</h2><div class="rp">${rs.map(([p,x],i)=>`<button class="rpc ${GR[i%4]} ${x.sum?'':'zero'}" data-tab="${esc(p.id)}"><div class="n">${esc(short(p.name))}</div><div class="v">${gbp(x.sum)}</div><div class="tr"><i data-w="${Math.max(x.sum?6:0,Math.round(x.sum/mx*100))}" style="width:0"></i></div><div class="m">${x.sum?`${x.n} payment${x.n>1?'s':''} since Sep - last on ${esc(dShort(x.last))}`:'No rent in yet - worth chasing'}</div></button>`).join('')}</div>`}
- if(m.expected.length)h+=`<h2>Waiting for</h2><div class="wait">${m.expected.map(e=>`<div class="wc"><div class="ic">${ic('clock',18)}</div><div><b>${esc(e.property)}</b>${esc(e.note)}</div></div>`).join('')}</div>`;
+ if(m.expected.length)h+=`<h2>Rent clock</h2><div class="wait">${m.expected.map(rentClock).join('')}</div>`;
  if(m.payments.length)h+=`<h2>Money in</h2><div class="pays">${m.payments.map(p=>`<div class="pay"><div class="ic">${ic('in',18)}</div><div><div class="w">${esc(p.from)}</div><div class="d">${esc(p.property)} - ${esc(new Date(p.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'}))}</div></div><div class="amt">+${gbp(p.amount,2)}</div></div>`).join('')}</div>`;
  if(m.costs_top.length){const cols=['#F07C8C','#4c7de0','#6a4bc4','#e3a32e','#2f9a63','#8a8a8a'],tot=m.costs_top.reduce((a,c)=>a+(+c[1]||0),0)||1,R=52,C=2*Math.PI*R;let off=0;
   const arcs=m.costs_top.map((c,i)=>{const len=(+c[1]||0)/tot*C,s=`<circle cx="66" cy="66" r="${R}" fill="none" stroke="${cols[i%6]}" stroke-width="20" stroke-dasharray="${Math.max(len-2,0)} ${C}" stroke-dashoffset="${-off}" transform="rotate(-90 66 66)"/>`;off+=len;return s}).join('');
@@ -715,7 +741,7 @@ function render(){const d=DATA,o=allO();let h='';
  document.getElementById('app').innerHTML=h;bindSwipe();
  const tabs=[['home','Today','home',0],...(d.money?[['money','Money','pound',0]]:[]),...d.properties.map(p=>[p.id,short(p.name),'bld',open_(p)])];
  document.getElementById('nav').innerHTML=tabs.map(([id,l,icn,n])=>`<button class="nb ${TAB===id?'on':''}" data-tab="${esc(id)}" ${TAB===id?'aria-current="page"':''}>${ic(icn,20)}<span>${esc(l)}</span>${n?`<b class="n" data-n="${esc(id)}">${n}</b>`:''}${propNews(id)?'<i class="nd" aria-label="Something new"></i>':''}</button>`).join('');
- requestAnimationFrame(()=>setTimeout(()=>{document.querySelectorAll('.bpair i').forEach(e=>e.style.height=e.dataset.h+'%');document.querySelectorAll('[data-w]').forEach(e=>e.style.width=e.dataset.w+'%')},40));countUp()}
+ requestAnimationFrame(()=>setTimeout(()=>{document.querySelectorAll('.bpair i').forEach(e=>e.style.height=e.dataset.h+'%');document.querySelectorAll('[data-w]').forEach(e=>e.style.width=e.dataset.w+'%');document.querySelectorAll('.rca').forEach(e=>e.style.strokeDashoffset=e.dataset.off)},40));countUp()}
 function refresh(){const o=allO(),$=id=>document.getElementById(id);refreshTeam();
  if($('openN'))$('openN').textContent=o;if($('hring'))$('hring').innerHTML=heroRing();if($('hisub'))$('hisub').textContent=subline(o);if($('t3c'))$('t3c').textContent=t3left()+' left';
  document.querySelectorAll('[data-n]').forEach(n=>{const p=DATA.properties.find(x=>x.id===n.dataset.n);if(p){const k=open_(p);n.textContent=k;n.style.display=k?'':'none'}});
