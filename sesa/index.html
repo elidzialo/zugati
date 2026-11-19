@@ -124,16 +124,19 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .lvl i{width:10px;height:10px;border-radius:50%}
 .tasks{display:grid;gap:8px}
 .tico{width:42px;height:42px;flex:0 0 42px;border-radius:14px;display:flex;align-items:center;justify-content:center;align-self:flex-start;position:relative}
-.tlab{font-style:normal;display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:2px;background:none!important}
+.tlab{font-style:normal;display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:2px;background:none!important}
 .tg{background:var(--grnbg);color:var(--grn)}.ta{background:var(--ambbg);color:var(--amb)}.tv{background:var(--violetbg);color:var(--violet)}.tk{background:#e0f4f4;color:#16797a}.ts{background:var(--soft);color:var(--muted)}
 .task .tico{transition:transform .25s}.task.done .tico{filter:grayscale(1);opacity:.6}.task.pop .tico{animation:tbump .4s}
 @keyframes tbump{40%{transform:scale(1.18) rotate(-8deg)}}
 .tmix{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 4px}
-.tchip{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;border-radius:999px;padding:7px 12px 7px 9px;font-size:13px;font-weight:600}.tchip b{font-weight:800}
+.tchip{border:0;font-family:inherit;cursor:pointer;min-height:44px;transition:transform .15s}.tchip:active{transform:scale(.94)}.tchip{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;border-radius:999px;padding:7px 12px 7px 9px;font-size:13px;font-weight:600}.tchip b{font-weight:800}
 .alert .ic.tico{width:38px;height:38px;flex:0 0 38px;border-radius:12px}
-.hot{position:absolute;top:-5px;right:-5px;width:17px;height:17px;border-radius:50%;background:var(--red);color:#fff;font-style:normal;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--card)}
+.hot{position:absolute;top:-5px;right:-5px;width:17px;height:17px;border-radius:50%;background:var(--red);color:#fff;font-style:normal;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--card)}
 .alert .ic.tg,.alert.r .ic.tg{background:var(--grnbg);color:var(--grn)}.alert .ic.ta,.alert.r .ic.ta{background:var(--ambbg);color:var(--amb)}.alert .ic.tv,.alert.r .ic.tv{background:var(--violetbg);color:var(--violet)}.alert .ic.tk,.alert.r .ic.tk{background:#e0f4f4;color:#16797a}.alert .ic.ts,.alert.r .ic.ts{background:var(--soft);color:var(--muted)}.alert .ic.tb,.alert.r .ic.tb{background:var(--bluebg);color:var(--blue)}.alert .ic.tp,.alert.r .ic.tp{background:var(--pinkbg);color:#b34657}
-.alert .tlab{display:block}
+.alert .tlab{display:flex}.tlab .mi{display:none}
+@media (max-width:520px){.task .tico{display:none}.task .tlab .mi{display:inline-flex}.task .tlab{border-radius:999px;padding:3px 9px 3px 7px;margin-bottom:5px}.task .tlab.tg{background:var(--grnbg)!important}.task .tlab.ta{background:var(--ambbg)!important}.task .tlab.tv{background:var(--violetbg)!important}.task .tlab.tb{background:var(--bluebg)!important}.task .tlab.tp{background:var(--pinkbg)!important}.task .tlab.ts{background:var(--soft)!important}.task .tlab.tk{background:#e0f4f4!important}}
+@media (max-width:520px) and (prefers-color-scheme:dark){.task .tlab.tk{background:#123134!important}}
+.task.flash{animation:tflash 1.4s}@keyframes tflash{0%,60%{box-shadow:0 0 0 3px var(--pink)}100%{box-shadow:var(--shadow)}}
 @media (prefers-color-scheme:dark){.tk,.alert .ic.tk,.alert.r .ic.tk{background:#123134;color:#7fd3d3}.alert .ic.tp,.alert.r .ic.tp{color:var(--pink)}}
 .task{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 12px 12px 16px;box-shadow:var(--shadow);transition:opacity .3s,transform .2s;position:relative;overflow:hidden}
 .task:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px}
@@ -410,7 +413,7 @@ const TOPICS=[['decide',/\b(decide|decision|choose|offer|whether|leave flat)/i,'
  ['talk',/\b(call|email|reply|chase|tell|text|nudge|facetime|ask|confirm|agree)\b/i,'chat','Talk','tp']];
 function topic(t){const s=String(t||'');for(const x of TOPICS)if(x[1].test(s))return{k:x[0],i:x[2],l:x[3],c:x[4]};return{k:'todo',i:'spark',l:'To do',c:'ts'}}
 function topicMix(ts){const c={},o=[];ts.forEach(t=>{const k=topic(t.title+' '+(t.detail||''));if(!c[k.k]){c[k.k]={...k,n:0};o.push(c[k.k])}c[k.k].n++});o.sort((a,b)=>b.n-a.n);
- return `<div class="tmix">${o.map(x=>`<span class="tchip ${x.c}">${ic(x.i,15,2.2)}<b>${x.n}</b> ${x.l}</span>`).join('')}</div>`}
+ return `<div class="tmix">${o.map(x=>`<button class="tchip ${x.c}" data-topic="${x.k}" aria-label="Jump to ${x.l} jobs">${ic(x.i,15,2.2)}<b>${x.n}</b> ${x.l}</button>`).join('')}</div>`}
 const ic=(n,s=18,w=2.2,col='currentColor')=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]}</svg>`;
 function face(tag,s=40){const c=tag==='ok'?['var(--grnbg)','var(--grn)']:tag==='bad'?['var(--redbg)','var(--red)']:['var(--ambbg)','var(--amb)'];
  const m=tag==='ok'?'M14 26q6 6 12 0':tag==='bad'?'M14 29q6-6 12 0':'M14 27h12';
@@ -619,7 +622,7 @@ function prop(p,i){let h='';const t=p.tasks.length,o=open_(p),att=p.units.filter
  h+=`<h2>Jobs <span class="cnt" id="pc">${t-o}/${t} done</span></h2>`;if(t)h+=topicMix(p.tasks.filter(x=>!DONE[x.id]).length?p.tasks.filter(x=>!DONE[x.id]):p.tasks);
  if(!t)h+=`<div class="alldone">Nothing to do here<small>Enjoy it while it lasts</small></div>`;
  for(const [lv,name,col] of [['urgent','Do now','var(--red)'],['high','This week','#e3a32e'],['normal','When you can','var(--muted)']]){const ts=p.tasks.filter(x=>(['urgent','high'].includes(x.level)?x.level:'normal')===lv);if(!ts.length)continue;
-  h+=`<div class="lvl"><i style="background:${col}"></i>${name}</div><div class="tasks">`+ts.map(x=>{const tp=topic(x.title+' '+(x.detail||''));return `<div class="task ${lv} ${DONE[x.id]?'done':''}"><div class="tico ${tp.c}">${ic(tp.i,20,2.1)}</div><div class="tx"><i class="tlab ${tp.c}">${tp.l}</i><b>${isNew(x.id)?'<em class="newb">NEW</em>':isUpd(x.id)?'<em class="newb up">UPDATED</em>':''}${esc(x.title)}</b>${x.detail?`<span>${esc(x.detail)}</span>`:''}<div class="acts">${acts(x)}</div></div><button class="chk" data-task="${esc(x.id)}" aria-label="Mark done">${tickIcon()}</button></div>`}).join('')+`</div>`}
+  h+=`<div class="lvl"><i style="background:${col}"></i>${name}</div><div class="tasks">`+ts.map(x=>{const tp=topic(x.title+' '+(x.detail||''));return `<div class="task ${lv} ${DONE[x.id]?'done':''}" data-tp="${tp.k}"><div class="tico ${tp.c}">${ic(tp.i,20,2.1)}</div><div class="tx"><i class="tlab ${tp.c}"><span class="mi">${ic(tp.i,13,2.4)}</span>${tp.l}</i><b>${isNew(x.id)?'<em class="newb">NEW</em>':isUpd(x.id)?'<em class="newb up">UPDATED</em>':''}${esc(x.title)}</b>${x.detail?`<span>${esc(x.detail)}</span>`:''}<div class="acts">${acts(x)}</div></div><button class="chk" data-task="${esc(x.id)}" aria-label="Mark done">${tickIcon()}</button></div>`}).join('')+`</div>`}
  if(p.units.length)h+=`<h2>Who's who <span class="cnt">${p.units.length}</span></h2>${unitMix(p.units)}<div class="units">${p.units.map(unitCard).join('')}</div>`;
  return h}
 function acts(x){const o=person(ownerId(x));
@@ -683,6 +686,7 @@ document.addEventListener('click',e=>{if(e.target.id==='shade')return closeSheet
    const pid='x_'+em.toLowerCase();if(!people().some(p=>p.id===pid))EXTRA.push({id:pid,name:n,email:em});return assign(a.dataset.addp,pid)}
   return assign(a.dataset.for,a.dataset.pick)}
  {const l=e.target.closest('[data-later]');if(l)return later(l.dataset.later)}
+ {const c=e.target.closest('[data-topic]');if(c){const ts=[...document.querySelectorAll(`.task[data-tp="${c.dataset.topic}"]`)];const t=ts.find(x=>!x.classList.contains('done'))||ts[0];if(t){t.scrollIntoView({behavior:'smooth',block:'center'});t.classList.remove('flash');void t.offsetWidth;t.classList.add('flash')}return}}
  const t=e.target.closest('[data-tab],[data-task],[data-t3],#morebtn');if(!t)return;
  if(t.dataset.task)return tick(t.dataset.task,t,'task');if(t.dataset.t3)return tick(t.dataset.t3,t,'t3');
  if(t.id==='morebtn'){document.getElementById('alerts').innerHTML=DATA.watch.map((w,i)=>alertCard(w,i)).join('');t.remove();return}
