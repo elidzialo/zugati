@@ -1,1 +1,2 @@
 2026-11-18 10:02 Setup: Zalo Estates Hub created as a copy of the Sesa hub design (ZALO wordmark, own password and storage keys).
+2026-11-19 09:55 Designer: same swipeable card stack for 'Your 3 things today' as the Sesa hub - swipe right or Done to clear, swipe left or Later to send to the back (localStorage 'zaloLater'), progress pips, green 'All 3 done!' card, tap-to-undo done pills, 'Up next' list on desktop.
