@@ -403,6 +403,21 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .shd{display:flex;align-items:center;gap:12px;margin-bottom:12px}.shd .av{width:46px;height:46px;flex:0 0 46px;font-size:16px;margin:0}
 .shd h3{margin:0}.shd .sub{margin:0}
 .tjempty{text-align:center;padding:20px;border-radius:18px;background:var(--grnbg);color:var(--grn);font-weight:700}
+.slots{background:var(--card);border-radius:22px;padding:14px;box-shadow:var(--shadow);margin-bottom:18px}
+.sltrack{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.slt{border-radius:16px;padding:12px;min-height:118px;display:flex;flex-direction:column;gap:4px;opacity:0;transform:translateY(10px) scale(.97);animation:slIn .45s cubic-bezier(.2,1.2,.4,1) forwards;animation-delay:calc(var(--i)*90ms)}
+.slt .sn{font-weight:700;font-size:15px}.slt .sd{font-size:13px;color:var(--muted)}
+.slt.took{background:var(--grnbg)}.slt.took .sn{color:var(--grn)}
+.slt.free{border:2px dashed var(--line);background:var(--soft)}
+.slt.next{border-color:var(--pink);background:var(--pinkbg)}.slt.next .sn{color:var(--pink)}
+.slt .sw{margin-top:auto;display:flex;align-items:center;gap:6px;font-weight:700;font-size:14px;flex-wrap:wrap}.slt .sw small{flex-basis:100%;font-weight:500;color:var(--muted);font-size:12px}
+.slt .sw .av{width:28px;height:28px;border-radius:50%;background:var(--grn);color:var(--card);font-size:11px;display:inline-flex;align-items:center;justify-content:center}
+.slt .sw.fr{color:var(--muted);font-weight:600;flex-wrap:nowrap;white-space:nowrap}.slt.next .sw.fr{color:var(--pink);font-weight:700}
+.slt.next{animation:slIn .45s cubic-bezier(.2,1.2,.4,1) forwards,slPulse 2.2s ease-in-out .8s infinite;animation-delay:calc(var(--i)*90ms),.8s}
+.slwait{margin-top:12px;font-size:14px;display:flex;align-items:center;gap:6px;color:var(--muted)}.slwait b{color:var(--ink)}
+@keyframes slIn{to{opacity:1;transform:none}}@keyframes slPulse{0%,100%{box-shadow:0 0 0 0 rgba(240,124,140,0)}50%{box-shadow:0 0 0 5px rgba(240,124,140,.25)}}
+@media (max-width:520px){.sltrack{grid-template-columns:1fr 1fr}}
+@media (prefers-reduced-motion:reduce){.slt,.slt.next{animation:none;opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -706,8 +721,20 @@ function prop(p,i){let h='';const t=p.tasks.length,o=open_(p),att=p.units.filter
  if(!t)h+=`<div class="alldone">Nothing to do here<small>Enjoy it while it lasts</small></div>`;
  for(const [lv,name,col] of [['urgent','Do now','var(--red)'],['high','This week','#e3a32e'],['normal','When you can','var(--muted)']]){const ts=p.tasks.filter(x=>(['urgent','high'].includes(x.level)?x.level:'normal')===lv);if(!ts.length)continue;
   h+=`<div class="lvl"><i style="background:${col}"></i>${name}</div><div class="tasks">`+ts.map(x=>{const tp=topic(x.title+' '+(x.detail||''));return `<div class="task ${lv} ${DONE[x.id]?'done':''}" data-tp="${tp.k}"><div class="tico ${tp.c}">${ic(tp.i,20,2.1)}</div><div class="tx"><i class="tlab ${tp.c}"><span class="mi">${ic(tp.i,13,2.4)}</span>${tp.l}</i><b>${isNew(x.id)?'<em class="newb">NEW</em>':isUpd(x.id)?'<em class="newb up">UPDATED</em>':''}${esc(x.title)}</b>${x.detail?`<span>${esc(x.detail)}</span>`:''}<div class="acts">${acts(x)}</div></div><button class="chk" data-task="${esc(x.id)}" aria-label="Mark done">${tickIcon()}</button></div>`}).join('')+`</div>`}
+ h+=slotBoard(p);
  if(p.units.length)h+=`<h2>Who's who <span class="cnt">${p.units.length}</span></h2>${unitMix(p.units)}<div class="units">${p.units.map(unitCard).join('')}</div>`;
  return h}
+/* A2 19 Nov: works slots board - which flat goes when, read from the job and tenant notes (no new data needed) */
+function slotBoard(p){const txt=[p.event,p.status,...p.tasks.map(t=>t.title+' '+(t.detail||'')),...p.units.map(u=>(u.label||'')+' '+(u.note||''))].join(' . ');
+ const S={};let mx=0;const re=/slot\s*(\d)\b(?:\s*\(([^)]*)\))?/gi;let m;
+ while((m=re.exec(txt))){const n=+m[1];if(n<1||n>8)continue;mx=Math.max(mx,n);S[n]=S[n]||{};const d=(m[2]||'').replace(/\b(mon|tue|wed|thu|fri|sat|sun)[a-z]*\s+/gi,'').trim();if(/\d.*-.*\d/.test(d)&&(!S[n].d||d.length>S[n].d.length))S[n].d=d;else if(d&&!S[n].d&&/\d/.test(d))S[n].d=d}
+ if(mx<2)return '';
+ p.units.forEach(u=>{const k=String(u.label||'').match(/slot\s*(\d)/i)||String(u.note||'').match(/picked\s+slot\s*(\d)/i);if(k&&S[+k[1]]&&u.tenant)S[+k[1]].who=u})
+ const waiting=p.units.filter(u=>/slots? sent|no reply/i.test((u.label||'')+' '+(u.note||''))&&!Object.values(S).some(x=>x.who===u)).map(u=>first(u.tenant));
+ let firstFree=0;const cells=[];for(let n=1;n<=mx;n++){const x=S[n]||{};if(!x.who&&!firstFree)firstFree=n;
+  cells.push(`<div class="slt ${x.who?'took':'free'}${!x.who&&firstFree===n?' next':''}" style="--i:${n}"><div class="sn">Slot ${n}</div><div class="sd">${x.d?esc(x.d):'Dates in the plan'}</div>${x.who?`<div class="sw"><span class="av">${esc(initials(x.who.tenant))}</span>${esc(first(x.who.tenant))}<small>${esc(x.who.name)}</small></div>`:`<div class="sw fr">${ic('user',16)}${firstFree===n?'Needs someone':'Free'}</div>`}</div>`)}
+ const taken=Object.values(S).filter(x=>x.who).length;
+ return `<h2>Works slots <span class="cnt">${taken}/${mx} taken</span></h2><div class="slots"><div class="sltrack">${cells.join('')}</div>${waiting.length?`<div class="slwait">${ic('bell',15)} Still to pick: <b>${esc(waiting.join(' and '))}</b></div>`:''}</div>`}
 function acts(x){const o=person(ownerId(x));
  return o?`<button class="own" data-assign="${esc(x.id)}" aria-label="Assigned to ${esc(o.name)} - change">${avatar(o)}${esc(o.me?'Me':o.name)}</button>${o.email&&!DONE[x.id]?`<button class="nudge" data-nudge="${esc(x.id)}">${ic('bell',16)} Nudge</button>`:''}`
   :`<button class="own none" data-assign="${esc(x.id)}">${ic('user',16)} Assign</button>`}

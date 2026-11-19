@@ -88,6 +88,11 @@ h2{font-size:21px;margin:30px 0 4px;font-weight:700}
 .run{height:10px;background:#eee;border-radius:6px;overflow:hidden;position:relative}
 .run i{display:block;height:100%;border-radius:6px}
 .runl{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.runl .ro{font-size:14px;font-weight:800;color:var(--ink)}.runl .ro.ok{color:var(--green)}.runl .ro.mid{color:var(--amber)}.runl .ro.bad{color:var(--red)}
+.rosub{margin-top:6px;font-size:12.5px;font-weight:700;border-radius:8px;padding:6px 9px;line-height:1.3}.rosub.bad{background:var(--redbg);color:var(--red);animation:roPulse 2.4s ease-in-out infinite}.rosub.ok{background:var(--greenbg);color:var(--green)}.rosub.mid{background:var(--amberbg);color:var(--amber)}
+@keyframes roPulse{0%,100%{box-shadow:0 0 0 0 rgba(204,12,57,0)}50%{box-shadow:0 0 0 3px rgba(204,12,57,.12)}}
+.big .inb.wait{color:var(--amber);background:var(--amberbg);padding:2px 8px;border-radius:10px}.big .inb+.inb{margin-left:6px}
+@media (prefers-reduced-motion:reduce){.rosub.bad{animation:none}}
 .facts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:2px}
 .fact{background:var(--greybg);border-radius:6px;padding:6px 8px}
 .fact .k{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase}
@@ -345,6 +350,18 @@ body.hasbar .toast{bottom:150px}
 .fbsend{display:block;text-align:center;background:var(--orange);color:#111;font-weight:800;font-size:17px;border-radius:26px;padding:15px;text-decoration:none;box-shadow:0 3px 0 #c7811b}
 .fbsend:active{transform:translateY(2px);box-shadow:0 1px 0 #c7811b}
 .fbn{font-size:13px;color:#666;text-align:center;margin:8px 0 2px}
+.fbgm{display:block;text-align:center;font-size:13px;color:var(--teal);margin:2px 0 0;padding:6px}
+.tip3{position:fixed;left:50%;bottom:18px;transform:translate(-50%,140%);z-index:60;width:min(440px,calc(100vw - 24px));background:var(--nav2);color:#fff;border-radius:18px;padding:16px 16px 12px;box-shadow:0 12px 32px rgba(0,0,0,.4);transition:transform .45s cubic-bezier(.2,1.3,.4,1)}
+.tip3.on{transform:translate(-50%,0)}.tip3 h4{margin:0 0 10px;font-size:17px}.tip3 h4 span{color:var(--orange)}
+.tip3 ol{list-style:none;margin:0 0 12px;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tip3 li{background:rgba(255,255,255,.08);border-radius:12px;padding:10px 6px;text-align:center;font-size:13px;line-height:1.25;opacity:0;transform:translateY(8px);animation:tipIn .4s forwards}
+.tip3 li:nth-child(2){animation-delay:.15s}.tip3 li:nth-child(3){animation-delay:.3s}
+.tip3 li b{display:block;font-size:24px;margin-bottom:4px}.tip3 li i{display:block;font-style:normal;color:var(--orange);font-weight:800;font-size:11px;margin-bottom:2px}
+.tip3 .t3b{display:flex;gap:8px}.tip3 .t3b button{flex:1;border:0;border-radius:22px;padding:11px;font:inherit;font-weight:800;font-size:15px;cursor:pointer}
+.tip3 .tgo{background:var(--orange);color:#111}.tip3 .tok{background:rgba(255,255,255,.14);color:#fff}
+@keyframes tipIn{to{opacity:1;transform:none}}
+.tipring{animation:tipRing 1.1s ease-in-out 4;position:relative;z-index:2}@keyframes tipRing{0%,100%{box-shadow:0 0 0 0 rgba(255,153,0,.0)}50%{box-shadow:0 0 0 7px rgba(255,153,0,.55)}}
+body.hasbar .tip3{bottom:84px}
 .fbskip{display:block;margin:4px auto 0;border:0;background:none;color:var(--teal);font:inherit;font-size:15px;padding:8px 18px;cursor:pointer}
 .prow.paid{background:#f3faf7;border-color:#bfe3d5}.prow.paid .pdate{background:#e3f3ec;color:var(--green)}.pill.p-paid{background:#d6f0e6;color:var(--green)}
 .asksup{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;margin:10px 0 4px;border:1.5px dashed #e3a33b;background:#fff8ec;color:#7a4b00;border-radius:12px;padding:10px 12px;font:inherit;font-size:15px;font-weight:700;cursor:pointer;text-align:left}
@@ -581,6 +598,17 @@ async function deriveKey(pw,salt,iter){const base=await crypto.subtle.importKey(
 async function load(pw){const r=await fetch('data.enc.json?t='+Date.now(),{cache:'no-store'});const e=await r.json();if(!KEY||pw)KEY=await deriveKey(pw,b64(e.salt),e.iter);const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(e.iv)},KEY,b64(e.ct));DATA=JSON.parse(new TextDecoder().decode(p));fixRates(DATA);render()}
 /* A2: per_day sometimes comes from one marketplace row only - never let it fall far below last 30 days' real sales */
 function fixRates(D){(D.products||[]).forEach(p=>{const r30=(p.units30||0)/30;if(p.per_day_raw==null&&r30>0&&r30>(p.per_day||0)*1.5){p.per_day_raw=p.per_day||0;p.per_day=Math.round(r30*100)/100}})}
+/* A2 19 Nov: 'Runs out ~date' on every card - red when it runs out before new stock lands */
+function runInfo(p,f){const t0=today(),calm=f.st==='stop'||f.st==='slow';
+  if(f.run===null)return {t:lastsTxt(f.left,p),c:calm?'':'ok',s:''};
+  const d=addD(t0,f.run),t=f.run<=1?(p.stock>0?'Runs out now':'Out of stock now'):'Runs out ~'+fmtD(d);
+  if(calm)return {t,c:'',s:''};
+  if(f.nx)return f.gap>2?{t,c:'bad',s:'⚠ '+f.gap+' days with none - '+(f.nx.wait?'new batch ~'+fmtD(addD(t0,f.nx.i))+'?':'new stock ~'+fmtD(addD(t0,f.nx.i)))}:{t,c:'ok',s:'✓ New stock lands ~'+fmtD(addD(t0,f.nx.i))+' - just in time'};
+  return {t,c:f.run<=(DATA.lead_days||45)?'bad':f.run<=75?'mid':'ok',s:f.run<=(DATA.lead_days||45)?'⚠ Nothing ordered yet':''}}
+function inbPill(p){const w=waitTxt(p),inb=p.inbound||0,o=p.on_order||0;let h='';
+  if(w)h+='<span class="inb wait">⏳ '+n0(inb)+' '+w.toLowerCase()+'</span>';
+  else if(inb&&o)h+='<span class="inb">+'+n0(inb+o)+' coming</span>';else if(inb)h+='<span class="inb">+'+n0(inb)+' on the way</span>';
+  if(w&&o)h+='<span class="inb">+'+n0(o)+' ordered</span>';else if(!inb&&o)h+='<span class="inb">+'+n0(o)+' ordered</span>';return h}
 function lastsTxt(left,p){if(p&&!(p.stock>0)&&!(p.inbound>0))return 'Out of stock now';if(left!=null&&left<=1)return 'Runs out now';if(left==null)return 'No recent sales';if(left>365)return 'Lasts over a year';if(left>120)return 'Lasts ~'+Math.round(left/30)+' months';return 'Lasts ~'+left+' days'}
 
 const DAY=864e5;
@@ -594,6 +622,15 @@ const img=(id,size)=>'https://m.media-amazon.com/images/I/'+encodeURIComponent(i
 const daysTo=s=>Math.round((new Date(s+'T00:00:00')-today())/DAY);
 
 /* ---------- forecast engine ---------- */
+/* A2 19 Nov: when does new stock really land? Valentine orders use their own ready + shipping dates; stock that never left (note says so) waits for the next batch */
+function waitTxt(p){const n=String(p.note||'');if(!(p.inbound>0)||!/(did not|didn't|has not|hasn't|never)\s+(go out|ship|leave|left)/i.test(n))return null;return /oil/i.test(n)?'Waiting for oil':'Not shipped yet'}
+function arrivals(p){const lead=DATA.lead_days||45,t0=today(),A=[];let inb=p.inbound||0,ord=p.on_order||0;const wait=waitTxt(p);
+  (DATA.valentine_orders||[]).filter(o=>o.product===p.id&&o.qty>0).forEach(o=>{let c={};try{c=vtlCalc(o)}catch(e){}const made=c.ready&&c.ready<=t0;
+    let q=0;if(made&&inb>0){q=Math.min(inb,o.qty);inb-=q}else if(!made&&ord>0){q=Math.min(ord,o.qty);ord-=q}
+    if(q>0)A.push({i:c.land?Math.max(1,Math.round((c.land-t0)/DAY)):lead,q,src:'vo',est:!c.ready||o.ready_est})});
+  if(inb>0)A.push({i:wait?lead:14,q:inb,src:'inb',wait,est:true});
+  if(ord>0)A.push({i:lead,q:ord,src:'ord',est:true});
+  return A.sort((a,b)=>a.i-b.i)}
 function forecast(p){
   const lead=DATA.lead_days||45,t0=today(),yr=t0.getFullYear();
   const vS=new Date((t0.getMonth()>2?yr+1:yr)+'-01-15T00:00:00'),vE=new Date((t0.getMonth()>2?yr+1:yr)+'-02-14T00:00:00');
@@ -601,16 +638,16 @@ function forecast(p){
   const valRate=p.valentine&&p.val_units?p.val_units/31:0;
   const xRate=p.xmas_units?p.xmas_units/31:0;
   const rate=d=>{let r=p.per_day||0;if(valRate&&d>=vS&&d<=vE)r=Math.max(r,valRate);if(xRate&&d>=xS&&d<=xE)r=Math.max(r,xRate*0.8);return r};
+  const AL=arrivals(p),ARR={};AL.forEach(a=>{ARR[a.i]=(ARR[a.i]||0)+a.q});
   const H=150;let s=p.stock||0,run=null,line=[],need60=0,need90=0,needLead=0,needVal=0;
   for(let i=0;i<=H;i++){
     const d=addD(t0,i);
-    if(i===14)s+=p.inbound||0;
-    if(i===lead)s+=p.on_order||0;
+    if(ARR[i])s+=ARR[i];
     line.push(Math.max(0,s));
     const r=rate(d);
     if(i<60)need60+=r;if(i<90)need90+=r;
     if(i<lead+60)needLead+=r;if(d<=vE)needVal+=r;
-    if(run===null&&s<=0&&(r>0||i>0)&&!(i<14&&p.inbound))run=i;
+    if(run===null&&s<=0&&(r>0||i>0)&&!(AL.length&&i<AL[0].i&&!(p.stock>0)&&AL[0].i<=14))run=i;
     s-=r;
   }
   const have=(p.stock||0)+(p.inbound||0)+(p.on_order||0);
@@ -627,13 +664,14 @@ function forecast(p){
   if(st==='stop'||st==='slow')qty=0;
   let left=p.per_day>0?Math.round(((p.stock||0)+(p.inbound||0))/p.per_day):null;if(run!==null&&(left===null||run<left))left=run;
   if(st==='now'&&!qty&&!p.on_order)qty=Math.max(50,Math.ceil(need60/50)*50);
-  return {line,run,needVal:Math.round(needVal),need60:Math.round(need60),need90:Math.round(need90),qty,reorderIn,st,left,have,vS,vE,xS};
+  const nx=run===null?null:AL.find(a=>a.i>run)||null,gap=run!==null&&nx?nx.i-run:null;
+  return {AL,nx,gap,line,run,needVal:Math.round(needVal),need60:Math.round(need60),need90:Math.round(need90),qty,reorderIn,st,left,have,vS,vE,xS};
 }
 const ST={now:['Order now','s-now'],soon:['Order soon','s-soon'],ok:['Healthy','s-ok'],stop:["Don't reorder",'s-stop'],slow:['Slow seller','s-slow']};
 function orderLine(p,f){
   if(f.st==='stop')return 'Losing money - sell down, don\'t reorder';
   if(f.st==='slow')return 'Selling slowly - no order needed';
-  if(f.st==='now'&&!f.qty&&p.on_order)return n0(p.on_order)+' ordered - make sure it ships now';
+  if(f.st==='now'&&!f.qty&&p.on_order){const a=(f.AL||[]).find(x=>x.src!=='inb');return n0(p.on_order)+' ordered'+(a&&a.src==='vo'?' - lands ~'+fmtD(addD(today(),a.i))+(f.gap>0?' - ask to send it sooner':''):' - make sure it ships now')}
   if(f.st==='now')return 'Order '+n0(f.qty)+' units now';
   if(f.st==='soon')return 'Order '+n0(f.qty)+' by '+fmtD(addD(today(),f.reorderIn));
   if(f.reorderIn!=null)return 'Next order by '+fmtD(addD(today(),f.reorderIn));
@@ -644,12 +682,19 @@ function orderLine(p,f){
 function spark(vals,w,h,col){const mx=Math.max(...vals,1),mn=Math.min(...vals,0);const pts=vals.map((v,i)=>[(i/(vals.length-1))*w,h-((v-mn)/(mx-mn||1))*h]);return '<svg width="'+w+'" height="'+h+'"><polyline fill="none" stroke="'+col+'" stroke-width="2.5" stroke-linejoin="round" points="'+pts.map(p=>p.join(',')).join(' ')+'"/></svg>'}
 
 /* ---------- render ---------- */
+/* A2 19 Nov: one-time 3-step tip so Eli knows his Done taps reach the team */
+function tip3(){let seen=0;try{seen=+localStorage.getItem('ztip1')||0}catch(e){}if(seen||document.querySelector('.tip3'))return;const btn=document.querySelector('#acts [data-dis],#app [data-dis]');if(!btn)return;
+  const el=document.createElement('div');el.className='tip3';el.setAttribute('role','dialog');
+  el.innerHTML='<h4>👋 Tell the team in <span>3 taps</span></h4><ol><li><i>STEP 1</i><b>✓</b>Tap <u>Done</u> or <u>Not relevant</u></li><li><i>STEP 2</i><b>💬</b>Pick a reason</li><li><i>STEP 3</i><b>✉️</b>Press <u>Send</u> in your email</li></ol><div class="t3b"><button class="tgo">Show me</button><button class="tok">Got it</button></div>';
+  document.body.append(el);setTimeout(()=>el.classList.add('on'),900);
+  const shut=()=>{try{localStorage.setItem('ztip1',Date.now())}catch(e){}el.classList.remove('on');setTimeout(()=>el.remove(),400)};
+  el.querySelector('.tok').onclick=shut;el.querySelector('.tgo').onclick=()=>{shut();const b=document.querySelector('#acts [data-dis],#app [data-dis]');if(!b)return;b.scrollIntoView({behavior:'smooth',block:'center'});b.classList.remove('tipring');void b.offsetWidth;b.classList.add('tipring')}}
 function render(){
   const upd=new Date(DATA.updated_at),age=(Date.now()-upd)/36e5;
   $('upd').innerHTML='<span class="dot'+(age>2?' old':'')+'"></span>Last update '+esc(upd.toLocaleString('en-GB',{timeZone:'Europe/London',weekday:'short',hour:'2-digit',minute:'2-digit'}));
   const h=new Date().getHours();$('greet').textContent=(h<12?'Good morning':h<18?'Good afternoon':'Good evening')+', Eli';
   $('todaydate').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
-  renderKpis();renderActs();renderCfo();try{renderToday()}catch(e){console.error(e)}renderBar();setupAsk();renderChips();renderGrid();renderPay();renderWin();renderYear();renderVal();try{renderVTL()}catch(e){console.error(e)}
+  renderKpis();renderActs();renderCfo();try{renderToday()}catch(e){console.error(e)}renderBar();setupAsk();renderChips();renderGrid();renderPay();renderWin();renderYear();renderVal();try{renderVTL()}catch(e){console.error(e)}try{tip3()}catch(e){}
 }
 function per(k){const a=DATA.accounts[ACC];return a&&a.periods.find(p=>p.key===k)||{}}
 function renderKpis(){
@@ -698,11 +743,11 @@ function renderGrid(){
   const L=list().filter(x=>FILTER==='all'||(FILTER==='val'?x.p.valentine:x.f.st===FILTER)).filter(x=>pMatch(x.p,PQ)).sort(srt);
   $('grid').innerHTML=L.map(({p,f})=>{
     const [lab,cls]=ST[f.st];const left=f.left;const pct=left==null?0:Math.min(100,left/120*100);
-    const col=f.st==='now'?'var(--red)':f.st==='soon'?'var(--amber)':'var(--green)';
+    const RI=runInfo(p,f);const col=f.st==='now'||RI.c==='bad'?'var(--red)':f.st==='soon'||RI.c==='mid'?'var(--amber)':'var(--green)';
     return '<div class="pc" data-id="'+esc(p.id)+'"><div class="pimg"><img loading="lazy" src="'+img(p.img,400)+'" alt=""><span class="rib '+cls+'">'+lab+'</span><span class="mk">'+esc(p.market)+'</span>'+(p.valentine?'<span class="vtag">♥ Valentine\'s</span>':'')+'</div>'+
     '<div class="pb"><div class="pn">'+esc(p.name)+'</div>'+
-    '<div class="big"><span class="num">'+n0(p.stock)+'</span><span class="u">in stock</span>'+(p.inbound&&p.on_order?'<span class="inb">+'+n0(p.inbound+p.on_order)+' coming</span>':p.inbound?'<span class="inb">+'+n0(p.inbound)+' on the way</span>':p.on_order?'<span class="inb">+'+n0(p.on_order)+' ordered</span>':'')+'</div>'+
-    '<div class="run"><i style="width:'+pct+'%;background:'+col+'"></i></div><div class="runl"><span>'+lastsTxt(left,p)+'</span><span>'+(p.per_day?(p.per_day<1?p.per_day.toFixed(1):Math.round(p.per_day))+' sold / day':'')+'</span></div>'+
+    '<div class="big"><span class="num">'+n0(p.stock)+'</span><span class="u">in stock</span>'+inbPill(p)+'</div>'+
+    '<div class="run"><i style="width:'+pct+'%;background:'+col+'"></i></div><div class="runl"><span class="ro '+RI.c+'">'+(RI.c==='bad'?'📅 ':'')+esc(RI.t)+'</span><span>'+(p.per_day?(p.per_day<1?p.per_day.toFixed(1):Math.round(p.per_day))+' sold / day':'')+'</span></div>'+(RI.s?'<div class="rosub '+RI.c+'">'+esc(RI.s)+'</div>':'')+
     '<div class="facts"><div class="fact">'+(p.valentine&&p.val_units?'<div class="k">Need until 14 Feb</div><div class="x">'+n0(f.needVal)+'</div>':'<div class="k">Next 60 days need</div><div class="x">'+n0(f.need60)+'</div>')+'</div><div class="fact"><div class="k">Profit 30 days</div><div class="x" style="color:'+((p.profit30||0)<0?'var(--red)':'var(--green)')+'">'+(p.profit30==null?'-':money(p.profit30,p.cur))+'</div></div></div>'+
     (p.valentine?quoteHtml(p,true):'')+(supOf(p)===NOSUP&&['now','soon'].includes(f.st)?'<button class="asksup sm" data-asksup="'+esc(p.id)+'">❓ Ask Eli who supplies this <span>Tap to answer</span></button>':'')+'<div class="order '+f.st+'">'+esc(orderLine(p,f))+'</div>'+(['now','soon','ok'].includes(f.st)?addBtn(p,f):'')+'</div></div>';
   }).join('')||(PQ?'<div class="card empty"><div class="ei">🔎</div><b>No product matches "'+esc(PQ)+'"</b><span class="note">Try fewer letters, or <a href="#" id="psclr">clear the search</a>'+(FILTER!=='all'?' and tap <b>All</b>':'')+'.</span></div>':'<div class="card empty"><div class="ei">'+(FILTER==='soon'?'🎉':FILTER==='now'?'✅':'📭')+'</div><b>'+(FILTER==='soon'||FILTER==='now'?'Nothing to order here - all good':'Nothing here')+'</b><span class="note">Tap <b>All</b> to see every product.</span></div>');
@@ -910,7 +955,7 @@ function sendOrder(B){B=B||BASKET;if(!Object.keys(B).length)return;const txt=ord
 
 /* ---------- feedback on tasks/payments ---------- */
 function wireDis(root){root.querySelectorAll('[data-dis]').forEach(b=>b.onclick=e=>{e.stopPropagation();if(b.dataset.busy)return;b.dataset.busy=1;let D={};try{D=JSON.parse(localStorage.getItem('zdis')||'{}')}catch(x){}
-  D[b.dataset.dis]={st:b.dataset.st,t:b.dataset.t,at:new Date().toISOString()};try{localStorage.setItem('zdis',JSON.stringify(D))}catch(x){}
+  D[b.dataset.dis]={st:b.dataset.st,t:b.dataset.t,at:new Date().toISOString()};try{localStorage.setItem('zdis',JSON.stringify(D));localStorage.setItem('ztip1',Date.now())}catch(x){}const tp=document.querySelector('.tip3');if(tp)tp.remove();
   const card=b.closest('.card.act,.prow');const go=()=>{renderActs();renderPay();try{renderCfo()}catch(x){}try{renderToday()}catch(x){}};
   if(card){card.classList.add('gone');setTimeout(go,330)}else go();toast(b.dataset.st,b.dataset.t)})}
 function toast(st,t){const R={'done':['✓ Done it','👍 Sorted already','🙋 Someone else did it'],'paid':['💷 Paid in full','💳 Paid the deposit','🔁 Paid another way'],'not relevant':['❌ Wrong info','🏷️ Not Zugati','✅ Already sorted','⏳ Not now']}[st]||['👍 OK'];
@@ -920,10 +965,10 @@ function fbSheet(o){const old=document.querySelector('.fbs');if(old)old.remove()
   el.innerHTML='<div class="fbin"><button class="fbx" aria-label="Close">×</button><div class="fbh">'+o.head+'</div>'+(o.sub?'<div class="fbt">'+esc(o.sub)+'</div>':'')+
    '<div class="fbq">'+esc(o.ask)+'</div><div class="fbc">'+o.chips.map(c=>'<button class="fbchip">'+esc(c)+'</button>').join('')+'</div>'+
    '<input class="fbi" placeholder="Or type a few words (optional)" aria-label="Why">'+
-   '<a class="fbsend" href="#">✉ Send to the team</a><div class="fbn">Your email app opens with it all filled in - just press <b>Send</b>.</div><button class="fbskip">Skip</button></div>';
+   '<a class="fbsend" href="#">✉ Send to the team</a><div class="fbn">Your email app opens with it all filled in - just press <b>Send</b>.</div><a class="fbgm" href="#" target="_blank" rel="noopener">Nothing opened? Send with Gmail instead</a><button class="fbskip">Skip</button></div>';
   document.body.append(el);requestAnimationFrame(()=>el.classList.add('on'));
   const inp=el.querySelector('.fbi'),a=el.querySelector('.fbsend');let picked=[];
-  const upd=()=>{const w=picked.map(x=>x.replace(/^\S+\s/,'')).concat((inp.value||'').trim()?[inp.value.trim()]:[]).join(' - ');a.href='mailto:eli@zelr.co.uk?subject='+encodeURIComponent(o.subject)+'&body='+encodeURIComponent(o.body(w))};upd();
+  const upd=()=>{const w=picked.map(x=>x.replace(/^\S+\s/,'')).concat((inp.value||'').trim()?[inp.value.trim()]:[]).join(' - ');a.href='mailto:eli@zelr.co.uk?subject='+encodeURIComponent(o.subject)+'&body='+encodeURIComponent(o.body(w));const g=el.querySelector('.fbgm');if(g)g.href='https://mail.google.com/mail/?view=cm&fs=1&to=eli@zelr.co.uk&su='+encodeURIComponent(o.subject)+'&body='+encodeURIComponent(o.body(w))};upd();
   el.querySelectorAll('.fbchip').forEach(b=>b.onclick=()=>{b.classList.toggle('on');picked=[...el.querySelectorAll('.fbchip.on')].map(x=>x.textContent);upd()});
   inp.oninput=upd;const close=()=>{el.classList.remove('on');setTimeout(()=>el.remove(),250)};
   el.querySelector('.fbx').onclick=close;el.querySelector('.fbskip').onclick=close;el.onclick=e=>{if(e.target===el)close()};
