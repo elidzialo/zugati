@@ -306,6 +306,46 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .nwtog{display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px;border:1px dashed rgba(255,255,255,.45);border-radius:14px;background:none;color:#fff;font:700 13px Poppins,sans-serif;cursor:pointer}
 .nwtog[aria-expanded=true] svg{transform:rotate(-90deg)}.nwtog svg{transform:rotate(90deg);transition:transform .2s}
 @media (min-width:760px){.nwtog{grid-column:1/-1}}
+/* D 19 Nov: swipe stack for Your 3 things */
+.stkw{display:grid;gap:12px}
+.stk{display:grid;padding-bottom:30px;position:relative}
+.sc{grid-area:1/1;position:relative;align-items:stretch;border-radius:26px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:12px;min-height:178px;transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .3s;will-change:transform;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.sc.p0{z-index:3;color:#fff;box-shadow:0 14px 30px rgba(29,29,31,.18);cursor:grab}
+.sc.m1{background:linear-gradient(135deg,#F07C8C,#f59f7a)}.sc.m2{background:linear-gradient(135deg,#4c7de0,#46b3d6)}.sc.m3{background:linear-gradient(135deg,#6a4bc4,#b067d6)}
+.sc.p1{z-index:2;transform:translateY(13px) scale(.94);opacity:.55}.sc.p2{z-index:1;transform:translateY(26px) scale(.88);opacity:.3}
+.sc.p1>*,.sc.p2>*{visibility:hidden}
+.sc .top{display:flex;align-items:center;gap:10px}
+.sc .num{width:38px;height:38px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;background:rgba(255,255,255,.25);color:#fff}
+.sc .of{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:.9}
+.sc .sw{margin-left:auto;font-size:12px;opacity:.85;display:flex;align-items:center;gap:4px}
+.sc p{margin:0;font-size:18px;font-weight:700;line-height:1.35;flex:1}
+.sc .bt{display:flex;gap:10px}
+.sc .bt button{flex:1;min-height:48px;border-radius:16px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;border:0}
+.sc .lat{background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.45)!important}
+.sc .dn{background:#fff;color:#1d1d1f}
+.sc .dn svg{stroke:#1f7a45}
+.sc .tag{position:absolute;top:18px;padding:6px 12px;border-radius:12px;font-weight:800;font-size:14px;letter-spacing:1px;opacity:0;transition:opacity .1s;border:3px solid #fff;color:#fff}
+.sc .tag.l{left:18px;transform:rotate(-10deg);background:rgba(29,29,31,.35)}.sc .tag.r{right:18px;transform:rotate(10deg);background:#2f9a63}
+.sc.fly-r{transform:translateX(130%) rotate(18deg)!important;opacity:0}.sc.fly-l{transform:translateX(-130%) rotate(-18deg)!important;opacity:0}
+.sc.drag{transition:none;cursor:grabbing}
+.sc.wig{animation:wig .4s}@keyframes wig{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.sc.win{background:linear-gradient(135deg,#2f9a63,#7cc98f);color:#fff;align-items:center;justify-content:center;text-align:center;z-index:3;box-shadow:0 14px 30px rgba(47,154,99,.28)}
+.sc.win .big{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;animation:popin .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes popin{from{transform:scale(.3)}to{transform:scale(1)}}
+.sc.win p{flex:0;font-size:20px}.sc.win small{opacity:.9;font-size:14px}
+.pips{display:flex;gap:6px;justify-content:center;margin-top:-8px}
+.pips i{width:28px;height:6px;border-radius:3px;background:var(--line);transition:background .3s}.pips i.on{background:var(--grn)}
+.sdl{display:flex;flex-wrap:wrap;gap:8px}
+.sdp{display:flex;align-items:center;gap:8px;min-height:44px;max-width:100%;padding:6px 14px 6px 6px;border-radius:22px;background:var(--grnbg);color:var(--grn);border:0;font:inherit;font-size:13px;font-weight:600;cursor:pointer;text-align:left}
+.sdp b{width:30px;height:30px;flex:0 0 30px;border-radius:50%;background:var(--grn);display:flex;align-items:center;justify-content:center}
+.sdp span{text-decoration:line-through;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px}
+.sdh{font-size:12px;color:var(--muted);font-weight:600}
+.sdr{display:grid;gap:16px}.sdn{display:none}
+.sdq{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;margin-top:8px;font-size:14px;font-weight:600;line-height:1.35}
+.sdq b{width:30px;height:30px;flex:0 0 30px;border-radius:10px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+.sdq.m1 b{background:var(--pink)}.sdq.m2 b{background:var(--blue)}.sdq.m3 b{background:var(--violet)}
+@media (min-width:760px){.sdn{display:block}.stkw{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);align-items:start;gap:20px}.sc{min-height:200px}.sc p{font-size:20px}}
+@media (prefers-reduced-motion:reduce){.sc{transition:none}.sc.win .big{animation:none}}
 </style>
 </head>
 <body>
@@ -461,10 +501,35 @@ function newsCard(){const r=DIFF;if(!r)return '';const rows=[],sn=id=>{const p=D
  <div class="nwls">${shown.join('')}${more.length?`<div class="nwmore" id="nwmore" hidden>${more.join('')}</div><button class="nwtog" data-nwmore="1" aria-expanded="false">Show ${more.length} more ${ic('arrow',14,2.6)}</button>`:''}</div></div>`}
 function gotIt(){const e=document.getElementById('news');SEEN.prev=null;DIFF=null;saveSeen();toast('All caught up');if(e){e.classList.add('bye');setTimeout(render,280)}else render()}
 /* ---------- views ---------- */
+/* D 19 Nov: swipe stack for Your 3 things. Later order per device per day in localStorage 'sesaLater' */
+let LATER={d:'',k:[]};try{LATER=JSON.parse(localStorage.getItem('sesaLater')||'null')||LATER}catch(e){}
+function laterK(){const t=dkey(new Date());if(LATER.d!==t)LATER={d:t,k:[]};return LATER.k}
+function saveLater(){try{localStorage.setItem('sesaLater',JSON.stringify(LATER))}catch(e){}}
+function stkItems(){const L=laterK();const it=DATA.top3.slice(0,3).map((x,i)=>({x,i,k:hash(x)}));const op=it.filter(o=>!DONE[o.k]);
+ const now=op.filter(o=>!L.includes(o.k)),lat=op.filter(o=>L.includes(o.k)).sort((a,b)=>L.indexOf(a.k)-L.indexOf(b.k));return{open:now.concat(lat),done:it.filter(o=>DONE[o.k]),all:it}}
+function stackHtml(){const s=stkItems(),n=s.all.length;let c='';
+ if(!s.open.length)c=`<div class="sc win"><div class="big">${ic('check',34,3,'#fff')}</div><p>All ${n===3?'3':n} done!</p><small>Nothing left for today. Go enjoy it.</small></div>`;
+ else c=s.open.slice(0,3).map((o,j)=>`<div class="sc move m${o.i+1} p${j}" data-sk="${o.k}"${j?' aria-hidden="true"':''}>${j?'':`<span class="tag l">LATER</span><span class="tag r">DONE</span>`}<div class="top"><div class="num">${o.i+1}</div><div class="of">${s.open.length===1?'Last one':`${s.open.length} to go`}</div>${s.open.length>1?`<div class="sw">Swipe ${ic('arrow',14,2.6)}</div>`:''}</div><p>${esc(o.x)}</p><div class="bt">${s.open.length>1?`<button class="lat" data-later="${o.k}">${ic('clock',18,2.4)} Later</button>`:''}<button class="dn" data-t3="${o.k}">${ic('check',20,3)} Done</button></div></div>`).reverse().join('');
+ const pips=`<div class="pips" aria-label="${s.done.length} of ${n} done">${s.all.map(o=>`<i class="${DONE[o.k]?'on':''}"></i>`).join('')}</div>`;
+ const dl=s.done.length?`<div><div class="sdh">Done today - tap to undo</div><div class="sdl" style="margin-top:8px">${s.done.map(o=>`<button class="sdp" data-t3="${o.k}" aria-label="Undo: ${esc(o.x)}"><b>${tickIcon()}</b><span>${esc(o.x)}</span></button>`).join('')}</div></div>`:'';
+ const nx=s.open.length>1?`<div class="sdn"><div class="sdh">Up next</div>${s.open.slice(1).map(o=>`<div class="sdq m${o.i+1}"><b>${o.i+1}</b><span>${esc(o.x)}</span></div>`).join('')}</div>`:'';
+ return `<div class="stkw"><div><div class="stk" id="stk">${c}</div>${pips}</div><div class="sdr">${nx}${dl}</div></div>`}
+function reStack(){const w=document.getElementById('stkw');if(w){w.innerHTML=stackHtml();bindSwipe()}const c=document.getElementById('t3c');if(c)c.textContent=t3left()+' left'}
+function later(k){const s=stkItems();const el=document.querySelector(`.sc[data-sk="${k}"]`);if(s.open.length<2){if(el){el.classList.remove('wig');void el.offsetWidth;el.classList.add('wig')}toast("Last one - you've got this");return}
+ const L=laterK();const i=L.indexOf(k);if(i>=0)L.splice(i,1);L.push(k);saveLater();if(el)el.classList.add('fly-l');toast('Moved to the back');setTimeout(reStack,280)}
+function bindSwipe(){const c=document.querySelector('.sc.p0');if(!c)return;let x0=null,y0=0,dx=0,lock=null;const tl=c.querySelector('.tag.l'),tr=c.querySelector('.tag.r');
+ c.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;x0=e.clientX;y0=e.clientY;dx=0;lock=null});
+ c.addEventListener('pointermove',e=>{if(x0===null)return;const ddx=e.clientX-x0,ddy=e.clientY-y0;if(lock===null&&(Math.abs(ddx)>8||Math.abs(ddy)>8)){lock=Math.abs(ddx)>Math.abs(ddy);if(lock){c.classList.add('drag');try{c.setPointerCapture(e.pointerId)}catch(_){}}}
+  if(!lock)return;dx=ddx;c.style.transform=`translateX(${dx}px) rotate(${dx/18}deg)`;if(tl)tl.style.opacity=Math.min(1,Math.max(0,-dx/90));if(tr)tr.style.opacity=Math.min(1,Math.max(0,dx/90))});
+ const end=()=>{if(x0===null)return;x0=null;c.classList.remove('drag');const k=c.dataset.sk;
+  if(lock&&dx>90){c.style.transform='';const b=c.querySelector('[data-t3]');tick(k,b,'t3');return}
+  if(lock&&dx<-90&&stkItems().open.length>1){c.style.transform='';later(k);return}
+  c.style.transform='';if(tl)tl.style.opacity=0;if(tr)tr.style.opacity=0};
+ c.addEventListener('pointerup',end);c.addEventListener('pointercancel',end)}
 function home(d){let h='';
  h+=`<div class="story"><small>Today's story</small><p>${esc(d.headline||'All quiet. Nice.')}</p></div>`;
  if(DIFF)h+=`<div style="margin-top:16px">${newsCard()}</div>`;
- if(d.top3.length){h+=`<h2>Your 3 things today <span class="cnt" id="t3c">${t3left()} left</span></h2><div class="moves">${d.top3.slice(0,3).map((x,i)=>{const k=hash(x);return `<div class="move m${i+1} ${DONE[k]?'done':''}"><div class="num">${i+1}</div><p>${esc(x)}</p><button class="chk" data-t3="${k}" aria-label="Mark done">${tickIcon()}</button></div>`}).join('')}</div>`}
+ if(d.top3.length){h+=`<h2>Your 3 things today <span class="cnt" id="t3c">${t3left()} left</span></h2><div id="stkw">${stackHtml()}</div>`}
  {const cd=comingUp(),cu=cd.length;h+=`<h2>Coming up${cu?` <span class="cnt">${cu} date${cu>1?'s':''}</span>`:''}</h2>${calStrip(cd)}`}
  h+=`<h2>Your week</h2><div class="streak" id="streak">${streakCard()}</div>`;
  if(d.properties.length){h+=`<h2>Properties</h2><div class="props">`;
@@ -557,7 +622,7 @@ function render(){const d=DATA,o=allO();let h='';
  h+=`<div class="sec">`;
  if(TAB==='money'&&d.money)h+=money(d.money);else{const i=d.properties.findIndex(p=>p.id===TAB);if(i>=0)h+=prop(d.properties[i],i);else{TAB='home';h+=home(d)}}
  h+=`</div>`;
- document.getElementById('app').innerHTML=h;
+ document.getElementById('app').innerHTML=h;bindSwipe();
  const tabs=[['home','Today','home',0],...(d.money?[['money','Money','pound',0]]:[]),...d.properties.map(p=>[p.id,short(p.name),'bld',open_(p)])];
  document.getElementById('nav').innerHTML=tabs.map(([id,l,icn,n])=>`<button class="nb ${TAB===id?'on':''}" data-tab="${esc(id)}" ${TAB===id?'aria-current="page"':''}>${ic(icn,20)}<span>${esc(l)}</span>${n?`<b class="n" data-n="${esc(id)}">${n}</b>`:''}${propNews(id)?'<i class="nd" aria-label="Something new"></i>':''}</button>`).join('');
  requestAnimationFrame(()=>setTimeout(()=>{document.querySelectorAll('.bpair i').forEach(e=>e.style.height=e.dataset.h+'%');document.querySelectorAll('[data-w]').forEach(e=>e.style.width=e.dataset.w+'%')},40));countUp()}
@@ -565,7 +630,8 @@ function refresh(){const o=allO(),$=id=>document.getElementById(id);
  if($('openN'))$('openN').textContent=o;if($('hring'))$('hring').innerHTML=heroRing();if($('hisub'))$('hisub').textContent=subline(o);if($('t3c'))$('t3c').textContent=t3left()+' left';
  document.querySelectorAll('[data-n]').forEach(n=>{const p=DATA.properties.find(x=>x.id===n.dataset.n);if(p){const k=open_(p);n.textContent=k;n.style.display=k?'':'none'}});
  const p=DATA.properties.find(x=>x.id===TAB);if(p){if($('po'))$('po').textContent=open_(p);if($('pc'))$('pc').textContent=`${p.tasks.length-open_(p)}/${p.tasks.length} done`}}
-function tick(key,el,kind){const wk0=streakStats().wk;DONE[key]=!DONE[key];if(!DONE[key]){delete DONE[key];delete LOG[key]}else LOG[key]=new Date().toISOString();saveDone();saveLog();refreshStreak();const row=el.closest(kind==='t3'?'.move':'.task');row.classList.toggle('done',!!DONE[key]);row.classList.remove('pop');void row.offsetWidth;row.classList.add('pop');refresh();
+function tick(key,el,kind){const wk0=streakStats().wk;DONE[key]=!DONE[key];if(!DONE[key]){delete DONE[key];delete LOG[key]}else LOG[key]=new Date().toISOString();saveDone();saveLog();refreshStreak();const row=el.closest(kind==='t3'?'.move,.sdp':'.task');if(row){row.classList.toggle('done',!!DONE[key]);row.classList.remove('pop');void row.offsetWidth;row.classList.add('pop')}refresh();
+ if(kind==='t3'){if(DONE[key]&&row&&row.classList.contains('sc'))row.classList.add('fly-r');setTimeout(reStack,DONE[key]?300:0)}
  if(!DONE[key])return;try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}
  const ss=streakStats();if(wk0<ss.goal&&ss.wk>=ss.goal){confetti();toast(`Weekly goal hit! +${ptsFor(key)} pts`);return}
  if(kind==='t3'){const left=t3left();if(!left){confetti();toast('All 3 done. Brilliant!')}else toast(`+${ptsFor(key)} pts - ${left} to go`);return}
@@ -584,6 +650,7 @@ document.addEventListener('click',e=>{if(e.target.id==='shade')return closeSheet
    if(!n||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){toast('Add a name and a valid email');return}
    const pid='x_'+em.toLowerCase();if(!people().some(p=>p.id===pid))EXTRA.push({id:pid,name:n,email:em});return assign(a.dataset.addp,pid)}
   return assign(a.dataset.for,a.dataset.pick)}
+ {const l=e.target.closest('[data-later]');if(l)return later(l.dataset.later)}
  const t=e.target.closest('[data-tab],[data-task],[data-t3],#morebtn');if(!t)return;
  if(t.dataset.task)return tick(t.dataset.task,t,'task');if(t.dataset.t3)return tick(t.dataset.t3,t,'t3');
  if(t.id==='morebtn'){document.getElementById('alerts').innerHTML=DATA.watch.map((w,i)=>alertCard(w,i)).join('');t.remove();return}
