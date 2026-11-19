@@ -459,6 +459,7 @@ const inits=n=>String(n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0
 const pcol=id=>{const i=people().findIndex(p=>p.id===id);return PCOL[(i<0?5:i)%PCOL.length]};
 const avatar=(p,cls='av')=>`<span class="${cls}" style="background:${pcol(p.id)}">${esc(inits(p.name))}</span>`;
 const first=n=>String(n||'').split(/\s+/)[0];
+const nick=p=>{const f=first(p.name),w=String(p.name||'').split(/\s+/);return people().some(o=>o.id!==p.id&&first(o.name)===f)&&w[1]?f+' '+w[1][0]:f};
 let DONE={};try{DONE=JSON.parse(localStorage.getItem('sesaDone')||'{}')}catch(e){}
 function saveDone(){try{localStorage.setItem('sesaDone',JSON.stringify(DONE))}catch(e){}}
 async function deriveKey(pw,salt,iter){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:iter,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt'])}
@@ -597,14 +598,14 @@ function teamData(){const ps=people(),by={},free=[];ps.forEach(p=>by[p.id]={p,op
  const core=(DATA.people||[]).map(p=>p.id);return{rows:Object.values(by).filter(b=>core.includes(b.p.id)||b.open.length||b.done),free}}
 function teamCard(){const{rows,free}=teamData();
  return rows.map(b=>{const n=b.open.length,tot=n+b.done,u=b.open.filter(([t])=>t.level==='urgent').length,c=pcol(b.p.id);
-  return `<button class="tm ${b.p.me?'me':''}" style="--c:${c}" data-team="${esc(b.p.id)}" aria-label="${esc(b.p.name)}: ${n} to do">${u?`<span class="hot" title="Urgent">${u}</span>`:''}<div class="rg">${ring(b.done,tot||1,70,6,c,'var(--line)')}<span class="big">${esc(inits(b.p.name))}</span></div><div class="nm">${esc(b.p.me?'Me':first(b.p.name))}</div>${n?`<span class="pill">${n} to do</span>`:`<span class="pill ok">${tot?'All clear':'Free'}</span>`}<div class="sb">${tot?`${b.done} of ${tot} done`:'Nothing assigned'}</div></button>`}).join('')
+  return `<button class="tm ${b.p.me?'me':''}" style="--c:${c}" data-team="${!tot&&b.p.me&&free.length?'':esc(b.p.id)}" aria-label="${esc(b.p.name)}: ${n} to do">${u?`<span class="hot" title="Urgent">${u}</span>`:''}<div class="rg">${ring(b.done,tot||1,70,6,c,'var(--line)')}<span class="big">${esc(inits(b.p.name))}</span></div><div class="nm">${esc(b.p.me?'Me':nick(b.p))}</div>${n?`<span class="pill">${n} to do</span>`:`<span class="pill ok">${tot?'All clear':'Free'}</span>`}<div class="sb">${tot?`${b.done} of ${tot} done`:b.p.me&&free.length?'Grab one':'&nbsp;'}</div></button>`}).join('')
  +`<button class="tm grab" data-team="" aria-label="${free.length} jobs nobody has claimed"><div class="rg"><span class="big">${free.length?ic('user',24,2.2):ic('check',24,3)}</span></div><div class="nm">Up for grabs</div>${free.length?`<span class="pill">${free.length} to claim</span>`:`<span class="pill ok">All claimed</span>`}<div class="sb">${free.length?'Tap to claim one':'Everyone has a job'}</div></button>`}
 function refreshTeam(){const e=document.getElementById('team');if(e)e.innerHTML=teamCard();const c=document.getElementById('tmc');if(c){const n=teamData().free.length;c.textContent=n+' up for grabs';c.hidden=!n}}
 function jobRow([t,pr],claim){const tp=topic(t.title+' '+(t.detail||''));
  return `<div class="tjr" data-row="${esc(t.id)}"><div class="tico ${tp.c}">${ic(tp.i,18,2.1)}</div><div class="tt">${esc(t.title)}<small>${LVC[t.level]?`<i class="lv" style="background:${LVC[t.level]}"></i>`:''}${esc(short(pr.name))} - ${esc(tp.l)}</small></div>${claim?`<button class="cl" data-claim="${esc(t.id)}">Claim</button>`:''}<button class="gt" data-goto="${esc(t.id)}" aria-label="Open this job">${ic('arrow',18,2.6)}</button></div>`}
 function teamSheet(pid){const{rows,free}=teamData(),b=pid?rows.find(r=>r.p.id===pid):null,sh=document.getElementById('shade');if(pid&&!b)return;
  const list=pid?b.open:free,rank={urgent:0,high:1};list.sort((a,c)=>(rank[a[0].level]??2)-(rank[c[0].level]??2));
- sh.innerHTML=`<div class="sheet" role="dialog" aria-label="${pid?'Jobs for '+esc(b.p.name):'Jobs up for grabs'}"><div class="grab"></div><div class="shd">${pid?avatar(b.p):`<span class="av" style="background:var(--pink)">${ic('user',22,2.2,'#fff')}</span>`}<div><h3>${pid?(b.p.me?'Your jobs':esc(first(b.p.name))+"'s jobs"):'Up for grabs'}</h3><div class="sub">${pid?`${list.length} to do, ${b.done} done`:list.length?'Nobody has these yet. Claim one and it is yours.':'Every job has someone on it.'}</div></div></div>
+ sh.innerHTML=`<div class="sheet" role="dialog" aria-label="${pid?'Jobs for '+esc(b.p.name):'Jobs up for grabs'}"><div class="grab"></div><div class="shd">${pid?avatar(b.p):`<span class="av" style="background:var(--pink)">${ic('user',22,2.2,'#fff')}</span>`}<div><h3>${pid?(b.p.me?'Your jobs':esc(nick(b.p))+"'s jobs"):'Up for grabs'}</h3><div class="sub">${pid?`${list.length} to do, ${b.done} done`:list.length?'Nobody has these yet. Claim one and it is yours.':'Every job has someone on it.'}</div></div></div>
  <div class="tjl" id="tjl">${list.length?list.map(x=>jobRow(x,!pid&&me())).join(''):`<div class="tjempty">${pid?'Nothing on their plate':'All claimed!'}</div>`}</div></div>`;
  sh.classList.remove('hidden')}
 function claim(id){const m=me();if(!m)return;OWN[id]=m.id;saveOwn();refreshTeam();const r=document.querySelector(`[data-row="${CSS.escape(id)}"]`);
@@ -691,7 +692,7 @@ function openSheet(id){const[t]=findTask(id);if(!t)return;const cur=ownerId(t),s
  sh.classList.remove('hidden')}
 function closeSheet(){const sh=document.getElementById('shade');sh.classList.add('hidden');sh.innerHTML=''}
 function assign(id,pid){OWN[id]=pid||null;saveOwn();closeSheet();refreshTeam();const[t]=findTask(id);const row=document.querySelector(`[data-assign="${CSS.escape(id)}"]`);if(row)row.closest('.acts').innerHTML=acts(t);
- const p=person(pid);toast(p?`Assigned to ${p.me?'you':first(p.name)}`:'Unassigned')}
+ const p=person(pid);toast(p?`Assigned to ${p.me?'you':nick(p)}`:'Unassigned')}
 function nudgeUrl(id){const[t,pr]=findTask(id);const o=t&&person(ownerId(t));if(!o||!o.email)return null;const m=me();
  const verb=/\bpay|paid|£/i.test(t.title)?'gets paid':'gets done';
  const body=`Hi ${first(o.name)},\n\nI'm the Sesa task portal AI agent. Please make sure this ${verb}:\n\n${t.title}${t.detail?'\n'+t.detail:''}\nProperty: ${pr.name}\n\nReply to this email when it's done so I can update the portal.\n\nThanks,\nSesa Estates Hub`;
