@@ -149,6 +149,24 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .alert .tlab{display:flex}.tlab .mi{display:none}
 @media (max-width:520px){.task .tico{display:none}.task .tlab .mi{display:inline-flex}.task .tlab{border-radius:999px;padding:3px 9px 3px 7px;margin-bottom:5px}.task .tlab.tg{background:var(--grnbg)!important}.task .tlab.ta{background:var(--ambbg)!important}.task .tlab.tv{background:var(--violetbg)!important}.task .tlab.tb{background:var(--bluebg)!important}.task .tlab.tp{background:var(--pinkbg)!important}.task .tlab.ts{background:var(--soft)!important}.task .tlab.tk{background:#e0f4f4!important}}
 @media (max-width:520px) and (prefers-color-scheme:dark){.task .tlab.tk{background:#123134!important}}
+/* D 20 Nov 15:47: Jobs board - pressure bar, level pills, fold-up job cards */
+.jmix{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:13px 14px;box-shadow:var(--shadow);margin-bottom:10px}
+.jmix .jt{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:9px}.jmix .jt b{font-size:15px;font-weight:700}.jmix .jt small{font-size:12px;color:var(--muted);font-weight:600}
+.jmix .mixb{display:flex;height:14px;border-radius:8px;overflow:hidden;gap:3px;background:var(--soft)}.jmix .mixb i{display:block;border-radius:8px;transition:flex-grow .6s ease}
+.jmix .lg{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:9px;font-size:13px;font-weight:600}.jmix .lg span{display:flex;align-items:center;gap:6px}.jmix .lg b{width:10px;height:10px;border-radius:50%;display:block}
+.lvl.pl{display:inline-flex;padding:6px 12px 6px 10px;border-radius:999px;margin:18px 2px 10px;font-size:13px}.lvl.pl em{font-style:normal;font-weight:700;background:rgba(255,255,255,.7);border-radius:999px;padding:1px 8px;font-size:12px}
+.lvl.pl.urgent{background:var(--redbg);color:var(--red)}.lvl.pl.high{background:var(--ambbg);color:var(--amb)}.lvl.pl.normal{background:var(--soft);color:var(--muted);border:1px solid var(--line)}
+.lvl.pl:before{display:none}
+@media (prefers-color-scheme:dark){.lvl.pl em{background:rgba(255,255,255,.1)}}
+.task .tx[data-fold]{cursor:pointer;-webkit-tap-highlight-color:transparent;outline:none;border-radius:10px}.task .tx[data-fold]:focus-visible{box-shadow:0 0 0 3px var(--pink)}
+.task .tx .tl1{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.task .tx .tl1 .tlab{margin-bottom:0}
+.task:not(.open) .tx>span{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.task:not(.open) .acts{display:none}
+.task .whom{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--muted)}.task .whom .av{width:22px;height:22px;font-size:10px;border-radius:50%;align-items:center;justify-content:center}
+.task.open .whom{display:none}
+.task .tmore{display:inline-flex;align-items:center;gap:3px;font-size:12px;min-height:22px;font-weight:700;color:#b34657;margin-top:4px}.task .tmore small{font-size:12px}.task .tmore svg{transition:transform .25s}.task.open .tmore svg{transform:rotate(180deg)}
+@media (prefers-color-scheme:dark){.task .tmore{color:var(--pink)}}
+.task.open .acts{animation:fup .25s ease}@keyframes fup{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .task.flash{animation:tflash 1.4s}@keyframes tflash{0%,60%{box-shadow:0 0 0 3px var(--pink)}100%{box-shadow:var(--shadow)}}
 @media (prefers-color-scheme:dark){.tk,.alert .ic.tk,.alert.r .ic.tk{background:#123134;color:#7fd3d3}.alert .ic.tp,.alert.r .ic.tp{color:var(--pink)}}
 .task{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 12px 12px 16px;box-shadow:var(--shadow);transition:opacity .3s,transform .2s;position:relative;overflow:hidden}
@@ -689,10 +707,10 @@ function teamSheet(pid){const{rows,free}=teamData(),b=pid?rows.find(r=>r.p.id===
 function claim(id){const m=me();if(!m)return;OWN[id]=m.id;saveOwn();refreshTeam();const r=document.querySelector(`[data-row="${CSS.escape(id)}"]`);
  try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}
  if(r){r.classList.add('gone');setTimeout(()=>{r.remove();const l=document.getElementById('tjl');if(l&&!l.children.length){l.innerHTML='<div class="tjempty">All claimed!</div>';confetti()}},300)}
- const row=document.querySelector(`[data-assign="${CSS.escape(id)}"]`);if(row){const[t]=findTask(id);row.closest('.acts').innerHTML=acts(t)}
+ const row=document.querySelector(`[data-assign="${CSS.escape(id)}"]`);if(row){const[t]=findTask(id);row.closest('.acts').innerHTML=acts(t)}syncRow(id);
  toast('Yours now - nice one')}
 function gotoTask(id){const[t,pr]=findTask(id);if(!t)return;closeSheet();if(TAB!==pr.id){TAB=pr.id;render()}
- setTimeout(()=>{const c=document.querySelector(`.task [data-task="${CSS.escape(id)}"]`),e=c&&c.closest('.task');if(e){e.scrollIntoView({behavior:'smooth',block:'center'});e.classList.remove('flash');void e.offsetWidth;e.classList.add('flash')}},80)}
+ setTimeout(()=>{const c=document.querySelector(`.task [data-task="${CSS.escape(id)}"]`),e=c&&c.closest('.task');if(e){fold(e.querySelector('[data-fold]'),true);e.scrollIntoView({behavior:'smooth',block:'center'});e.classList.remove('flash');void e.offsetWidth;e.classList.add('flash')}},80)}
 function home(d){let h='';
  h+=`<div class="story"><small>Today's story</small><p>${esc(d.headline||'All quiet. Nice.')}</p></div>`;
  if(DIFF)h+=`<div style="margin-top:16px">${newsCard()}</div>`;
@@ -784,13 +802,25 @@ function unitCard(u){const tg=tagOf(u),ds=u.note?noteDates(u.note):[];
  return `<div class="u2 s-${tg}"><div class="band">${face(tg,44)}<div style="min-width:0"><div class="un">${esc(u.name)}</div>${u.tenant?`<div class="ut2"><span class="av">${esc(initials(u.tenant))}</span>${esc(u.tenant)}</div>`:''}</div>${u.label?`<span class="tag ${tg}">${esc(u.label)}</span>`:''}</div>${(()=>{const t=tlHtml(ds);return t+nextUp(ds,!!t)})()}${u.note?`<details><summary><span class="cl">${esc(u.note)}</span>${u.note.length>110?'<em>Tap to read more</em>':''}</summary></details>`:''}</div>`}
 function unitMix(us){const c={ok:0,warn:0,bad:0};us.forEach(u=>c[tagOf(u)]++);const L=[['ok','All good','var(--grn)'],['warn','Waiting','#e3a32e'],['bad','Problem','var(--red)']];
  return `<div class="umix"><div class="mixb">${L.filter(x=>c[x[0]]).map(x=>`<i style="flex:${c[x[0]]} 1 0;background:${x[2]}"></i>`).join('')}</div><div class="lg">${L.filter(x=>c[x[0]]).map(x=>`<span><b style="background:${x[2]}"></b>${c[x[0]]} ${x[1].toLowerCase()}</span>`).join('')}</div></div>`}
+/* D 20 Nov 15:47: Jobs board helpers */
+const LVLS=[['urgent','Do now','var(--red)'],['high','This week','#e3a32e'],['normal','When you can','#a9a49b']];
+const lvOf=x=>['urgent','high'].includes(x.level)?x.level:'normal';
+function jobMix(p){const c={urgent:0,high:0,normal:0,done:0};p.tasks.forEach(x=>{if(DONE[x.id])c.done++;else c[lvOf(x)]++});
+ const L=[...LVLS.map(l=>[l[0],l[1],l[2]]),['done','Done','var(--grn)']].filter(x=>c[x[0]]);const o=c.urgent+c.high+c.normal;
+ const head=o?(c.urgent?`${c.urgent} to do now`:c.high?`${c.high} for this week`:'Only small stuff left'):'All clear';
+ return `<div class="jmix" id="jmix"><div class="jt"><b>${head}</b><small>${o} open of ${p.tasks.length}</small></div><div class="mixb">${L.map(x=>`<i style="flex:${c[x[0]]} 1 0;background:${x[2]}"></i>`).join('')}</div><div class="lg">${L.map(x=>`<span><b style="background:${x[2]}"></b>${c[x[0]]} ${x[1].toLowerCase()}</span>`).join('')}</div></div>`}
+function lvlLeft(p,lv){return p.tasks.filter(x=>lvOf(x)===lv&&!DONE[x.id]).length}
+function whoMini(x){const o=person(ownerId(x));return o?`<span class="whom">${avatar(o)}${esc(o.me?'Me':first(o.name))}</span>`:''}
+const CHEV='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+function fold(tx,force){const t=tx.closest('.task');if(!t)return;const on=force??!t.classList.contains('open');t.classList.toggle('open',on);tx.setAttribute('aria-expanded',on);const m=t.querySelector('.tmore small');if(m)m.textContent=on?'Less':'More'}
+function syncRow(id){const c=document.querySelector(`.task [data-task="${CSS.escape(id)}"]`),r=c&&c.closest('.task');if(!r)return;const[t]=findTask(id);const w=r.querySelector('.whom'),n=whoMini(t);if(w)w.outerHTML=n;else if(n)r.querySelector('.tl1').insertAdjacentHTML('beforeend',n)}
 function prop(p,i){let h='';const t=p.tasks.length,o=open_(p),att=p.units.filter(u=>u.tag!=='ok').length;
  h+=`<div class="pban ${GR[i%4]}"><div class="t">${esc(p.name)}</div><div class="a">${esc(p.area||'')}</div>${p.status?`<div class="s">${esc(p.status)}</div>`:''}${p.event?`<div class="ev">${ic('cal',16)} ${esc(String(p.event).replace(/^([A-Z])([A-Z]{3,})\b/,(m,a,b)=>a+b.toLowerCase()))}</div>`:''}${DATA.money?(()=>{const x=rentOf(p);return `<div class="rentchip">${ic('pound',14,2.4)} ${x.sum?`${gbp(x.sum)} rent in since Sep`:'No rent in yet'}</div>`})():''}
  <div class="pstats"><div><b id="po">${o}</b><span>Jobs left</span></div><div><b>${p.units.length}</b><span>Units</span></div><div><b>${att}</b><span>Need a look</span></div></div></div>`;
- h+=`<h2>Jobs <span class="cnt" id="pc">${t-o}/${t} done</span></h2>`;if(t)h+=topicMix(p.tasks.filter(x=>!DONE[x.id]).length?p.tasks.filter(x=>!DONE[x.id]):p.tasks);
+ h+=`<h2>Jobs <span class="cnt" id="pc">${t-o}/${t} done</span></h2>`;if(t)h+=jobMix(p);if(t)h+=topicMix(p.tasks.filter(x=>!DONE[x.id]).length?p.tasks.filter(x=>!DONE[x.id]):p.tasks);
  if(!t)h+=`<div class="alldone">Nothing to do here<small>Enjoy it while it lasts</small></div>`;
- for(const [lv,name,col] of [['urgent','Do now','var(--red)'],['high','This week','#e3a32e'],['normal','When you can','var(--muted)']]){const ts=p.tasks.filter(x=>(['urgent','high'].includes(x.level)?x.level:'normal')===lv);if(!ts.length)continue;
-  h+=`<div class="lvl"><i style="background:${col}"></i>${name}</div><div class="tasks">`+ts.map(x=>{const tp=topic(x.title+' '+(x.detail||''));return `<div class="task ${lv} ${DONE[x.id]?'done':''}" data-tp="${tp.k}"><div class="tico ${tp.c}">${ic(tp.i,20,2.1)}</div><div class="tx"><i class="tlab ${tp.c}"><span class="mi">${ic(tp.i,13,2.4)}</span>${tp.l}</i><b>${isNew(x.id)?'<em class="newb">NEW</em>':isUpd(x.id)?'<em class="newb up">UPDATED</em>':''}${esc(x.title)}</b>${x.detail?`<span>${esc(x.detail)}</span>`:''}<div class="acts">${acts(x)}</div></div><button class="chk" data-task="${esc(x.id)}" aria-label="Mark done">${tickIcon()}</button></div>`}).join('')+`</div>`}
+ for(const [lv,name,col] of LVLS){const ts=p.tasks.filter(x=>lvOf(x)===lv);if(!ts.length)continue;const lf=lvlLeft(p,lv);
+  h+=`<div class="lvl pl ${lv}"><i style="background:${col}"></i>${name}<em data-lvl="${lv}">${lf?lf+' left':'all done'}</em></div><div class="tasks">`+ts.map(x=>{const tp=topic(x.title+' '+(x.detail||''));return `<div class="task ${lv} ${DONE[x.id]?'done':''}" data-tp="${tp.k}"><div class="tico ${tp.c}">${ic(tp.i,20,2.1)}</div><div class="tx" data-fold="${esc(x.id)}" role="button" tabindex="0" aria-expanded="false"><div class="tl1"><i class="tlab ${tp.c}"><span class="mi">${ic(tp.i,13,2.4)}</span>${tp.l}</i>${whoMini(x)}</div><b>${isNew(x.id)?'<em class="newb">NEW</em>':isUpd(x.id)?'<em class="newb up">UPDATED</em>':''}${esc(x.title)}</b>${x.detail?`<span>${esc(x.detail)}</span>`:''}<div class="tmore"><small>More</small>${CHEV}</div><div class="acts">${acts(x)}</div></div><button class="chk" data-task="${esc(x.id)}" aria-label="Mark done">${tickIcon()}</button></div>`}).join('')+`</div>`}
  h+=slotBoard(p);
  if(p.units.length)h+=`<h2>Who's who <span class="cnt">${p.units.length}</span></h2>${unitMix(p.units)}<div class="units">${p.units.map(unitCard).join('')}</div>`;
  return h}
@@ -816,7 +846,7 @@ function openSheet(id){const[t]=findTask(id);if(!t)return;const cur=ownerId(t),s
  ${cur?`<button class="btn ghost" data-pick="" data-for="${esc(id)}">Unassign</button>`:''}</div></div>`;
  sh.classList.remove('hidden')}
 function closeSheet(){const sh=document.getElementById('shade');sh.classList.add('hidden');sh.innerHTML=''}
-function assign(id,pid){OWN[id]=pid||null;saveOwn();closeSheet();refreshTeam();const[t]=findTask(id);const row=document.querySelector(`[data-assign="${CSS.escape(id)}"]`);if(row)row.closest('.acts').innerHTML=acts(t);
+function assign(id,pid){OWN[id]=pid||null;saveOwn();closeSheet();refreshTeam();const[t]=findTask(id);const row=document.querySelector(`[data-assign="${CSS.escape(id)}"]`);if(row)row.closest('.acts').innerHTML=acts(t);syncRow(id);
  const p=person(pid);toast(p?`Assigned to ${p.me?'you':nick(p)}`:'Unassigned')}
 function nudgeUrl(id){const[t,pr]=findTask(id);const o=t&&person(ownerId(t));if(!o||!o.email)return null;const m=me();
  const verb=/\bpay|paid|£/i.test(t.title)?'gets paid':'gets done';
@@ -844,7 +874,7 @@ function render(){const d=DATA,o=allO();let h='';
 function refresh(){const o=allO(),$=id=>document.getElementById(id);refreshTeam();
  if($('openN'))$('openN').textContent=o;if($('hring'))$('hring').innerHTML=heroRing();if($('hisub'))$('hisub').textContent=subline(o);if($('t3c'))$('t3c').textContent=t3left()+' left';
  document.querySelectorAll('[data-n]').forEach(n=>{const p=DATA.properties.find(x=>x.id===n.dataset.n);if(p){const k=open_(p);n.textContent=k;n.style.display=k?'':'none'}});
- const p=DATA.properties.find(x=>x.id===TAB);if(p){if($('po'))$('po').textContent=open_(p);if($('pc'))$('pc').textContent=`${p.tasks.length-open_(p)}/${p.tasks.length} done`}}
+ const p=DATA.properties.find(x=>x.id===TAB);if(p){if($('po'))$('po').textContent=open_(p);if($('pc'))$('pc').textContent=`${p.tasks.length-open_(p)}/${p.tasks.length} done`;if($('jmix'))$('jmix').outerHTML=jobMix(p);document.querySelectorAll('[data-lvl]').forEach(e=>{const n=lvlLeft(p,e.dataset.lvl);e.textContent=n?n+' left':'all done'})}}
 function tick(key,el,kind){const wk0=streakStats().wk;DONE[key]=!DONE[key];if(!DONE[key]){delete DONE[key];delete LOG[key]}else LOG[key]=new Date().toISOString();saveDone();saveLog();refreshStreak();const row=el.closest(kind==='t3'?'.move,.sdp':'.task');if(row){row.classList.toggle('done',!!DONE[key]);row.classList.remove('pop');void row.offsetWidth;row.classList.add('pop')}refresh();
  if(kind==='t3'){if(DONE[key]&&row&&row.classList.contains('sc'))row.classList.add('fly-r');setTimeout(reStack,DONE[key]?300:0)}
  if(!DONE[key])return;try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}
@@ -868,11 +898,12 @@ document.addEventListener('click',e=>{if(e.target.id==='shade')return closeSheet
  {const l=e.target.closest('[data-later]');if(l)return later(l.dataset.later)}
  {const m=e.target.closest('[data-team],[data-claim],[data-goto]');if(m){if(m.dataset.claim)return claim(m.dataset.claim);if(m.dataset.goto)return gotoTask(m.dataset.goto);return teamSheet(m.dataset.team)}}
  {const c=e.target.closest('[data-topic]');if(c){const ts=[...document.querySelectorAll(`.task[data-tp="${c.dataset.topic}"]`)];const t=ts.find(x=>!x.classList.contains('done'))||ts[0];if(t){t.scrollIntoView({behavior:'smooth',block:'center'});t.classList.remove('flash');void t.offsetWidth;t.classList.add('flash')}return}}
+ {const f=e.target.closest('[data-fold]');if(f&&!e.target.closest('button,a'))return fold(f)}
  const t=e.target.closest('[data-tab],[data-task],[data-t3],#morebtn');if(!t)return;
  if(t.dataset.task)return tick(t.dataset.task,t,'task');if(t.dataset.t3)return tick(t.dataset.t3,t,'t3');
  if(t.id==='morebtn'){document.getElementById('alerts').innerHTML=DATA.watch.map((w,i)=>alertCard(w,i)).join('');t.remove();return}
  if(t.dataset.tab)setTab(t.dataset.tab)});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet();const f=e.target.closest&&e.target.closest('[data-fold]');if(f&&e.target===f&&(e.key==='Enter'||e.key===' ')){e.preventDefault();fold(f)}});
 (async()=>{let pw;try{pw=sessionStorage.getItem('sesaPw')}catch(e){}if(!pw)pw=remPw('sesaRemember');if(pw){document.getElementById('pw').value=pw;go()}})();
 </script>
 </body>
