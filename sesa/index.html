@@ -453,6 +453,8 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 @keyframes slR{from{opacity:0;transform:translateX(36px)}to{opacity:1;transform:none}}@keyframes slL{from{opacity:0;transform:translateX(-36px)}to{opacity:1;transform:none}}
 @media (prefers-color-scheme:dark){.skel .skc.big{background:linear-gradient(90deg,#3a1e23 0%,#4a2a30 45%,#3a1e23 90%);background-size:220% 100%}}
 @media (prefers-reduced-motion:reduce){.nind{transition:none}}
+/* O 20 Nov: chunkier money bars on wide screens */
+@media (min-width:700px){.bpair i{max-width:52px;border-radius:12px 12px 4px 4px}.bpair{gap:6px}.bar b{font-size:15px}}
 </style>
 </head>
 <body>
@@ -545,13 +547,14 @@ const subline=o=>o?`${o} jobs to go across ${DATA.properties.length} ${DATA.prop
 function ring(d,t,sz,stroke,col,track,txt){const r=(sz-stroke)/2,C=2*Math.PI*r,f=t?d/t:0;
  return `<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}" role="img" aria-label="${d} of ${t} done"><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="${track}" stroke-width="${stroke}"/><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="${col}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-f)}" transform="rotate(-90 ${sz/2} ${sz/2})"/>${txt||''}</svg>`}
 function heroRing(){const t=allT(),d=t-allO(),s=78;return ring(d,t,s,8,'#F07C8C','#333336',`<text x="${s/2}" y="${s/2+2}" text-anchor="middle" font-size="18" font-weight="700" fill="#fff">${t?Math.round(d/t*100):0}%</text><text x="${s/2}" y="${s/2+17}" text-anchor="middle" font-size="12" fill="#bbb">${d?'done':'let\'s go'}</text>`)}
-function setTab(t){const o=tabOrder(),a=o.indexOf(TAB),b=o.indexOf(t);SLIDE=a<0||b<0||a===b?'':(b>a?'fromR':'fromL');TAB=t;render();SLIDE='';window.scrollTo({top:0,behavior:'smooth'})}
+function setTab(t){const o=tabOrder(),a=o.indexOf(TAB),b=o.indexOf(t);SLIDE=a<0||b<0||a===b?'':(b>a?'fromR':'fromL');TAB=t;render();SLIDE='';window.scrollTo(0,0)}
 let SLIDE='',NPOS=null;addEventListener('resize',()=>{NPOS=null;navPill()});
 function tabOrder(){return DATA?['home',...(DATA.money?['money']:[]),...DATA.properties.map(p=>p.id)]:[]}
 function navPill(){const n=document.getElementById('nav'),on=n&&n.querySelector('.nb.on');if(!on||!on.offsetWidth)return;n.querySelectorAll('.nind').forEach(x=>x.remove());const e=document.createElement('span');e.className='nind';e.setAttribute('aria-hidden','true');n.prepend(e);
  const to={x:on.offsetLeft,w:on.offsetWidth},from=NPOS||to;e.style.transition='none';e.style.width=from.w+'px';e.style.transform=`translateX(${from.x}px)`;void e.offsetWidth;e.style.transition='';e.style.width=to.w+'px';e.style.transform=`translateX(${to.x}px)`;NPOS=to}
-function skeleton(on){const app=document.getElementById('app'),g=document.getElementById('gate');if(!on){app.classList.remove('skel');return}
- g.classList.add('hidden');app.classList.remove('hidden');app.classList.add('skel');
+let SKT=0;function skeleton(on){const app=document.getElementById('app'),g=document.getElementById('gate');clearTimeout(SKT);if(!on){app.classList.remove('skel');return}
+ SKT=setTimeout(()=>skelShow(app,g),140)}
+function skelShow(app,g){g.classList.add('hidden');app.classList.remove('hidden');app.classList.add('skel');
  app.innerHTML=`<div class="hero"><div class="top"><div class="brand"><b>SESA<i>.</i></b><small>ESTATES HUB</small></div></div>
  <div class="hrow"><div style="flex:1"><div class="sk" style="height:24px;width:70%;margin-bottom:8px"></div><div class="sk" style="height:14px;width:55%"></div></div><div class="sk skr"></div></div>
  <div class="stats"><div class="sk skt"></div><div class="sk skt"></div><div class="sk skt"></div></div>
