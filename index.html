@@ -400,6 +400,20 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
 .tmust .tmok{background:#fff;color:#067d62;font-weight:800;border-radius:20px;padding:10px 16px;font-size:14px;cursor:pointer;min-height:20px;transition:opacity .35s}
 .tmust .tmi.gone{opacity:0;transform:scale(.97);transition:.35s}
 @media (max-width:620px){.tmust .tmr{width:100%;gap:8px}.tmust .tma{font-size:22px}.tmust .tmok{margin-left:auto}.tmust .clk{font-size:13px;padding:6px 10px}}
+.tmust .tmd{display:flex;gap:8px;flex-wrap:wrap;width:100%;margin-top:10px}
+.tmust .tmd a{flex:1 1 150px;text-align:center;text-decoration:none;font-weight:800;font-size:14.5px;border-radius:10px;padding:11px 12px;line-height:1.25}
+.tmust .tmd a.pt{background:#fff;color:#cc0c39}.tmust .tmd a.hd{background:rgba(255,255,255,.14);color:#fff;border:2px solid rgba(255,255,255,.75)}
+.tmust .tmd a small{display:block;font-weight:600;font-size:11.5px;opacity:.85;margin-top:2px}
+.tmust .tmdq{width:100%;font-size:12.5px;color:#ffd6de;margin-top:8px;font-weight:700}
+.leaks{margin-top:14px;background:var(--card);border-radius:10px;padding:12px 16px;border-left:6px solid var(--teal)}
+.leaks .lkh{font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700}
+.leaks .lks{font-size:15.5px;font-weight:700;margin:3px 0 8px;line-height:1.35}
+.leaks .lkr{display:grid;grid-template-columns:52px 1fr auto;gap:10px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
+.leaks .lkd{font-size:12px;font-weight:800;color:var(--muted);text-align:center;line-height:1.1}.leaks .lkd b{display:block;font-size:19px;color:var(--ink)}
+.leaks .lkn{font-size:13.5px;line-height:1.35;min-width:0}
+.leaks .lkb{height:6px;border-radius:3px;margin-top:5px;display:flex;gap:3px}.leaks .lkb i{display:block;height:100%;border-radius:3px}
+.leaks .lkv{text-align:right;font-weight:800;font-size:15px;white-space:nowrap;line-height:1.3}
+.leaks .lin{color:var(--green)}.leaks .lout{color:var(--red)}
 .ocash{display:flex;align-items:center;gap:14px;margin-top:14px;background:#fff;border-radius:10px;padding:12px 16px;border-left:6px solid var(--grey)}
 .ocash .oci{font-size:26px}.ocash .oct{flex:1;min-width:0}.ocash .ocl{font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700}
 .ocash .ocn{font-weight:700;font-size:15px}.ocash .ocd{font-size:12.5px;color:var(--muted)}
@@ -525,6 +539,7 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
       <p class="h2sub">Where the cash is, what's coming in, what's going out, and how much you can safely spend on stock.</p>
       <div class="kpis" id="cfokpis"></div>
       <div id="othercash"></div>
+      <div id="leaks"></div>
       <div class="card dip" id="dip" style="margin-top:14px"></div>
       <div class="card" style="margin-top:14px"><h4 style="margin:0 0 2px;font-size:18px">Money in and out - next 16 weeks</h4><div class="cfsay" id="cfsay"></div><div id="cashline"></div></div>
       <div class="two" style="margin-top:14px">
@@ -1113,7 +1128,14 @@ function mustHtml(L){if(!L.length)return '';
   return '<div class="tmust" role="alert"><div class="tmh"><span class="bell">⏰</span>Must do today</div>'+L.map(x=>{const dl=deadlineOf(x),a=acctFor(x),acn=a?String(a.name).split('(')[0].trim():'';
     const sub=[dl?'Must be in by <b>'+dl.lab+'</b>'+(acn?' - into <b>'+esc(acn)+'</b>':''):'',a?'That account has <b>'+money(a.gbp,'GBP',a.gbp<10?2:0)+'</b>'+(a.other?' (your other company)':''):'',x.why?esc(x.why):''].filter(Boolean).join(' · ');
     const ck=dl?clockTxt(dl.d.getTime()):null;
-    return '<div class="tmi" data-pid="'+esc(x.id)+'"><div class="tmt"><b>'+esc(x.to)+'</b><span>'+sub+'</span></div><div class="tmr">'+(ck?'<span class="clk'+(ck.past?' past':'')+'" data-dl="'+dl.d.getTime()+'">'+ck.t+'</span>':'')+'<span class="tma">'+(x.cur==='GBP'&&x.amount?money(x.amount,'GBP',x.amount%1?2:0):money(payGbp(x),'GBP'))+'</span><span class="tmok" data-dis="p:'+esc(x.id)+'" data-st="paid" data-t="'+esc(x.what)+'">✓ Done</span></div></div>'}).join('')+'</div>'}
+    return '<div class="tmi" data-pid="'+esc(x.id)+'"><div class="tmt"><b>'+esc(x.to)+'</b><span>'+sub+'</span></div><div class="tmr">'+(ck?'<span class="clk'+(ck.past?' past':'')+'" data-dl="'+dl.d.getTime()+'">'+ck.t+'</span>':'')+'<span class="tma">'+(x.cur==='GBP'&&x.amount?money(x.amount,'GBP',x.amount%1?2:0):money(payGbp(x),'GBP'))+'</span><span class="tmok" data-dis="p:'+esc(x.id)+'" data-st="paid" data-t="'+esc(x.what)+'">✓ Done</span></div>'+mustDrafts(x)+'</div>'}).join('')+'</div>'}
+function mustDrafts(x){const D=(x.drafts||[]).filter(d=>d&&d.url);if(!D.length)return '';
+  return (D.length>1?'<div class="tmdq">Pick one - each opens a ready email in Gmail (nothing is sent until you press Send):</div>':'')+'<div class="tmd">'+D.map((d,i)=>'<a class="'+(i?'hd':'pt')+'" target="_blank" rel="noopener" href="'+esc(d.url)+'">'+(i?'✋ ':'💳 ')+esc(d.label||'Open draft')+(d.note?'<small>'+esc(d.note)+'</small>':'')+'</a>').join('')+'</div>'}
+function renderLeaks(){const el=$('leaks');if(!el)return;const L=((DATA.cfo||{}).leaks||[]).slice().sort((a,b)=>a.date<b.date?1:-1);if(!L.length){el.innerHTML='';return}
+  const tin=L.reduce((s,x)=>s+(+x.in||0),0),tout=L.reduce((s,x)=>s+(+x.out||0),0),mx=Math.max(...L.map(x=>Math.max(+x.in||0,+x.out||0)),1),net=tin-tout;
+  const say=net<0?'More went out than came in this week - '+money(-net,'GBP')+' more out.':net>0?'More came in than went out this week - '+money(net,'GBP')+' ahead.':'What came in this week all went straight back out.';
+  el.innerHTML='<div class="leaks"><div class="lkh">💸 Where the money went this week</div><div class="lks">'+say+'</div>'+L.map(x=>{const d=new Date(x.date+'T00:00:00'),i=+x.in||0,o=+x.out||0;
+    return '<div class="lkr"><div class="lkd">'+d.toLocaleDateString('en-GB',{weekday:'short'})+'<b>'+d.getDate()+'</b></div><div class="lkn">'+esc(x.note||'')+'<div class="lkb">'+(i?'<i style="width:'+(i/mx*100*.5).toFixed(1)+'%;background:var(--green)"></i>':'')+(o?'<i style="width:'+(o/mx*100*.5).toFixed(1)+'%;background:var(--red)"></i>':'')+'</div></div><div class="lkv">'+(i?'<div class="lin">+'+money(i,'GBP')+'</div>':'')+(o?'<div class="lout">-'+money(o,'GBP')+'</div>':'')+'</div></div>'}).join('')+'</div>'}
 function renderOther(){const el=$('othercash');if(!el)return;const O=(DATA.cfo||{}).other_cash||[];if(!O.length){el.innerHTML='';return}
   el.innerHTML=O.map(a=>{const nm=String(a.name).split('(')[0].trim(),nt=(String(a.name).match(/\((.*)\)/)||[])[1]||'';const at=a.at?new Date(a.at):null;
     return '<div class="ocash'+(a.gbp<50?' low':'')+'"><div class="oci">🏢</div><div class="oct"><div class="ocl">Your other company - not in the cash above</div><div class="ocn">'+esc(nm)+'</div><div class="ocd">'+(nt?esc(nt.charAt(0).toUpperCase()+nt.slice(1))+' · ':'')+(at&&!isNaN(at)?'checked '+fmtD(at):'')+'</div></div><div class="ocv">'+money(a.gbp,'GBP',a.gbp<100?2:0)+'</div></div>'}).join('')}
@@ -1177,7 +1199,7 @@ function renderCfo(){
    (()=>{const nx=W.slice(1,3).find(x=>x.pay);return '<div class="card kpi" style="border:2px solid var(--orange)"><div class="l">Pay next</div><div class="v" style="font-size:20px;line-height:1.25;margin:6px 0">'+(nx?esc(nx.pay):'Nothing - let cash build')+'</div><div class="d">'+(nx?'Week of '+fmtD(nx.d)+' · only once that week\'s Amazon money has landed':'Keep at least '+money(c.floor,'GBP')+' in the bank')+'</div></div>'})()
   ].join('');
   const uc=$('updcash');if(uc)uc.onclick=e=>{e.preventDefault();const v=prompt('How much is in the bank right now? (£)');if(v===null)return;const n=parseFloat(String(v).replace(/[£,\s]/g,''));if(isNaN(n))return;try{localStorage.setItem('zcash',JSON.stringify({v:n,at:new Date().toISOString()}))}catch(x){}renderCfo();if(confirm('Saved on this phone. Tell the team too, so the agents use it?'))location.href='mailto:eli@zelr.co.uk?subject='+encodeURIComponent('Zugati portal feedback - bank balance')+'&body='+encodeURIComponent('Cash in the bank today: £'+n+'\n(Sent from the Zugati portal)')};
-  renderCashFlow();try{renderDip()}catch(e){console.error(e)}try{renderOther()}catch(e){console.error(e)}
+  renderCashFlow();try{renderDip()}catch(e){console.error(e)}try{renderOther()}catch(e){console.error(e)}try{renderLeaks()}catch(e){console.error(e)}
   // big months
   const sm=c.seasons||[],bm=Math.max(...sm.map(x=>x.profit));
   $('bigmonths').innerHTML=sm.map(x=>{const v=x.label.indexOf('Valentine')===0;return '<div style="margin:10px 0"><div class="nm" style="display:flex;justify-content:space-between;font-size:14px;font-weight:600"><span>'+(v?'♥ ':'★ ')+esc(x.label)+'</span><b>'+money(x.profit,'GBP')+' profit</b></div><div style="height:16px;border-radius:5px;margin-top:4px;width:'+(x.profit/bm*100)+'%;background:'+(v?'#e8436a':'#1d8f5f')+'"></div><div class="note">'+money(x.sales,'GBP')+' sales</div></div>'}).join('')+'<div class="note" style="margin-top:6px">Valentine\'s is your strongest month every year. Christmas 2025 was weaker than 2024 - more stock earlier would have helped.</div>';

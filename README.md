@@ -25,7 +25,8 @@ Besides `updated_at` and `accounts`, data.json now holds:
 - `lead_days` (45), `season` {valentines, christmas}
 - `products[]`: id, name, img (Amazon image id), asin, sku, market, account (UK|USA), cur, stock, inbound, on_order, per_day, units30, sales30, profit30, margin, lost_sales, val_units (15 Jan-14 Feb last year), xmas_units (Dec last year), supplier, valentine (bool), note, optional `monthly` {months[], units[], profit[]}
 - `tasks[]`: id, level (urgent|high|normal), title, who, detail, due, link, link_label, email
-- `payments[]`: id, to, what, amount, cur, amount_note, status (unpaid|overdue|check|planned|later|forecast|paid), due, why, link, email
+- `payments[]`: id, to, what, amount, cur, amount_note, status (unpaid|overdue|check|planned|later|forecast|paid), due, why, link, email, drafts? ([{label, note?, url}] - A1: shown as big choice buttons on the "Must do today" card, first = go-ahead, second = hold)
+- `cfo.leaks[]`: {date, in, out, note} - A1: Money page "Where the money went this week" card (green in, red out, one sentence on top). Keep to the last ~7 days.
 - `history`: UK account monthly months/sales/profit/units/payout (24 months)
 - `team`: agent notes and the daily update shown to Eli
 
