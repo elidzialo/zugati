@@ -469,6 +469,11 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .gr .gl small.op{color:#ffb3bf;font-weight:700;opacity:1}
 @media (prefers-color-scheme:dark){.gantt{background:linear-gradient(135deg,#26262a,#3a2228)}}
 @media (prefers-reduced-motion:reduce){.gb{animation:none}}
+/* O 20 Nov 20:15: with the timeline on top, slot cards go compact and the still-to-pick line becomes a pink action chip */
+.slots.hg .slt{min-height:0;padding:10px 12px;gap:2px}.slots.hg .slt .sw{margin-top:6px}
+.gb.free{animation:gGrow .7s cubic-bezier(.2,1,.3,1) both,slPulse 2.2s ease-in-out 1.4s infinite;animation-delay:calc(var(--i)*110ms + 150ms),1.4s}
+@media (prefers-reduced-motion:reduce){.gb.free{animation:none}}
+.slwait{background:var(--pinkbg);color:var(--ink);border-radius:999px;padding:10px 14px;width:fit-content;max-width:100%;font-weight:600}.slwait svg{color:var(--pink);flex:0 0 auto}.slwait b{color:var(--pink)}
 /* D 20 Nov: Money 'Good to know' cards (replaces the grey footnote) */
 .gk{display:grid;gap:10px}
 .gkc{display:flex;gap:12px;align-items:flex-start;background:var(--card);border-radius:18px;padding:12px 14px;box-shadow:var(--shadow);border-left:5px solid var(--k);animation:gkin .45s cubic-bezier(.2,.8,.3,1.2) both;animation-delay:calc(var(--n,0)*70ms)}
@@ -888,7 +893,8 @@ function slotBoard(p){const txt=[p.event,p.status,...p.tasks.map(t=>t.title+' '+
  let firstFree=0;const cells=[];for(let n=1;n<=mx;n++){const x=S[n]||{};if(!x.who&&!firstFree)firstFree=n;
   cells.push(`<div class="slt ${x.who?'took':'free'}${!x.who&&firstFree===n?' next':''}" style="--i:${n}"><div class="sn">Slot ${n}</div><div class="sd">${x.d?esc(x.d):'Dates in the plan'}</div>${x.who?`<div class="sw"><span class="av">${esc(initials(x.who.tenant))}</span>${esc(first(x.who.tenant))}<small>${esc(x.who.name)}</small></div>`:`<div class="sw fr">${ic('user',16)}${firstFree===n?'Needs someone':'Free'}</div>`}</div>`)}
  const taken=Object.values(S).filter(x=>x.who).length;
- return `<h2>Works slots <span class="cnt">${taken}/${mx} taken</span></h2><div class="slots">${gantt(S,mx,firstFree)}<div class="sltrack">${cells.join('')}</div>${waiting.length?`<div class="slwait">${ic('bell',15)} Still to pick: <b>${esc(waiting.join(' and '))}</b></div>`:''}</div>`}
+ const gg=gantt(S,mx,firstFree);
+ return `<h2>Works slots <span class="cnt">${taken}/${mx} taken</span></h2><div class="slots${gg?' hg':''}">${gg}<div class="sltrack">${cells.join('')}</div>${waiting.length?`<div class="slwait">${ic('bell',15)} Still to pick: <b>${esc(waiting.join(' and '))}</b></div>`:''}</div>`}
 function acts(x){const o=person(ownerId(x));
  return o?`<button class="own" data-assign="${esc(x.id)}" aria-label="Assigned to ${esc(o.name)} - change">${avatar(o)}${esc(o.me?'Me':o.name)}</button>${o.email&&!DONE[x.id]?`<button class="nudge" data-nudge="${esc(x.id)}">${ic('bell',16)} Nudge</button>`:''}`
   :`<button class="own none" data-assign="${esc(x.id)}">${ic('user',16)} Assign</button>`}
