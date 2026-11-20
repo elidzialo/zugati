@@ -511,6 +511,8 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 @media (prefers-reduced-motion:reduce){.nind{transition:none}}
 /* O 20 Nov: chunkier money bars on wide screens */
 @media (min-width:700px){.bpair i{max-width:52px;border-radius:12px 12px 4px 4px}.bpair{gap:6px}.bar b{font-size:15px}}
+.tile .stale{font-style:normal;font-size:11.5px;font-weight:600;margin-top:4px;padding:3px 8px;border-radius:99px;background:rgba(255,255,255,.6);align-self:flex-start;opacity:.9}
+.stat .est{font-style:normal;font-size:10px;font-weight:700;background:rgba(0,0,0,.08);border-radius:99px;padding:1px 6px;margin-left:2px}
 </style>
 </head>
 <body>
@@ -582,6 +584,8 @@ const pcol=id=>{const i=people().findIndex(p=>p.id===id);return PCOL[(i<0?5:i)%P
 const avatar=(p,cls='av')=>`<span class="${cls}" style="background:${pcol(p.id)}">${esc(inits(p.name))}</span>`;
 const first=n=>String(n||'').split(/\s+/)[0];
 const nick=p=>{const f=first(p.name),w=String(p.name||'').split(/\s+/);return people().some(o=>o.id!==p.id&&first(o.name)===f)&&w[1]?f+' '+w[1][0]:f};
+/* A2 20 Nov: the bank figure is the last bank-feed sync; when the note gives a newer estimate, show that (with a small 'est.' chip) so Eli isn't misled */
+function realCash(m){if(!m)return null;const t=String(m.note||'')+' '+(m.cash_note||'');const v=t.match(/(?:real cash is|cash should be|cash is) (?:about |around |roughly )?£(\d{1,3}(?:,\d{3})*(?:\.\d+)?)/i);const sy=t.match(/(?:not synced since|last synced?|feed[^.]*?since) (\d{1,2} [A-Z][a-z]{2})/);return {v:v?+v[1].replace(/,/g,''):null,sync:sy?sy[1]:null}}
 let DONE={};try{DONE=JSON.parse(localStorage.getItem('sesaDone')||'{}')}catch(e){}
 function saveDone(){try{localStorage.setItem('sesaDone',JSON.stringify(DONE))}catch(e){}}
 async function deriveKey(pw,salt,iter){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:iter,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt'])}
@@ -789,7 +793,7 @@ function money(m){let h='';const max=Math.max(...m.months.map(x=>Math.max(x.rent
  h+=`<div class="mhero"><div class="l">Rent received since Sep</div><div class="big" data-count="${Number(m.rent_total)||0}">${gbp(m.rent_total)}</div>
  ${m.months.length?`<div class="bars">${m.months.map(x=>`<div class="bar"><b>${gbp(x.rent)}</b><div class="bpair"><i class="r" data-h="${Math.round((x.rent||0)/max*100)}"></i><i class="c" data-h="${Math.round((x.costs||0)/max*100)}"></i></div><span>${esc(x.m)}${x.partial?' so far':''}</span>${(()=>{const n=(+x.rent||0)-(+x.costs||0);return `<em class="net ${n<0?'neg':'pos'}" title="Rent ${gbp(x.rent)} - costs ${gbp(x.costs)}">${n<0?'-':'+'}${gbp(Math.abs(n))}</em>`})()}</div>`).join('')}</div><div class="netkey">Pill = what was left after costs that month</div>
  <div class="legend"><span><i style="background:#fff"></i>Rent in</span><span><i style="background:rgba(255,255,255,.3)"></i>Costs out</span></div>`:''}</div>
- <div class="tiles"><div class="tile tb"><div class="ic">${ic('bank',18)}</div><b>${gbp(m.bank_balance,2)}</b><span>In the bank (last sync)</span></div><div class="tile tp"><div class="ic">${ic('out',18)}</div><b>${gbp(m.costs_total)}</b><span>Costs since Sep</span></div></div>`;
+ <div class="tiles">${(()=>{const rc=realCash(m);return rc&&rc.v!=null?`<div class="tile tb"><div class="ic">${ic('bank',18)}</div><b>~${gbp(rc.v)}</b><span>Real cash, roughly</span><em class="stale">Feed: ${gbp(m.bank_balance)}${rc.sync?' on '+esc(rc.sync):''}</em></div>`:`<div class="tile tb"><div class="ic">${ic('bank',18)}</div><b>${gbp(m.bank_balance,2)}</b><span>In the bank (last sync)</span></div>`})()}<div class="tile tp"><div class="ic">${ic('out',18)}</div><b>${gbp(m.costs_total)}</b><span>Costs since Sep</span></div></div>`;
  {const r=+m.rent_total||0,c=+m.costs_total||0,t=(r+c)||1,net=r-c;
  h+=`<div class="card io"><div class="ttl">Money in vs money out since Sep</div><div class="sbar"><i class="r" data-w="${Math.round(r/t*100)}" style="width:0"></i><i class="c" data-w="${Math.round(c/t*100)}" style="width:0"></i></div>
  <div class="lg"><span><b>${gbp(r)}</b> in</span><span><b>${gbp(c)}</b> out</span></div><div class="say">${net>=0?`You are <b style="color:var(--grn)">${gbp(net)} up</b> - rent covers the costs.`:`Costs are <b style="color:var(--red)">${gbp(-net)} more</b> than rent so far - mostly set-up and repairs, so this should turn round once all rents come in.`}</div></div>`;}
@@ -820,7 +824,7 @@ function goodToKnow(m){const ss=String(m.note||'').split(/(?<=[.!?])\s+(?=[A-Z£
  const RK={cash:0,rent:1,out:2,sort:3,feed:4,no:5,info:6};
  const it=ss.map(t=>({t,k:gkKind(t)})).sort((a,b)=>RK[a.k[0]]-RK[b.k[0]]);
  const card=(x,i)=>{const[k,l,c,bg,icn]=x.k;
-  if(k==='cash'){const v=x.t.match(/real cash is (?:about |around )?(£\d{1,3}(?:,\d{3})*(?:\.\d+)?)/i);if(v){const tt=x.t.replace(/,?\s*so real cash is (?:about |around )?£[\d,.]+,?\s*before (the )?/i,'. Still to come: $1').replace(/^(\w)/,c=>c.toUpperCase());return `<div class="gkc big" style="--n:${i}"><div class="gi">${ic(icn,22)}</div><div><div class="gl">Real cash right now, roughly</div><div class="gv">${esc(v[1])}</div><div class="gt">${gkTxt(tt)}</div></div></div>`}}
+  if(k==='cash'){const v=x.t.match(/(?:real cash is|cash should be) (?:about |around )?(£\d{1,3}(?:,\d{3})*(?:\.\d+)?)/i);if(v){const tt=x.t.replace(/,?\s*so real cash is (?:about |around )?£[\d,.]+,?\s*before (the )?/i,'. Still to come: $1').replace(/^(\w)/,c=>c.toUpperCase());return `<div class="gkc big" style="--n:${i}"><div class="gi">${ic(icn,22)}</div><div><div class="gl">Real cash right now, roughly</div><div class="gv">${esc(v[1])}</div><div class="gt">${gkTxt(tt)}</div></div></div>`}}
   return `<div class="gkc" style="--k:${c};--kb:${bg};--n:${i}"><div class="gi">${ic(icn,18)}</div><div style="min-width:0"><div class="gl">${l}</div><div class="gt">${gkTxt(x.t)}</div></div></div>`};
  const top=it.slice(0,3).map(card).join(''),rest=it.slice(3);
  return `<h2>Good to know <span class="cnt">${it.length}</span></h2><div class="gk">${top}${rest.length?`<details><summary>Show ${rest.length} more</summary><div class="gk">${rest.map((x,i)=>card(x,i)).join('')}</div></details>`:''}</div>${src}`}
@@ -923,7 +927,7 @@ function nudge(id){const r=nudgePrompt(id)||nudgeUrl(id);if(!r)return;const w=wi
 function render(){const d=DATA,o=allO();let h='';
  h+=`<div class="hero"><div class="top"><div class="brand"><b>SESA<i>.</i></b><small>ESTATES HUB</small></div><div class="upd"><i></i>${esc(ago(d.updated_at))}</div></div>
  <div class="hrow"><div><div class="hi">${greet()}, Eli</div><div class="hisub" id="hisub">${subline(o)}</div></div><div class="bigring" id="hring">${heroRing()}</div></div>
- <div class="stats"><div class="stat s1"><div class="v">${d.money?gbp(d.money.rent_total):'-'}</div><div class="l">Rent in</div></div><div class="stat s2"><div class="v" id="openN">${o}</div><div class="l">Jobs open</div></div><div class="stat s3"><div class="v">${d.money?gbp(d.money.bank_balance):'-'}</div><div class="l">Bank</div></div></div></div>`;
+ <div class="stats"><div class="stat s1"><div class="v">${d.money?gbp(d.money.rent_total):'-'}</div><div class="l">Rent in</div></div><div class="stat s2"><div class="v" id="openN">${o}</div><div class="l">Jobs open</div></div>${(()=>{const rc=realCash(d.money);return `<div class="stat s3"><div class="v">${d.money?(rc&&rc.v!=null?'~'+gbp(rc.v):gbp(d.money.bank_balance)):'-'}</div><div class="l">Bank${rc&&rc.v!=null?' <i class="est">est.</i>':''}</div></div>`})()}</div></div>`;
  h+=`<div class="sec${SLIDE?' '+SLIDE:''}">`;
  if(TAB==='money'&&d.money)h+=money(d.money);else{const i=d.properties.findIndex(p=>p.id===TAB);if(i>=0)h+=prop(d.properties[i],i);else{TAB='home';h+=home(d)}}
  h+=`</div>`;
