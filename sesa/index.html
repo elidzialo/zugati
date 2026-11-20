@@ -436,6 +436,23 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .gks span{font-size:12px;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:3px 10px}
 @keyframes gkin{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.gkc{animation:none}}
+/* D 20 Nov: skeleton loader, sliding nav pill, directional tab slides */
+.skel .sk{background:linear-gradient(90deg,var(--soft) 0%,var(--card) 45%,var(--soft) 90%);background-size:220% 100%;animation:skw 1.2s linear infinite;border-radius:14px}
+.skel .hero .sk{background:linear-gradient(90deg,#2a2a2d 0%,#3a3a3e 45%,#2a2a2d 90%);background-size:220% 100%}
+@keyframes skw{from{background-position:120% 0}to{background-position:-100% 0}}
+.skel .skr{width:78px;height:78px;border-radius:50%;flex:none}
+.skel .skt{height:58px;border-radius:16px}
+.skel .skc{height:150px;border-radius:24px;margin-bottom:12px}
+.skel .skc.big{height:190px;background:linear-gradient(90deg,#f6c1c9 0%,#fbdde2 45%,#f6c1c9 90%);background-size:220% 100%}
+.skel .skh{height:18px;width:150px;margin:20px 0 12px;border-radius:9px}
+.skmsg{display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-size:13px;font-weight:600;color:#ffd3d9;position:relative;z-index:1}
+.skmsg svg{animation:skl 1s ease-in-out infinite;transform-origin:50% 60%}@keyframes skl{50%{transform:rotate(-12deg) scale(1.12)}}
+.nav .nb{z-index:1;transition:color .25s}.nav .nb.on{background:none}
+.nind{position:absolute;top:6px;bottom:6px;left:0;border-radius:20px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.25);transition:transform .38s cubic-bezier(.3,1.35,.5,1),width .38s cubic-bezier(.3,1.35,.5,1);pointer-events:none}
+.sec.fromR{animation:slR .34s cubic-bezier(.2,.8,.3,1) both}.sec.fromL{animation:slL .34s cubic-bezier(.2,.8,.3,1) both}
+@keyframes slR{from{opacity:0;transform:translateX(36px)}to{opacity:1;transform:none}}@keyframes slL{from{opacity:0;transform:translateX(-36px)}to{opacity:1;transform:none}}
+@media (prefers-color-scheme:dark){.skel .skc.big{background:linear-gradient(90deg,#3a1e23 0%,#4a2a30 45%,#3a1e23 90%);background-size:220% 100%}}
+@media (prefers-reduced-motion:reduce){.nind{transition:none}}
 </style>
 </head>
 <body>
@@ -460,6 +477,7 @@ const I={
  pound:'<path d="M17 20H7c2-2 2-4 2-7V8a4 4 0 0 1 7.5-2M6 13h8"/>',
  bld:'<path d="M4 21V5l8-3 8 3v16M9 21v-4h6v4M8 8h1M15 8h1M8 12h1M15 12h1"/>',
  check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+ lock:'<rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3M12 15v2"/>',
  bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/>',
  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
  alert:'<path d="M12 3l9.5 17h-19zM12 10v4M12 17.5v.5"/>',
@@ -515,8 +533,8 @@ function remPw(k){try{const o=JSON.parse(localStorage.getItem(k)||'null');if(o&&
 function savePw(k,pw){try{localStorage.setItem(k,JSON.stringify({pw:pw,t:Date.now()}))}catch(e){}}
 function forgetPw(k){try{localStorage.removeItem(k)}catch(e){}}
 async function go(){const pw=document.getElementById('pw').value;document.getElementById('err').classList.add('hidden');
- try{await load(pw);try{sessionStorage.setItem('sesaPw',pw)}catch(e){}savePw('sesaRemember',pw);document.getElementById('gate').classList.add('hidden');document.getElementById('app').classList.remove('hidden');document.getElementById('nav').classList.remove('hidden')}
- catch(e){KEY=null;forgetPw('sesaRemember');document.getElementById('err').classList.remove('hidden');const g=document.getElementById('pw');g.classList.remove('shake');void g.offsetWidth;g.classList.add('shake')}}
+ try{skeleton(true);await load(pw);skeleton(false);try{sessionStorage.setItem('sesaPw',pw)}catch(e){}savePw('sesaRemember',pw);document.getElementById('gate').classList.add('hidden');document.getElementById('app').classList.remove('hidden');document.getElementById('nav').classList.remove('hidden');NPOS=null;navPill()}
+ catch(e){KEY=null;skeleton(false);document.getElementById('app').classList.add('hidden');document.getElementById('app').innerHTML='';document.getElementById('gate').classList.remove('hidden');forgetPw('sesaRemember');document.getElementById('err').classList.remove('hidden');const g=document.getElementById('pw');g.classList.remove('shake');void g.offsetWidth;g.classList.add('shake')}}
 function ago(t){const m=Math.round((Date.now()-new Date(t))/60000);if(!isFinite(m))return 'recently';if(m<2)return 'just now';if(m<60)return m+' min ago';const h=Math.round(m/60);if(h<48)return h+'h ago';return Math.round(h/24)+' days ago'}
 function greet(){const h=new Date().getHours();return h<12?'Good morning':h<18?'Good afternoon':'Good evening'}
 const short=n=>String(n).replace(/^\d+\s*/,'').replace(/ Road South$/,'').replace(/ HMO$/,'');
@@ -527,7 +545,18 @@ const subline=o=>o?`${o} jobs to go across ${DATA.properties.length} ${DATA.prop
 function ring(d,t,sz,stroke,col,track,txt){const r=(sz-stroke)/2,C=2*Math.PI*r,f=t?d/t:0;
  return `<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}" role="img" aria-label="${d} of ${t} done"><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="${track}" stroke-width="${stroke}"/><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="${col}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-f)}" transform="rotate(-90 ${sz/2} ${sz/2})"/>${txt||''}</svg>`}
 function heroRing(){const t=allT(),d=t-allO(),s=78;return ring(d,t,s,8,'#F07C8C','#333336',`<text x="${s/2}" y="${s/2+2}" text-anchor="middle" font-size="18" font-weight="700" fill="#fff">${t?Math.round(d/t*100):0}%</text><text x="${s/2}" y="${s/2+17}" text-anchor="middle" font-size="12" fill="#bbb">${d?'done':'let\'s go'}</text>`)}
-function setTab(t){TAB=t;render();window.scrollTo({top:0,behavior:'smooth'})}
+function setTab(t){const o=tabOrder(),a=o.indexOf(TAB),b=o.indexOf(t);SLIDE=a<0||b<0||a===b?'':(b>a?'fromR':'fromL');TAB=t;render();SLIDE='';window.scrollTo({top:0,behavior:'smooth'})}
+let SLIDE='',NPOS=null;addEventListener('resize',()=>{NPOS=null;navPill()});
+function tabOrder(){return DATA?['home',...(DATA.money?['money']:[]),...DATA.properties.map(p=>p.id)]:[]}
+function navPill(){const n=document.getElementById('nav'),on=n&&n.querySelector('.nb.on');if(!on||!on.offsetWidth)return;n.querySelectorAll('.nind').forEach(x=>x.remove());const e=document.createElement('span');e.className='nind';e.setAttribute('aria-hidden','true');n.prepend(e);
+ const to={x:on.offsetLeft,w:on.offsetWidth},from=NPOS||to;e.style.transition='none';e.style.width=from.w+'px';e.style.transform=`translateX(${from.x}px)`;void e.offsetWidth;e.style.transition='';e.style.width=to.w+'px';e.style.transform=`translateX(${to.x}px)`;NPOS=to}
+function skeleton(on){const app=document.getElementById('app'),g=document.getElementById('gate');if(!on){app.classList.remove('skel');return}
+ g.classList.add('hidden');app.classList.remove('hidden');app.classList.add('skel');
+ app.innerHTML=`<div class="hero"><div class="top"><div class="brand"><b>SESA<i>.</i></b><small>ESTATES HUB</small></div></div>
+ <div class="hrow"><div style="flex:1"><div class="sk" style="height:24px;width:70%;margin-bottom:8px"></div><div class="sk" style="height:14px;width:55%"></div></div><div class="sk skr"></div></div>
+ <div class="stats"><div class="sk skt"></div><div class="sk skt"></div><div class="sk skt"></div></div>
+ <div class="skmsg">${ic('lock',16,2.4,'#ffd3d9')}Unlocking your hub</div></div>
+ <div class="sk skh"></div><div class="sk skc big"></div><div class="sk skh"></div><div class="sk skc"></div><div class="sk skc"></div>`}
 function hash(s){let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))|0;return 't3_'+(h>>>0).toString(36)}
 const tickIcon=()=>ic('check',20,3,'#fff');
 /* D 18 Nov: streak + points. Tick times per device in localStorage 'sesaLog' */
@@ -802,12 +831,12 @@ function render(){const d=DATA,o=allO();let h='';
  h+=`<div class="hero"><div class="top"><div class="brand"><b>SESA<i>.</i></b><small>ESTATES HUB</small></div><div class="upd"><i></i>${esc(ago(d.updated_at))}</div></div>
  <div class="hrow"><div><div class="hi">${greet()}, Eli</div><div class="hisub" id="hisub">${subline(o)}</div></div><div class="bigring" id="hring">${heroRing()}</div></div>
  <div class="stats"><div class="stat s1"><div class="v">${d.money?gbp(d.money.rent_total):'-'}</div><div class="l">Rent in</div></div><div class="stat s2"><div class="v" id="openN">${o}</div><div class="l">Jobs open</div></div><div class="stat s3"><div class="v">${d.money?gbp(d.money.bank_balance):'-'}</div><div class="l">Bank</div></div></div></div>`;
- h+=`<div class="sec">`;
+ h+=`<div class="sec${SLIDE?' '+SLIDE:''}">`;
  if(TAB==='money'&&d.money)h+=money(d.money);else{const i=d.properties.findIndex(p=>p.id===TAB);if(i>=0)h+=prop(d.properties[i],i);else{TAB='home';h+=home(d)}}
  h+=`</div>`;
  document.getElementById('app').innerHTML=h;bindSwipe();
  const tabs=[['home','Today','home',0],...(d.money?[['money','Money','pound',0]]:[]),...d.properties.map(p=>[p.id,short(p.name),'bld',open_(p)])];
- document.getElementById('nav').innerHTML=tabs.map(([id,l,icn,n])=>`<button class="nb ${TAB===id?'on':''}" data-tab="${esc(id)}" ${TAB===id?'aria-current="page"':''}>${ic(icn,20)}<span>${esc(l)}</span>${n?`<b class="n" data-n="${esc(id)}">${n}</b>`:''}${propNews(id)?'<i class="nd" aria-label="Something new"></i>':''}</button>`).join('');
+ document.getElementById('nav').innerHTML=tabs.map(([id,l,icn,n])=>`<button class="nb ${TAB===id?'on':''}" data-tab="${esc(id)}" ${TAB===id?'aria-current="page"':''}>${ic(icn,20)}<span>${esc(l)}</span>${n?`<b class="n" data-n="${esc(id)}">${n}</b>`:''}${propNews(id)?'<i class="nd" aria-label="Something new"></i>':''}</button>`).join('');navPill();
  requestAnimationFrame(()=>setTimeout(()=>{document.querySelectorAll('.bpair i').forEach(e=>e.style.height=e.dataset.h+'%');document.querySelectorAll('[data-w]').forEach(e=>e.style.width=e.dataset.w+'%');document.querySelectorAll('.rca').forEach(e=>e.style.strokeDashoffset=e.dataset.off)},40));countUp()}
 function refresh(){const o=allO(),$=id=>document.getElementById(id);refreshTeam();
  if($('openN'))$('openN').textContent=o;if($('hring'))$('hring').innerHTML=heroRing();if($('hisub'))$('hisub').textContent=subline(o);if($('t3c'))$('t3c').textContent=t3left()+' left';
