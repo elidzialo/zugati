@@ -405,6 +405,25 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
 .tmust .tmd a.pt{background:#fff;color:#cc0c39}.tmust .tmd a.hd{background:rgba(255,255,255,.14);color:#fff;border:2px solid rgba(255,255,255,.75)}
 .tmust .tmd a small{display:block;font-weight:600;font-size:11.5px;opacity:.85;margin-top:2px}
 .tmust .tmdq{width:100%;font-size:12.5px;color:#ffd6de;margin-top:8px;font-weight:700}
+.bfc{margin:0 0 16px}.bfc:empty{display:none}
+.bfc .bfh{background:linear-gradient(120deg,#131921,#232f3e 60%,#37475a);color:#fff;border-radius:12px 12px 0 0;padding:14px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.bfc .bft{font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--orange)}
+.bfc .bfs{font-size:17px;font-weight:700;line-height:1.35;flex:1;min-width:220px}
+.bfc .bfd{background:var(--orange);color:#131921;border-radius:10px;padding:6px 12px;text-align:center;font-weight:800;line-height:1.05}.bfc .bfd b{display:block;font-size:26px}.bfc .bfd small{font-size:11px;text-transform:uppercase}
+.bfc .bfg{background:var(--card);border-radius:0 0 12px 12px;padding:6px 14px 12px;box-shadow:0 1px 2px rgba(15,17,17,.12);display:grid;grid-template-columns:1fr 1fr;gap:0 22px}
+.bfc .bfr{display:grid;grid-template-columns:64px 1fr;gap:12px;padding:12px 0;border-top:1px solid var(--line);cursor:pointer;animation:vtlin .45s both}
+.bfc .bfr:nth-child(-n+2){border-top:0}
+.bfc .bfr img{width:64px;height:64px;object-fit:contain;border-radius:8px;background:#fff;border:1px solid var(--line)}
+.bfc .bfn{font-weight:800;font-size:15.5px}.bfc .bfn small{font-weight:600;color:var(--muted);font-size:12px}
+.bfc .bfk{display:flex;gap:6px;flex-wrap:wrap;margin:5px 0}
+.bfc .bfk span{font-size:12.5px;font-weight:700;border-radius:20px;padding:3px 9px;background:var(--greybg)}
+.bfc .bfk .tie{background:var(--redbg);color:#7a0721}
+.bfc .bfbar{height:8px;border-radius:4px;background:var(--greybg);overflow:hidden;margin:4px 0 2px}.bfc .bfbar i{display:block;height:100%;border-radius:4px}
+.bfc .bfl{font-size:12px;color:var(--muted);font-weight:600}
+.bfc .bfi{margin-top:7px;background:#e7f4f5;border-left:4px solid var(--teal);border-radius:6px;padding:7px 10px;font-size:13.5px;line-height:1.4}
+.bfc .bfi b{color:var(--teal)}.bfc .bfi div{color:var(--muted);font-size:12.5px;margin-top:2px}
+.bfc .bff{grid-column:1/-1;font-size:12px;color:var(--muted);padding-top:8px;border-top:1px solid var(--line)}
+@media(max-width:700px){.bfc .bfg{grid-template-columns:1fr}.bfc .bfr:nth-child(2){border-top:1px solid var(--line)}.bfc .bfs{font-size:15px;min-width:0}.bfc .bfh{flex-wrap:nowrap;align-items:flex-start}.bfc .bfd b{font-size:22px}}
 .leaks{margin-top:14px;background:var(--card);border-radius:10px;padding:12px 16px;border-left:6px solid var(--teal)}
 .leaks .lkh{font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700}
 .leaks .lks{font-size:15.5px;font-weight:700;margin:3px 0 8px;line-height:1.35}
@@ -519,6 +538,7 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
     <section id="products">
       <h2>Your products</h2>
       <p class="h2sub">Tap any product for its full picture - graphs, forecast and what to order.</p>
+      <div class="bfc" id="bfc"></div>
       <div class="chips" id="chips"></div>
       <div class="ptools"><label class="psrch"><span aria-hidden="true">🔍</span><input id="psq" type="search" placeholder="Find a product - name, ASIN or supplier" autocomplete="off"><button id="psx" class="psx hidden" aria-label="Clear">✕</button></label><div class="psort" id="psort"></div></div>
       <div class="grid" id="grid"></div>
@@ -709,7 +729,7 @@ function render(){
   $('upd').innerHTML='<span class="dot'+(age>2?' old':'')+'"></span>Last update '+esc(upd.toLocaleString('en-GB',{timeZone:'Europe/London',weekday:'short',hour:'2-digit',minute:'2-digit'}));
   const h=new Date().getHours();$('greet').textContent=(h<12?'Good morning':h<18?'Good afternoon':'Good evening')+', Eli';
   $('todaydate').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
-  renderKpis();renderActs();renderCfo();try{renderToday()}catch(e){console.error(e)}renderBar();setupAsk();renderChips();renderGrid();renderPay();renderWin();renderYear();renderVal();try{renderVTL()}catch(e){console.error(e)}try{tip3()}catch(e){}
+  renderKpis();renderActs();renderCfo();try{renderToday()}catch(e){console.error(e)}renderBar();setupAsk();renderChips();renderGrid();renderPay();renderWin();renderYear();renderVal();try{renderVTL()}catch(e){console.error(e)}try{renderBF()}catch(e){console.error(e)}try{tip3()}catch(e){}
 }
 function per(k){const a=DATA.accounts[ACC];return a&&a.periods.find(p=>p.key===k)||{}}
 function renderKpis(){
@@ -1272,6 +1292,23 @@ function vtlCalc(o){const S=DATA.shipping||{},M=(S.methods||{})[o.ship||'air']||
   const V=DATA.season&&DATA.season.valentines,peak=V?dt(V.peak_from):null,vday=V?dt(V.date):null;
   let v='unk';if(land&&peak){const g=Math.round((land-peak)/DAY);v=g<=-7?'ok':g<=7?'mid':'bad';if(vday&&land>=vday)v='bad'}
   return {ord,dep,bal,ready,land,v,M}}
+function renderBF(){const el=$('bfc');if(!el)return;const C=DATA.clearout;if(!C||!(C.items||[]).length){el.innerHTML='';return}
+  const day=new Date(C.date+'T00:00:00'),dl=Math.round((day-today())/DAY);if(dl<-3){el.innerHTML='';return}
+  const fx=FXU(),P=id=>DATA.products.find(p=>p.id===id);let tot=0,anyEst=false;
+  const rows=C.items.map(it=>{const ps=(it.ids||[]).map(P).filter(Boolean);if(!ps.length)return null;const stock=ps.reduce((a,p)=>a+(p.stock||0)+(p.inbound||0),0),pd=ps.reduce((a,p)=>a+(p.per_day||0),0);
+    const gbp=it.cost_usd!=null?stock*it.cost_usd*fx:null;if(gbp)tot+=gbp;if(it.est)anyEst=true;const days=pd>0?stock/pd:Infinity,mo=days/30.4;
+    const tl=!isFinite(days)?'No sales - would never sell':mo<1.5?'Gone in ~'+Math.round(days)+' days':mo<18?'~'+Math.round(mo)+' months to sell at today\'s speed':'~'+Math.round(mo/12)+' years to sell at today\'s speed';
+    const pct=!isFinite(days)?100:Math.min(100,mo/24*100),col=mo<=3?'var(--green)':mo<=9?'var(--amber)':'var(--red)';
+    return {it,ps,stock,gbp,tl,pct,col}}).filter(Boolean);
+  if(!rows.length){el.innerHTML='';return}
+  const when=dl>1?'in '+dl+' days':dl===1?'tomorrow':dl===0?'today':'this weekend';
+  el.innerHTML='<div class="bfh"><div class="bfd"><small>'+esc(C.label||'Black Friday')+'</small><b>'+day.getDate()+'</b><small>'+day.toLocaleDateString('en-GB',{month:'short'})+'</small></div><div class="bfs"><div class="bft">🏷️ Clear-out ideas · '+when+'</div>About <span style="color:var(--orange)">'+money(tot,'GBP')+'</span> of your money is sitting in slow stock. A deal turns it back into cash for Valentine\'s.</div></div>'+
+  '<div class="bfg">'+rows.map((r,i)=>{const p=r.ps[0];return '<div class="bfr" data-bf="'+esc(p.id)+'" style="animation-delay:'+(i*.06)+'s"><img loading="lazy" src="'+img(p.img,200)+'" alt="" onerror="this.style.visibility=\'hidden\'"><div style="min-width:0"><div class="bfn">'+esc(r.it.title)+' <small>'+esc(p.market)+'</small></div>'+
+    '<div class="bfk"><span>📦 '+n0(r.stock)+' sitting</span>'+(r.gbp!=null?'<span class="tie">💷 ≈'+money(r.gbp,'GBP')+' tied up'+(r.it.est?'*':'')+'</span>':'')+'</div>'+
+    '<div class="bfbar"><i style="width:'+r.pct+'%;background:'+r.col+'"></i></div><div class="bfl">'+esc(r.tl)+'</div>'+
+    '<div class="bfi"><b>Idea:</b> '+esc(r.it.deal)+(r.it.keep?'<div>'+esc(r.it.keep)+'</div>':'')+'</div></div></div>'}).join('')+
+  '<div class="bff">Ideas only - nothing changes on Amazon unless you set the deal up in Seller Central.'+(anyEst?' * cost per unit is a guess (Sellerboard has no product costs for these).':'')+'</div></div>';
+  el.querySelectorAll('[data-bf]').forEach(r=>r.onclick=()=>openP(r.dataset.bf))}
 function renderVTL(){const el=$('vtl');if(!el)return;const P=id=>DATA.products.find(p=>p.id===id);
   const O=(DATA.valentine_orders||[]).filter(o=>{const p=P(o.product);return p&&(o.account||p.account)===ACC});
   const V=DATA.season&&DATA.season.valentines;
