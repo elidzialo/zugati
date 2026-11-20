@@ -418,6 +418,24 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 @keyframes slIn{to{opacity:1;transform:none}}@keyframes slPulse{0%,100%{box-shadow:0 0 0 0 rgba(240,124,140,0)}50%{box-shadow:0 0 0 5px rgba(240,124,140,.25)}}
 @media (max-width:520px){.sltrack{grid-template-columns:1fr 1fr}}
 @media (prefers-reduced-motion:reduce){.slt,.slt.next{animation:none;opacity:1;transform:none}}
+/* D 20 Nov: Money 'Good to know' cards (replaces the grey footnote) */
+.gk{display:grid;gap:10px}
+.gkc{display:flex;gap:12px;align-items:flex-start;background:var(--card);border-radius:18px;padding:12px 14px;box-shadow:var(--shadow);border-left:5px solid var(--k);animation:gkin .45s cubic-bezier(.2,.8,.3,1.2) both;animation-delay:calc(var(--n,0)*70ms)}
+.gkc .gi{flex:none;width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:var(--kb);color:var(--k)}
+.gkc .gl{font-size:12px;font-weight:700;color:var(--k);letter-spacing:.02em}
+.gkc .gt{font-size:14px;line-height:1.45;margin-top:2px}
+.gkc .gt b{font-weight:700;background:var(--kb);color:var(--ink);border-radius:6px;padding:0 4px;white-space:nowrap}
+.gkc.big{border-left:0;background:linear-gradient(135deg,#2f9a63,#1f7a4c);color:#fff;padding:16px}
+.gkc.big .gi{background:rgba(255,255,255,.2);color:#fff;width:44px;height:44px}
+.gkc.big .gl{color:#d6f5e3}.gkc.big .gv{font-size:30px;font-weight:700;line-height:1.1;margin:2px 0 4px}
+.gkc.big .gt{color:#eafaf1;font-size:13px}.gkc.big .gt b{background:rgba(255,255,255,.2);color:#fff}
+.gk details summary{list-style:none;cursor:pointer;min-height:44px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;color:var(--muted);border:1.5px dashed var(--line);border-radius:16px}
+.gk details summary::-webkit-details-marker{display:none}
+.gk details[open] summary{display:none}.gk details .gk{margin:0}
+.gks{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.gks span{font-size:12px;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:3px 10px}
+@keyframes gkin{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.gkc{animation:none}}
 </style>
 </head>
 <body>
@@ -696,8 +714,27 @@ function money(m){let h='';const max=Math.max(...m.months.map(x=>Math.max(x.rent
   const arcs=m.costs_top.map((c,i)=>{const len=(+c[1]||0)/tot*C,s=`<circle cx="66" cy="66" r="${R}" fill="none" stroke="${cols[i%6]}" stroke-width="20" stroke-dasharray="${Math.max(len-2,0)} ${C}" stroke-dashoffset="${-off}" transform="rotate(-90 66 66)"/>`;off+=len;return s}).join('');
   h+=`<h2>Where the money went</h2><div class="card donut"><svg width="132" height="132" viewBox="0 0 132 132" role="img" aria-label="Top costs">${arcs}<text x="66" y="62" text-anchor="middle" font-size="12" fill="var(--muted)">Top ${m.costs_top.length}</text><text x="66" y="81" text-anchor="middle" font-size="16" font-weight="700" fill="var(--ink)">${gbp(tot)}</text></svg>
   <div class="dl">${m.costs_top.map((c,i)=>`<div><i style="background:${cols[i%6]}"></i><span>${esc(c[0])}</span><b>${gbp(c[1])}</b></div>`).join('')}</div></div>`}
- h+=`<div class="note">${esc(m.note||'')} Source: ${esc(m.source||'QuickBooks')}${m.as_of?', as of '+esc(m.as_of):''}.</div>`;
+ h+=goodToKnow(m);
  return h}
+/* D 20 Nov: split the money note into colour-coded 'Good to know' cards, pounds highlighted */
+function gkKind(t){const x=t.toLowerCase();
+ if(/real cash/.test(x))return['cash','Real cash','#2f9a63','var(--grnbg)','bank'];
+ if(/not (counted as )?(income|rent)/.test(x))return['no','Not rent','var(--violet)','var(--violetbg)','scale'];
+ if(/categor/.test(x))return['sort','Still to sort','var(--amb)','var(--ambbg)','doc'];
+ if(/no (new )?rent/.test(x))return['rent','Rent','var(--red)','var(--redbg)','bell'];
+ if(/bank feed|sync/.test(x))return['feed','Bank feed','var(--blue)','var(--bluebg)','bank'];
+ if(/went out|goes out|paid|\bdd\b|due/.test(x))return['out','Money out','var(--pink)','var(--pinkbg)','out'];
+ return['info','Good to know','var(--muted)','var(--soft)','spark']}
+function gkTxt(t){return esc(t).replace(/£\d{1,3}(?:,\d{3})*(?:\.\d+)?/g,'<b>$&</b>')}
+function goodToKnow(m){const ss=String(m.note||'').split(/(?<=[.!?])\s+(?=[A-Z£])/).map(x=>x.trim()).filter(Boolean);
+ const src=`<div class="gks"><span>Source: ${esc(m.source||'QuickBooks')}</span>${m.as_of?`<span>As of ${esc(dShort(m.as_of))}</span>`:''}</div>`;
+ if(!ss.length)return src;
+ const it=ss.map(t=>({t,k:gkKind(t)})).sort((a,b)=>(b.k[0]==='cash')-(a.k[0]==='cash'));
+ const card=(x,i)=>{const[k,l,c,bg,icn]=x.k;
+  if(k==='cash'){const v=x.t.match(/real cash is (?:about |around )?(£\d{1,3}(?:,\d{3})*(?:\.\d+)?)/i);if(v)return `<div class="gkc big" style="--n:${i}"><div class="gi">${ic(icn,22)}</div><div><div class="gl">Real cash right now, roughly</div><div class="gv">${esc(v[1])}</div><div class="gt">${gkTxt(x.t)}</div></div></div>`}
+  return `<div class="gkc" style="--k:${c};--kb:${bg};--n:${i}"><div class="gi">${ic(icn,18)}</div><div style="min-width:0"><div class="gl">${l}</div><div class="gt">${gkTxt(x.t)}</div></div></div>`};
+ const top=it.slice(0,3).map(card).join(''),rest=it.slice(3);
+ return `<h2>Good to know <span class="cnt">${it.length}</span></h2><div class="gk">${top}${rest.length?`<details><summary>Show ${rest.length} more</summary><div class="gk">${rest.map((x,i)=>card(x,i)).join('')}</div></details>`:''}</div>${src}`}
 const MON=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
 function tagOf(u){return ['ok','warn','bad'].includes(u.tag)?u.tag:'warn'}
 function noteDates(n){const base=new Date(DATA.updated_at||Date.now());const out={};const add=d=>{d.setHours(0,0,0,0);out[d.getTime()]=d};
