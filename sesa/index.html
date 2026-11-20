@@ -441,6 +441,34 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 @keyframes slIn{to{opacity:1;transform:none}}@keyframes slPulse{0%,100%{box-shadow:0 0 0 0 rgba(240,124,140,0)}50%{box-shadow:0 0 0 5px rgba(240,124,140,.25)}}
 @media (max-width:520px){.sltrack{grid-template-columns:1fr 1fr}}
 @media (prefers-reduced-motion:reduce){.slt,.slt.next{animation:none;opacity:1;transform:none}}
+/* D 20 Nov 18:47: Works timeline - a Gantt road of slots with today marker and countdown */
+.gantt{margin:0 0 14px;padding:14px;border-radius:18px;background:linear-gradient(135deg,#1D1D1F,#3a2a30);color:#fff;position:relative;overflow:hidden}
+.gantt:after{content:"";position:absolute;right:-60px;top:-70px;width:180px;height:180px;border-radius:50%;background:rgba(240,124,140,.18);pointer-events:none}
+.gh{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
+.gh .gi{width:46px;height:46px;border-radius:15px;background:var(--pink);display:flex;align-items:center;justify-content:center;flex:0 0 46px;box-shadow:0 6px 16px rgba(240,124,140,.4)}
+.gh .gn{font-size:20px;font-weight:800;line-height:1.15}.gh .gn em{font-style:normal;color:#ffb3bf}
+.gh .gs{font-size:13px;opacity:.8;margin-top:2px}
+.gmo,.gr{display:grid;grid-template-columns:62px 1fr;gap:8px;align-items:center;position:relative;z-index:1}
+.gmo{margin-top:14px}.gmo .ms{position:relative;height:18px}
+.gmo .ms span{position:absolute;top:0;font-size:12px;font-weight:700;opacity:.7;transform:translateX(2px);text-transform:uppercase;letter-spacing:.5px}
+.gr{margin-top:8px}
+.gr .gl{font-size:13px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gr .gl small{display:block;font-size:12px;font-weight:500;opacity:.7}
+.gt{position:relative;height:36px;border-radius:12px;background:rgba(255,255,255,.07)}
+.gt .mk{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.1)}
+.gt .now{position:absolute;top:-4px;bottom:-4px;width:3px;margin-left:-1px;border-radius:3px;background:var(--pink);box-shadow:0 0 0 3px rgba(240,124,140,.25);z-index:2}
+.gb{position:absolute;top:3px;bottom:3px;border-radius:10px;display:flex;align-items:center;gap:6px;padding:0 5px;overflow:hidden;white-space:nowrap;font-size:12px;font-weight:700;transform-origin:left center;animation:gGrow .7s cubic-bezier(.2,1,.3,1) both;animation-delay:calc(var(--i)*110ms + 150ms)}
+@keyframes gGrow{from{transform:scaleX(0);opacity:0}}
+.gb.took{background:linear-gradient(90deg,#2f9a63,#5bd68b);color:#fff}
+.gb.free{background:repeating-linear-gradient(135deg,rgba(240,124,140,.95) 0 8px,rgba(240,124,140,.7) 8px 16px);color:#fff}
+.gb .av{width:24px;height:24px;flex:0 0 24px;margin:0;border-radius:50%;background:#fff;color:#1D1D1F;font-size:12px}
+.gb.free .av{color:var(--pink)}
+.gt .tbc{position:absolute;inset:3px;border:2px dashed rgba(255,255,255,.25);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;opacity:.75}
+.gnow{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:12px;font-weight:700;position:relative;z-index:1;opacity:.9}.gnow i{width:10px;height:10px;border-radius:3px;background:var(--pink)}
+.gnow b{width:10px;height:10px;border-radius:3px;background:#5bd68b;margin-left:10px}.gnow u{width:10px;height:10px;border-radius:3px;background:repeating-linear-gradient(135deg,var(--pink) 0 3px,#f7b3bd 3px 6px);margin-left:10px;text-decoration:none}
+@media (max-width:620px){.gb .bd{display:none}}
+.gr .gl small.op{color:#ffb3bf;font-weight:700;opacity:1}
+@media (prefers-color-scheme:dark){.gantt{background:linear-gradient(135deg,#26262a,#3a2228)}}
+@media (prefers-reduced-motion:reduce){.gb{animation:none}}
 /* D 20 Nov: Money 'Good to know' cards (replaces the grey footnote) */
 .gk{display:grid;gap:10px}
 .gkc{display:flex;gap:12px;align-items:flex-start;background:var(--card);border-radius:18px;padding:12px 14px;box-shadow:var(--shadow);border-left:5px solid var(--k);animation:gkin .45s cubic-bezier(.2,.8,.3,1.2) both;animation-delay:calc(var(--n,0)*70ms)}
@@ -830,16 +858,37 @@ function prop(p,i){let h='';const t=p.tasks.length,o=open_(p),att=p.units.filter
  if(p.units.length)h+=`<h2>Who's who <span class="cnt">${p.units.length}</span></h2>${unitMix(p.units)}<div class="units">${p.units.map(unitCard).join('')}</div>`;
  return h}
 /* A2 19 Nov: works slots board - which flat goes when, read from the job and tenant notes (no new data needed) */
+function slotRange(d){const m=[...String(d||'').matchAll(/\b(\d{1,2})\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*/gi)];if(m.length<2)return null;
+ const base=new Date();base.setHours(0,0,0,0);const mk=x=>{const t=new Date(base.getFullYear(),MON.indexOf(x[2].toLowerCase()),+x[1]);if(base-t>60*864e5)t.setFullYear(t.getFullYear()+1);return t};
+ const a=mk(m[0]),b=mk(m[m.length-1]);while(b<a)b.setFullYear(b.getFullYear()+1);return[a,b]}
+function gantt(S,mx,firstFree){const rows=[];for(let n=1;n<=mx;n++){const x=S[n]||{};rows.push({n,x,r:slotRange(x.d)})}
+ const dated=rows.filter(r=>r.r);if(dated.length<2)return '';
+ const now=new Date();now.setHours(0,0,0,0);const st=new Date(Math.min(now,...dated.map(r=>r.r[0])));st.setDate(1);
+ const en0=new Date(Math.max(...dated.map(r=>r.r[1])));const en=new Date(en0.getFullYear(),en0.getMonth()+1,1);const span=en-st,pc=d=>Math.max(0,Math.min(100,(d-st)/span*100));
+ const months=[];for(let d=new Date(st);d<en;d.setMonth(d.getMonth()+1))months.push(new Date(d));
+ const ms=months.map(d=>`<span style="left:${pc(d)}%">${MON[d.getMonth()].slice(0,3)}</span>`).join('');
+ const mk=months.slice(1).map(d=>`<i class="mk" style="left:${pc(d)}%"></i>`).join('');
+ const nowL=now>=st&&now<en?`<b class="now" style="left:${pc(now)}%"></b>`:'';
+ const s0=new Date(Math.min(...dated.map(r=>r.r[0]))),e0=en0,days=d=>Math.round((d-now)/864e5);
+ const cur=dated.find(r=>r.r[0]<=now&&now<=r.r[1]);
+ const head=now<s0?`Works start in <em>${days(s0)} day${days(s0)===1?'':'s'}</em>`:cur?`Slot ${cur.n} underway - <em>${days(cur.r[1])} days left</em>`:now>e0?'All works slots done':`Next slot in <em>${days(dated.find(r=>r.r[0]>now).r[0])} days</em>`;
+ const fmt=d=>d.getDate()+' '+MON[d.getMonth()].slice(0,3).replace(/^./,c=>c.toUpperCase());
+ const body=rows.map(({n,x,r},i)=>{const who=x.who?first(x.who.tenant):(firstFree===n?'Open':'Free');
+  const bar=r?`<span class="gb ${x.who?'took':'free'}" style="left:${pc(r[0])}%;width:${Math.max(4,pc(r[1])-pc(r[0]))}%;--i:${i}" title="Slot ${n}: ${esc(fmt(r[0])+' - '+fmt(r[1]))}"><span class="av">${x.who?esc(initials(x.who.tenant)):'?'}</span><span class="bd">${esc(fmt(r[0]))}</span></span>`:`<span class="tbc">Dates not set yet</span>`;
+  return `<div class="gr"><div class="gl">Slot ${n}<small${!x.who&&firstFree===n?' class="op"':''}>${esc(who)}</small></div><div class="gt">${mk}${nowL}${bar}</div></div>`}).join('');
+ return `<div class="gantt" role="img" aria-label="Works timeline from ${esc(fmt(s0))} to ${esc(fmt(e0))}"><div class="gh"><div class="gi">${ic('tool',24,2.2,'#fff')}</div><div><div class="gn">${head}</div><div class="gs">${esc(fmt(s0))} - ${esc(fmt(e0))} - ${mx} slots, ${rows.filter(r=>r.x.who).length} booked</div></div></div>
+ <div class="gmo"><span></span><div class="ms">${ms}</div></div>${body}<div class="gnow"><i></i>Today<b></b>Booked<u></u>Needs someone</div></div>`}
 function slotBoard(p){const txt=[p.event,p.status,...p.tasks.map(t=>t.title+' '+(t.detail||'')),...p.units.map(u=>(u.label||'')+' '+(u.note||''))].join(' . ');
  const S={};let mx=0;const re=/slot\s*(\d)\b(?:\s*\(([^)]*)\))?/gi;let m;
  while((m=re.exec(txt))){const n=+m[1];if(n<1||n>8)continue;mx=Math.max(mx,n);S[n]=S[n]||{};const d=(m[2]||'').replace(/\b(mon|tue|wed|thu|fri|sat|sun)[a-z]*\s+/gi,'').trim();if(/\d.*-.*\d/.test(d)&&(!S[n].d||d.length>S[n].d.length))S[n].d=d;else if(d&&!S[n].d&&/\d/.test(d))S[n].d=d}
  if(mx<2)return '';
+ (DATA.top3||[]).forEach(t=>{let k;const r2=/slot\s*(\d)\b\s*\(([^)]*)\)/gi;while((k=r2.exec(String(t)))){const n=+k[1];if(S[n]&&!S[n].d&&/\d.*-.*\d/.test(k[2]))S[n].d=k[2].replace(/\b(mon|tue|wed|thu|fri|sat|sun)[a-z]*\s+/gi,'').trim()}});
  p.units.forEach(u=>{const k=String(u.label||'').match(/slot\s*(\d)/i)||String(u.note||'').match(/picked\s+slot\s*(\d)/i);if(k&&S[+k[1]]&&u.tenant)S[+k[1]].who=u})
  const waiting=p.units.filter(u=>/slots? sent|no reply/i.test((u.label||'')+' '+(u.note||''))&&!Object.values(S).some(x=>x.who===u)).map(u=>first(u.tenant));
  let firstFree=0;const cells=[];for(let n=1;n<=mx;n++){const x=S[n]||{};if(!x.who&&!firstFree)firstFree=n;
   cells.push(`<div class="slt ${x.who?'took':'free'}${!x.who&&firstFree===n?' next':''}" style="--i:${n}"><div class="sn">Slot ${n}</div><div class="sd">${x.d?esc(x.d):'Dates in the plan'}</div>${x.who?`<div class="sw"><span class="av">${esc(initials(x.who.tenant))}</span>${esc(first(x.who.tenant))}<small>${esc(x.who.name)}</small></div>`:`<div class="sw fr">${ic('user',16)}${firstFree===n?'Needs someone':'Free'}</div>`}</div>`)}
  const taken=Object.values(S).filter(x=>x.who).length;
- return `<h2>Works slots <span class="cnt">${taken}/${mx} taken</span></h2><div class="slots"><div class="sltrack">${cells.join('')}</div>${waiting.length?`<div class="slwait">${ic('bell',15)} Still to pick: <b>${esc(waiting.join(' and '))}</b></div>`:''}</div>`}
+ return `<h2>Works slots <span class="cnt">${taken}/${mx} taken</span></h2><div class="slots">${gantt(S,mx,firstFree)}<div class="sltrack">${cells.join('')}</div>${waiting.length?`<div class="slwait">${ic('bell',15)} Still to pick: <b>${esc(waiting.join(' and '))}</b></div>`:''}</div>`}
 function acts(x){const o=person(ownerId(x));
  return o?`<button class="own" data-assign="${esc(x.id)}" aria-label="Assigned to ${esc(o.name)} - change">${avatar(o)}${esc(o.me?'Me':o.name)}</button>${o.email&&!DONE[x.id]?`<button class="nudge" data-nudge="${esc(x.id)}">${ic('bell',16)} Nudge</button>`:''}`
   :`<button class="own none" data-assign="${esc(x.id)}">${ic('user',16)} Assign</button>`}
