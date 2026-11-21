@@ -405,6 +405,9 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
 .tmust .tmd a{flex:1 1 150px;text-align:center;text-decoration:none;font-weight:800;font-size:14.5px;border-radius:10px;padding:11px 12px;line-height:1.25}
 .tmust .tmd a.pt{background:#fff;color:#cc0c39}.tmust .tmd a.hd{background:rgba(255,255,255,.14);color:#fff;border:2px solid rgba(255,255,255,.75)}
 .tmust .tmd a small{display:block;font-weight:600;font-size:11.5px;opacity:.85;margin-top:2px}
+.tmust .tmpay{display:flex;align-items:center;gap:12px;width:100%;margin-top:12px;background:#ff9900;color:#0f1111;text-decoration:none;font-weight:800;font-size:18px;border-radius:12px;padding:14px 16px;box-shadow:0 4px 0 #c45500;line-height:1.25;transition:transform .1s}
+.tmust .tmpay:active{transform:translateY(2px);box-shadow:0 2px 0 #c45500}.tmust .tmpay .pi{font-size:26px}.tmust .tmpay small{display:block;font-weight:600;font-size:12.5px;margin-top:2px;color:#3a2a00}
+.tmust .tmpay.wait{background:#fff3df;box-shadow:0 4px 0 #e8b56a}
 .tmust .tmdq{width:100%;font-size:12.5px;color:#ffd6de;margin-top:8px;font-weight:700}
 .bfc{margin:0 0 16px}.bfc:empty{display:none}
 .bfc .bfh{background:linear-gradient(120deg,#131921,#232f3e 60%,#37475a);color:#fff;border-radius:12px 12px 0 0;padding:14px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
@@ -444,6 +447,9 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
 .dlg{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;flex-wrap:wrap}.dlg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-left:6px}
 .dsay{font-size:16px;line-height:1.45;margin:8px 0 4px}.dneg{color:var(--red)}.dok{display:block;margin-top:6px;color:var(--green);font-weight:700}.dhint{display:block;margin-top:6px;color:var(--teal);font-weight:600}
 .dbar{transform-box:fill-box;transform-origin:bottom;animation:dgrow .5s ease-out both}@keyframes dgrow{from{opacity:0;transform:scaleY(.2)}}
+.darea{animation:dfade .8s ease both}@keyframes dfade{from{opacity:0}}.dline{stroke-dasharray:2400;stroke-dashoffset:2400;animation:ddraw 1.3s ease forwards}@keyframes ddraw{to{stroke-dashoffset:0}}.ddot{animation:dfade .4s ease both}
+.dopt.best{border-color:#ff9900;box-shadow:0 3px 10px rgba(255,153,0,.18)}.dopt.best.on{border-color:var(--green)}.dbest{display:inline-block;align-self:flex-start;font-style:normal;font-size:11.5px;font-weight:800;color:#c45500;background:#fff3df;border-radius:10px;padding:2px 8px;margin-bottom:4px}
+.dmore{grid-column:1/-1}.dmore summary{cursor:pointer;color:var(--teal);font-weight:700;padding:6px 0;list-style:none}.dmore summary::-webkit-details-marker{display:none}.dmore[open] summary{margin-bottom:8px}
 .dh2{font-weight:800;font-size:15px;margin:6px 0 8px}.dopts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .dopt{display:flex;gap:10px;align-items:flex-start;text-align:left;background:#fff;border:2px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;font:inherit;color:inherit;transition:border-color .15s,background .15s,transform .1s}
 .dopt:active{transform:scale(.98)}.dopt.on{border-color:var(--green);background:var(--greenbg)}
@@ -580,10 +586,10 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
     <section id="cfo">
       <h2>Your money - CFO view</h2>
       <p class="h2sub">Where the cash is, what's coming in, what's going out, and how much you can safely spend on stock.</p>
+      <div class="card dip" id="dip" style="margin-bottom:14px"></div>
       <div class="kpis" id="cfokpis"></div>
       <div id="othercash"></div>
       <div id="leaks"></div>
-      <div class="card dip" id="dip" style="margin-top:14px"></div>
       <div class="card" style="margin-top:14px"><h4 style="margin:0 0 2px;font-size:18px">Money in and out - next 16 weeks</h4><div class="cfsay" id="cfsay"></div><div id="cashline"></div></div>
       <div class="two" style="margin-top:14px">
         <div class="card"><h4 style="margin:0 0 4px">Your big months - last 2 years</h4><div class="note" style="margin-bottom:6px">Profit in each Christmas and Valentine's month.</div><div id="bigmonths"></div></div>
@@ -1187,14 +1193,16 @@ function deadlineOf(x){const t=[x.amount_note,x.what,x.why].filter(Boolean).join
 function clockTxt(ms){const r=ms-Date.now();if(r<=0)return {t:'Deadline passed - check it went through',past:true};const mi=Math.round(r/6e4),h=Math.floor(mi/60);return {t:'⏱ '+(h?h+' h '+(mi%60)+' min':mi+' min')+' left',past:false}}
 function acctFor(x){const c=DATA.cfo||{},A=(c.cash||[]).map(a=>Object.assign({mine:1},a)).concat((c.other_cash||[]).map(a=>Object.assign({other:1},a)));const t=[x.what,x.amount_note,x.to].join(' ').toLowerCase();
   return A.find(a=>{const n=String(a.name).split('(')[0].trim().toLowerCase();return n.length>3&&t.includes(n)})||null}
-function mustDo(DIS){const t=today().getTime();return (DATA.payments||[]).filter(x=>['unpaid','overdue'].includes(x.status)&&x.due&&!DIS['p:'+x.id]&&(new Date(x.due+'T00:00:00').getTime()===t||(x.status==='overdue'&&new Date(x.due+'T00:00:00').getTime()<=t)))}
+function mustDo(DIS){const t=today().getTime();return (DATA.payments||[]).filter(x=>['unpaid','overdue'].includes(x.status)&&x.due&&!DIS['p:'+x.id]&&(x.must||new Date(x.due+'T00:00:00').getTime()===t||(x.status==='overdue'&&new Date(x.due+'T00:00:00').getTime()<=t)))}
 function mustHtml(L){if(!L.length)return '';
   return '<div class="tmust" role="alert"><div class="tmh"><span class="bell">⏰</span>Must do today</div>'+L.map(x=>{const dl=deadlineOf(x),a=acctFor(x),acn=a?String(a.name).split('(')[0].trim():'';
     const sub=[dl?'Must be in by <b>'+dl.lab+'</b>'+(acn?' - into <b>'+esc(acn)+'</b>':''):'',a?'That account has <b>'+money(a.gbp,'GBP',a.gbp<10?2:0)+'</b>'+(a.other?' (your other company)':''):'',x.why?esc(x.why):''].filter(Boolean).join(' · ');
     const ck=dl?clockTxt(dl.d.getTime()):null;
-    return '<div class="tmi" data-pid="'+esc(x.id)+'"><div class="tmt"><b>'+esc(x.to)+'</b><span>'+sub+'</span></div><div class="tmr">'+(ck?'<span class="clk'+(ck.past?' past':'')+'" data-dl="'+dl.d.getTime()+'">'+ck.t+'</span>':'')+'<span class="tma">'+(x.cur==='GBP'&&x.amount?money(x.amount,'GBP',x.amount%1?2:0):money(payGbp(x),'GBP'))+'</span><span class="tmok" data-dis="p:'+esc(x.id)+'" data-st="paid" data-t="'+esc(x.what)+'">✓ Done</span></div>'+mustDrafts(x)+'</div>'}).join('')+'</div>'}
+    return '<div class="tmi" data-pid="'+esc(x.id)+'"><div class="tmt"><b>'+esc(x.to)+'</b><span>'+sub+'</span></div><div class="tmr">'+(ck?'<span class="clk'+(ck.past?' past':'')+'" data-dl="'+dl.d.getTime()+'">'+ck.t+'</span>':'')+'<span class="tma">'+(x.cur==='GBP'&&x.amount?money(x.amount,'GBP',x.amount%1?2:0):money(payGbp(x),'GBP'))+'</span><span class="tmok" data-dis="p:'+esc(x.id)+'" data-st="paid" data-t="'+esc(x.what)+'">✓ Done</span></div>'+mustPay(x)+mustDrafts(x)+'</div>'}).join('')+'</div>'}
+function mustPay(x){if(!x.link)return '';const {start}=cashWeeks(),need=payGbp(x),short=start<need;
+  return '<a class="tmpay'+(short?' wait':'')+'" target="_blank" rel="noopener" href="'+esc(x.link)+'"><span class="pi">'+(short?'⏳':'💳')+'</span><span>'+esc(x.pay_label||'Pay now')+' ↗<small>'+(short?'The bank has '+money(start,'GBP')+' right now - pay when the money is in':'Opens the payment page - you press Pay')+'</small></span></a>'}
 function mustDrafts(x){const D=(x.drafts||[]).filter(d=>d&&d.url);if(!D.length)return '';
-  return (D.length>1?'<div class="tmdq">Pick one - each opens a ready email in Gmail (nothing is sent until you press Send):</div>':'')+'<div class="tmd">'+D.map((d,i)=>'<a class="'+(i?'hd':'pt')+'" target="_blank" rel="noopener" href="'+esc(d.url)+'">'+(i?'✋ ':'💳 ')+esc(d.label||'Open draft')+(d.note?'<small>'+esc(d.note)+'</small>':'')+'</a>').join('')+'</div>'}
+  return (D.length>1?'<div class="tmdq">Pick one - each opens a ready email in Gmail (nothing is sent until you press Send):</div>':'')+'<div class="tmd">'+D.map((d,i)=>'<a class="'+(i?'hd':'pt')+'" target="_blank" rel="noopener" href="'+esc(d.url)+'">'+(D.length===1?'✉ ':i?'✋ ':'💳 ')+esc(d.label||'Open draft')+(d.note?'<small>'+esc(d.note)+'</small>':'')+'</a>').join('')+'</div>'}
 function renderLeaks(){const el=$('leaks');if(!el)return;const L=((DATA.cfo||{}).leaks||[]).slice().sort((a,b)=>a.date<b.date?1:-1);if(!L.length){el.innerHTML='';return}
   const tin=L.reduce((s,x)=>s+(+x.in||0),0),tout=L.reduce((s,x)=>s+(+x.out||0),0),mx=Math.max(...L.map(x=>Math.max(+x.in||0,+x.out||0)),1),net=tin-tout;
   const say=net<0?'More went out than came in this week - '+money(-net,'GBP')+' more out.':net>0?'More came in than went out this week - '+money(net,'GBP')+' ahead.':'What came in this week all went straight back out.';
@@ -1241,7 +1249,7 @@ let _cfT;window.addEventListener('resize',()=>{clearTimeout(_cfT);_cfT=setTimeou
 /* ---------- CFO ---------- */
 function payoutFor(d){const h=DATA.history;if(!h)return 0;const L=h.months.length,ratio=h.payout[L-14]?h.payout[L-2]/h.payout[L-14]:1;const key=(d.getFullYear()-1)+'-'+String(d.getMonth()+1).padStart(2,'0');const i=h.months.indexOf(key);if(i<0)return 0;return h.payout[i]*ratio/new Date(d.getFullYear(),d.getMonth()+1,0).getDate()}
 function cashWeeks(){
-  const c0=DATA.cfo;if(c0.weekly&&c0.weekly.length){let bal=c0.cash.reduce((s,x)=>s+x.gbp,0);try{const o=JSON.parse(localStorage.getItem('zcash')||'null');if(o&&o.at>(c0.as_of||''))bal=o.v}catch(e){}const start=bal;const W=[{w:0,d:today(),b:bal,in:0,out:0}];c0.weekly.forEach((x,i)=>{bal+=x.in-x.out;W.push({w:i+1,d:new Date(x.w+'T00:00:00'),b:bal,in:x.in,out:x.out,pay:x.pay})});return {W,start,low:Math.min(...W.map(x=>x.b))}}
+  const c0=DATA.cfo;if(c0.weekly&&c0.weekly.length){let bal=c0.cash.reduce((s,x)=>s+x.gbp,0);try{const o=JSON.parse(localStorage.getItem('zcash')||'null');if(o&&o.at>(c0.as_of||''))bal=o.v}catch(e){}const start=bal;const W=[{w:0,d:today(),b:bal,in:0,out:0}];const t0=today();c0.weekly.forEach((x,i)=>{const d=new Date(x.w+'T00:00:00'),cur=x.bal!=null&&d<=t0&&addD(d,7)>t0;/* current week: the bank balance already includes it */if(!cur)bal+=x.in-x.out;W.push({w:i+1,d,b:bal,in:cur?0:x.in,out:cur?0:x.out,pay:x.pay})});return {W,start,low:Math.min(...W.map(x=>x.b))}}
   return cashWeeksOld();}
 function cashWeeksOld(){
   const c=DATA.cfo,t0=today();let bal=c.cash.reduce((s,x)=>s+x.gbp,0);try{const o=JSON.parse(localStorage.getItem('zcash')||'null');if(o&&o.at>(c.as_of||''))bal=o.v}catch(e){}const start=bal;
@@ -1430,17 +1438,25 @@ function renderDip(){const el=$('dip');if(!el)return;const c=DATA.cfo;if(!c||!c.
   const restA=A.slice(1),lowA=restA.reduce((m,x)=>x.b<m.b?x:m,restA[0]);
   const k=v=>(v<0?'-':'')+'£'+(Math.abs(v)/1000).toFixed(1).replace(/\.0$/,'')+'k';
   // chart
-  const sm=window.innerWidth<640,Wd=sm?400:900,H=sm?250:260,pl=sm?34:46,pr=8,pt=60,pb=30,N=n-1;
+  const sm=window.innerWidth<640,Wd=sm?400:900,H=sm?290:260,pl=sm?34:46,pr=8,pt=60,pb=30,N=n-1;
   const all=B.concat(A).slice(1).map(x=>x.b);const mx=Math.max(...all,c.floor||0,1000)*1.08,mn=Math.min(...all,0)*1.25-200;
   const slot=(Wd-pl-pr)/N,X=i=>pl+slot*(i-0.5),Y=v=>pt+(mx-v)/(mx-mn)*(H-pt-pb),bw=Math.min(slot*0.7,34);let g='';
   const step=mx-mn>12000?4000:2000;for(let v=Math.ceil(mn/step)*step;v<=mx;v+=step)if(v)g+='<line x1="'+pl+'" x2="'+(Wd-pr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#eef0f0"/><text x="'+(pl-5)+'" y="'+(Y(v)+4)+'" font-size="11" fill="#888" text-anchor="end">'+k(v)+'</text>';
   // christmas band
   const xi=B.map((x,i)=>i&&x.d.getMonth()===11?i:-1).filter(i=>i>0);if(xi.length){const a=X(xi[0])-slot/2,b=X(xi[xi.length-1])+slot/2;g+='<rect x="'+a+'" y="'+(pt-30)+'" width="'+(b-a)+'" height="'+(H-pb-pt+30)+'" rx="8" fill="rgba(29,143,95,.07)"/><text x="'+(a+8)+'" y="'+(pt-16)+'" font-size="11.5" font-weight="800" fill="#1d8f5f">🎄 December</text>'}
   const col=v=>v<0?'#cc0c39':v<(c.floor||0)?'#ff9900':'#1d8f5f';
-  for(let i=1;i<n;i++){const v=A[i].b,ov=B[i].b,y0=Y(0),cx=X(i);
-    if(picks.length&&Math.abs(ov-v)>1){const yy=Math.min(Y(ov),y0),hh=Math.abs(Y(ov)-y0);g+='<rect x="'+(cx-bw/2)+'" y="'+yy+'" width="'+bw+'" height="'+Math.max(hh,1)+'" rx="4" fill="none" stroke="'+col(ov)+'" stroke-width="1.5" stroke-dasharray="3 3" opacity=".7"/>'}
-    const yy=Math.min(Y(v),y0),hh=Math.abs(Y(v)-y0);
-    g+='<rect class="dbar" style="animation-delay:'+(i*40)+'ms" x="'+(cx-bw/2)+'" y="'+yy+'" width="'+bw+'" height="'+Math.max(hh,2)+'" rx="4" fill="'+col(v)+'"><title>Week of '+fmtD(A[i].d)+': £'+n0(v)+' left in the bank'+(A[i].pay?' - '+esc(A[i].pay):'')+'</title></rect>';
+  const y0=Y(0),PA=[],PB=[];for(let i=1;i<n;i++){PA.push([X(i),Y(A[i].b)]);PB.push([X(i),Y(B[i].b)])}
+  const ln=P=>P.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),ar=P=>'M'+P[0][0].toFixed(1)+','+y0+' L'+ln(P).split(' ').join(' L')+' L'+P[P.length-1][0].toFixed(1)+','+y0+' Z';
+  g+='<defs><clipPath id="dcA"><rect x="0" y="0" width="'+Wd+'" height="'+y0+'"/></clipPath><clipPath id="dcB"><rect x="0" y="'+y0+'" width="'+Wd+'" height="'+(H-y0)+'"/></clipPath>'+
+    '<linearGradient id="dgA" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#1d8f5f" stop-opacity=".38"/><stop offset="1" stop-color="#1d8f5f" stop-opacity=".06"/></linearGradient>'+
+    '<linearGradient id="dgB" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#cc0c39" stop-opacity=".18"/><stop offset="1" stop-color="#cc0c39" stop-opacity=".55"/></linearGradient></defs>';
+  if(picks.length)g+='<path d="'+ar(PB)+'" fill="rgba(204,12,57,.10)" clip-path="url(#dcB)"/><polyline points="'+ln(PB)+'" fill="none" stroke="#9aa0a0" stroke-width="2" stroke-dasharray="5 4"/>';
+  g+='<path class="darea" d="'+ar(PA)+'" fill="url(#dgA)" clip-path="url(#dcA)"/><path class="darea" d="'+ar(PA)+'" fill="url(#dgB)" clip-path="url(#dcB)"/>';
+  g+='<polyline class="dline" points="'+ln(PA)+'" fill="none" stroke="#1d8f5f" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" clip-path="url(#dcA)"/><polyline class="dline" points="'+ln(PA)+'" fill="none" stroke="#cc0c39" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" clip-path="url(#dcB)"/>';
+  const negI=[];for(let i=1;i<n;i++)if(A[i].b<0)negI.push(i);
+  if(negI.length>1){const mid=negI[Math.floor(negI.length/2)];if(Y(A[mid].b)-y0>44)g+='<text x="'+X(mid)+'" y="'+(y0+20)+'" text-anchor="middle" font-size="'+(sm?12:14)+'" font-weight="800" fill="#fff" style="paint-order:stroke" stroke="#cc0c39" stroke-width="3">Below zero</text>'}
+  for(let i=1;i<n;i++){const v=A[i].b,cx=X(i);
+    g+='<circle class="ddot" style="animation-delay:'+(300+i*45)+'ms" cx="'+cx+'" cy="'+Y(v)+'" r="'+(v<0?4.5:3.5)+'" fill="#fff" stroke="'+col(v)+'" stroke-width="2.5"><title>Week of '+fmtD(A[i].d)+': £'+n0(v)+' left in the bank'+(A[i].pay?' - '+esc(A[i].pay):'')+'</title></circle>';
     if(sm?(i%3===1):(i%2===1))g+='<text x="'+cx+'" y="'+(H-pb+17)+'" font-size="11" fill="#666" text-anchor="middle">'+fmtD(A[i].d)+'</text>'}
   g+='<line x1="'+pl+'" x2="'+(Wd-pr)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="#0f1111" stroke-width="1.5"/><text x="'+(pl-5)+'" y="'+(Y(0)+4)+'" font-size="11" font-weight="700" fill="#0f1111" text-anchor="end">£0</text>';
   const dips=dipLows(A);let lastX=-999,row=0;
@@ -1452,17 +1468,21 @@ function renderDip(){const el=$('dip');if(!el)return;const c=DATA.cfo;if(!c||!c.
   const svg='<svg viewBox="0 0 '+Wd+' '+H+'" width="100%" role="img" aria-label="Cash left at the end of each week">'+g+'</svg>';
   // sentence
   let say;if(low.b>=0)say='Good news - your cash stays <b>above zero</b> every week. Lowest point is about <b>'+k(low.b)+'</b> in the week of '+fmtD(low.d)+'.';
-  else{const bl=dipLows(B),lastNeg=rest.filter(x=>x.b<0).pop();
+  else{const bl=dipLows(B);let li0=B.indexOf(low);while(li0+1<B.length&&B[li0+1].b<0)li0++;const lastNeg=B[li0];
     if(bl.length>1)say='Your cash dips <b class="dneg">below zero</b> twice: about <b class="dneg">'+k(-B[bl[0]].b)+' short</b> in the week of '+fmtD(B[bl[0]].d)+', then about <b class="dneg">'+k(-B[bl[1]].b)+' short</b> in the week of '+fmtD(B[bl[1]].d)+'. It stays below zero until '+(lastNeg.d.getMonth()===0&&lastNeg.d.getDate()>=18?'late January':'the week of '+fmtD(lastNeg.d))+' - big supplier balances land before Christmas money does.';
     else say='Your cash dips <b class="dneg">below zero</b> for '+(neg>1?neg+' weeks':'a week')+' around Christmas - about <b class="dneg">'+k(-low.b)+' short</b> in the week of '+fmtD(low.d)+', when big supplier balances are due before Christmas money lands.';
     if(!picks.length)say+=' <span class="dhint">Tap one or two fixes below to see the gap close.</span>';
     else if(lowA.b>=0)say+=' <span class="dok">✓ With '+(picks.length>1?'these fixes':'this fix')+' the gap closes - your lowest week is about '+k(lowA.b)+'.</span>';
     else say+=' <span class="dhint">With '+(picks.length>1?'these fixes':'this fix')+' you are still about '+k(-lowA.b)+' short - add another.</span>'}
-  const cards=O.map(o=>{const on=!!DIPP[o.k];const one=dipSim(W,[o]),lo1=Math.min(...one.slice(1).map(x=>x.b)),gain=Math.round((lo1-low.b)/100)*100;
+  const G={};O.forEach(o=>{const one=dipSim(W,[o]);G[o.k]=Math.min(...one.slice(1).map(x=>x.b))-low.b});
+  const OS=O.slice().sort((a,b)=>G[b.k]-G[a.k]),best=OS.filter(o=>G[o.k]>0).slice(0,2).map(o=>o.k);
+  const card=o=>{const on=!!DIPP[o.k];const gain=Math.round(G[o.k]/100)*100,isB=best.includes(o.k);
     const eff=o.fx?(o.fx.type==='jan'?'Moves '+o.fx.who+'\'s ~'+k(o.fx.v)+' to the week of '+(o.tw?fmtD(o.tw):'4 Jan')+(gain>0?' - lifts your lowest week by about '+k(gain):''):o.fx.type==='topup'?'Covers the gap - borrow about '+k(o.amt||0)+', repay in February':gain>0?'Lifts your lowest week by about '+k(gain)+(o.fx.type==='sell'?' (per £1k sold)':''):'Moves the gap later'):'';
-    return '<button class="dopt'+(on?' on':'')+'" data-dip="'+o.k+'" aria-pressed="'+on+'"><span class="dic">'+o.ic+'</span><span class="dtx"><b>'+esc(o.t)+'</b>'+(o.d?'<span>'+esc(o.d)+'</span>':'')+(eff?'<em>'+eff+'</em>':'')+'</span><span class="dck">'+(on?'✓':'+')+'</span></button>'}).join('');
-  el.innerHTML='<div class="dhd"><h4>The December dip</h4><span class="dlg"><i style="background:#1d8f5f"></i>Safe <i style="background:#ff9900"></i>Under £'+n0(c.floor||0)+' <i style="background:#cc0c39"></i>Below zero</span></div><div class="dsay">'+say+'</div>'+svg+'<div class="note" style="margin:2px 0 10px">Each bar is the cash left at the end of that week.'+(picks.length?' Dotted outline = before your fixes.':'')+'</div>'+
-    (O.length?'<div class="dh2">Ways to close the gap - pick one or two</div><div class="dopts">'+cards+'</div>'+(picks.length?'<div class="dfoot"><a class="btn ghost" id="diptell" href="#">Tell the team what I picked</a><span class="lnk" id="dipclr">Clear</span></div>':''):'');
+    return '<button class="dopt'+(on?' on':'')+(isB?' best':'')+'" data-dip="'+o.k+'" aria-pressed="'+on+'"><span class="dic">'+o.ic+'</span><span class="dtx">'+(isB?'<i class="dbest">⭐ Best fix</i>':'')+'<b>'+esc(o.t)+'</b>'+(o.d?'<span>'+esc(o.d)+'</span>':'')+(eff?'<em>'+eff+'</em>':'')+'</span><span class="dck">'+(on?'✓':'+')+'</span></button>'};
+  const rest2=OS.filter(o=>!best.includes(o.k)),openR=rest2.some(o=>DIPP[o.k]);
+  const cards=(best.length?best.map(k=>card(O.find(o=>o.k===k))).join(''):'')+(rest2.length?(best.length?'<details class="dmore"'+(openR?' open':'')+'><summary>'+rest2.length+' more idea'+(rest2.length>1?'s':'')+' ▾</summary><div class="dopts">'+rest2.map(card).join('')+'</div></details>':rest2.map(card).join('')):'');
+  el.innerHTML='<div class="dhd"><h4>The December dip</h4><span class="dlg"><i style="background:#1d8f5f"></i>Safe <i style="background:#ff9900"></i>Under £'+n0(c.floor||0)+' <i style="background:#cc0c39"></i>Below zero</span></div><div class="dsay">'+say+'</div>'+svg+'<div class="note" style="margin:2px 0 10px">The line is the cash left at the end of each week. Red = you would be short.'+(picks.length?' Grey dashed line = before your fixes.':'')+'</div>'+
+    (O.length?'<div class="dh2">'+(best.length?'The '+(best.length>1?'2 best fixes':'best fix')+' - tap to see the gap close':'Ways to close the gap - pick one or two')+'</div><div class="dopts">'+cards+'</div>'+(picks.length?'<div class="dfoot"><a class="btn ghost" id="diptell" href="#">Tell the team what I picked</a><span class="lnk" id="dipclr">Clear</span></div>':''):'');
   el.querySelectorAll('[data-dip]').forEach(b=>b.onclick=()=>{const kk=b.dataset.dip;if(DIPP[kk])delete DIPP[kk];else DIPP[kk]=1;try{localStorage.setItem('zdip',JSON.stringify(DIPP))}catch(e){}try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}renderDip()});
   const cl=$('dipclr');if(cl)cl.onclick=()=>{DIPP={};try{localStorage.setItem('zdip','{}')}catch(e){}renderDip()};
   const tl=$('diptell');if(tl)tl.onclick=e=>{e.preventDefault();window.open(gmailUrl('Zugati portal feedback - December gap','To close the December gap I want to:\n'+picks.map(o=>'- '+o.t+(o.d?' ('+o.d+')':'')).join('\n')+'\n\n(Sent from the Zugati portal)'),'_blank','noopener')};
