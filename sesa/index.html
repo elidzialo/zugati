@@ -354,8 +354,15 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 @keyframes shine{0%,60%{background-position:150% 0}100%{background-position:-100% 0}}
 .bd span{font-size:12px;font-weight:700;line-height:1.15;text-align:center;color:#6b5320;max-width:66px}
 .bd:not(.got) span{opacity:.75}.bd b{font-size:12px;font-weight:700;color:#b07a10;line-height:1}
+/* O 21 Nov 14:13: locked badges tinted in their own colour, next badge glows */
+.bdg .bt small{flex:1;min-width:0;margin:0 8px;font-size:12px;font-weight:600;color:#8a5a00;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bd:not(.got) .bc i{background:color-mix(in srgb,var(--c) 13%,#fff);color:var(--c)}.bd:not(.got) .bc i svg{opacity:.85}.brow{align-items:flex-start}
+.bd.bnext .bc{animation:bnx 2.2s ease-in-out infinite}.bd.bnext .bc i svg{opacity:1}.bd.bnext span{opacity:1}
+.bd.bnext b{background:#F07C8C;color:#fff;border-radius:8px;padding:0 6px;line-height:14px}
+@keyframes bnx{0%,100%{box-shadow:0 0 0 0 rgba(240,124,140,.55)}50%{box-shadow:0 0 0 7px rgba(240,124,140,0)}}
+@media (prefers-reduced-motion:reduce){.bd.bnext .bc{animation:none}}
 .bd.new .bc{animation:bpop .9s cubic-bezier(.2,1.6,.4,1)}@keyframes bpop{0%{transform:scale(.3) rotate(-30deg)}100%{transform:none}}
-@media (prefers-color-scheme:dark){.bdg .bt em{background:#fff;color:#1d1d1f}.bd .bc{background:conic-gradient(#F07C8C calc(var(--p)*1%),rgba(255,255,255,.12) 0)}.bd .bc i{background:#2a2a2c;color:#8a7a5a}.bd span{color:#e3c78a}.bd b{color:#f3c46a}}
+@media (prefers-color-scheme:dark){.bdg .bt small{color:#f3c46a}.bd:not(.got) .bc i{background:color-mix(in srgb,var(--c) 22%,#2a2a2c)}.bdg .bt em{background:#fff;color:#1d1d1f}.bd .bc{background:conic-gradient(#F07C8C calc(var(--p)*1%),rgba(255,255,255,.12) 0)}.bd .bc i{background:#2a2a2c;color:#8a7a5a}.bd span{color:#e3c78a}.bd b{color:#f3c46a}}
 
 /* D 18 Nov 15:47: Coming up - calendar strip of dated items */
 .cal{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 16px;margin:0 -16px;padding:2px 16px 10px;scrollbar-width:none}
@@ -725,8 +732,9 @@ function badgeList(){const s=streakStats(),done=Object.keys(LOG).filter(k=>DONE[
  {id:'goal',n:'Goal getter',i:'trophy',g:'linear-gradient(135deg,#1d1d1f,#5a4a2a)',v:Math.min(s.wk,s.goal),of:s.goal,how:'Hit the weekly goal'}
  ].map(b=>({...b,got:b.v>=b.of||(BADGES||[]).includes(b.id)}))}
 function badgeShelf(){if(BADGES===null){BADGES=badgeList().filter(b=>b.got).map(b=>b.id);saveBadges()}const L=badgeList(),n=L.filter(b=>b.got).length;
- return `<div class="bdg"><div class="bt"><span>Badges</span><em>${n}/${L.length}</em></div><div class="brow">${L.sort((a,b)=>(b.got-a.got)||(b.v/b.of-a.v/a.of)).map(b=>{const p=b.got?100:Math.round(b.v/b.of*100);
- return `<button class="bd ${b.got?'got':''}" data-badge="${b.id}" style="--g:${b.g};--p:${p}" aria-label="${b.n}${b.got?' - earned':''}"><div class="bc"><i>${ic(b.i,22,2.4)}</i></div><span>${b.n}</span>${b.got?'':`<b>${b.pc?p+'%':b.v+'/'+b.of}</b>`}</button>`}).join('')}</div></div>`}
+ L.sort((a,b)=>(b.got-a.got)||(b.v/b.of-a.v/a.of));const nx=L.find(b=>!b.got);
+ return `<div class="bdg"><div class="bt"><span>Badges</span>${nx?`<small>Next: ${nx.how.toLowerCase()}</small>`:'<small>All earned!</small>'}<em>${n}/${L.length}</em></div><div class="brow">${L.map(b=>{const p=b.got?100:Math.round(b.v/b.of*100);
+ return `<button class="bd ${b.got?'got':''}${b===nx?' bnext':''}" data-badge="${b.id}" style="--g:${b.g};--c:${(b.g.match(/#\w{6}/g)||['#F07C8C']).pop()};--p:${p}" aria-label="${b.n}${b.got?' - earned':''}"><div class="bc"><i>${ic(b.i,22,2.4)}</i></div><span>${b.n}</span>${b.got?'':`<b>${b===nx?'Next':b.pc?p+'%':b.v+'/'+b.of}</b>`}</button>`}).join('')}</div></div>`}
 function badgeCheck(){const L=badgeList(),got=L.filter(b=>b.got).map(b=>b.id);if(BADGES===null){BADGES=got;saveBadges();return}
  const nw=L.filter(b=>b.got&&!BADGES.includes(b.id));if(!nw.length)return;BADGES=[...new Set([...BADGES,...got])];saveBadges();refreshStreak();
  nw.forEach(b=>{const e=document.querySelector(`[data-badge="${b.id}"]`);if(e){e.classList.add('new');e.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'})}});
