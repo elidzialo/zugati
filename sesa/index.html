@@ -318,6 +318,8 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .cf{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;z-index:30;pointer-events:none;animation:fall 1.6s cubic-bezier(.25,.6,.4,1) forwards}
 @keyframes fall{to{transform:translate(var(--x),105vh) rotate(var(--r));opacity:.9}}
 /* gate */
+#gate .plink{text-align:center;margin:14px 0 6px;font-size:14px}#gate .plink a{color:var(--ink);opacity:.7}#gate #perr{color:#d33}
+.hout{font:600 12px Poppins,sans-serif;margin-left:8px;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.35);background:transparent;color:inherit;cursor:pointer;vertical-align:middle}
 #gate{max-width:380px;margin:14vh auto 0;padding:0 18px}
 #gate .hero{border-radius:24px;margin:0 0 16px;padding:24px 20px}
 #gate .hi{margin-top:18px;position:relative;z-index:1}
@@ -637,6 +639,13 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
   <input id="pw" type="password" autocomplete="current-password" placeholder="Password" aria-label="Password" onkeydown="if(event.key==='Enter')go()">
   <button onclick="go()">Open hub</button>
   <p id="err" class="hidden">Wrong password, or the data could not be loaded.</p>
+  <p class="plink"><a href="#" onclick="partnerForm(true);return false">Partner? Log in with your email</a></p>
+  <div id="pform" class="hidden">
+   <input id="pem" type="email" autocomplete="username" placeholder="Email" aria-label="Email">
+   <input id="ppw" type="password" autocomplete="current-password" placeholder="Password" aria-label="Partner password" onkeydown="if(event.key==='Enter')plogin()">
+   <button onclick="plogin()">Log in</button>
+   <p id="perr" class="hidden">Wrong email or password.</p>
+  </div>
 </div>
 <div id="app" class="wrap hidden"></div>
 <nav id="nav" class="nav hidden" aria-label="Sections"></nav>
@@ -697,7 +706,8 @@ const PCOL=['#F07C8C','#4c7de0','#6a4bc4','#2f9a63','#d48a1c','#1d1d1f'];
 const people=()=>[...(DATA.people||[]),...EXTRA.filter(x=>!(DATA.people||[]).some(p=>p.id===x.id))];
 const person=id=>people().find(p=>p.id===id);
 const ownerId=t=>(t.id in OWN)?OWN[t.id]:t.owner;
-const me=()=>(DATA.people||[]).find(p=>p.me);
+const normEm=e=>String(e||'').toLowerCase().replace(/\.(?=[^@]*@)/g,'');
+const me=()=>{const ps=DATA.people||[];if(USER)return ps.find(p=>normEm(p.email)===normEm(USER.email))||{id:'u_'+USER.email,name:USER.name||USER.email,email:USER.email};return ps.find(p=>p.me)};
 const inits=n=>String(n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
 const pcol=id=>{const i=people().findIndex(p=>p.id===id);return PCOL[(i<0?5:i)%PCOL.length]};
 const avatar=(p,cls='av')=>`<span class="${cls}" style="background:${pcol(p.id)}">${esc(inits(p.name))}</span>`;
@@ -713,8 +723,28 @@ function norm(d){d.properties=d.properties||[];d.top3=d.top3||[];d.watch=d.watch
 function remPw(k){try{const o=JSON.parse(localStorage.getItem(k)||'null');if(o&&o.pw&&Date.now()-o.t<6048e5){o.t=Date.now();localStorage.setItem(k,JSON.stringify(o));return o.pw}localStorage.removeItem(k)}catch(e){}return null}
 function savePw(k,pw){try{localStorage.setItem(k,JSON.stringify({pw:pw,t:Date.now()}))}catch(e){}}
 function forgetPw(k){try{localStorage.removeItem(k)}catch(e){}}
+/* Partner logins (21 Nov): partners sign in with their Eli Hub email + password (Supabase).
+   Only people with Sesa access can read the Sesa data key, so they never see Zugati or Zalo.
+   Eli's own password still works: keys.json holds the data key locked with it. */
+const SB='https://kddhkuwnkkjcnbjegsmc.supabase.co',SBK='sb_publishable_zASd1ua4ZuknbOatR4MnTA_nVwqRZlR';
+let USER=null;try{USER=JSON.parse(localStorage.getItem('sesaUser')||'null')}catch(e){}
+async function unwrap(pw){try{const r=await fetch('keys.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return null;const j=await r.json();
+ for(const w of j.wraps||[]){try{const k=await deriveKey(pw,b64(w.salt),w.iter);const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(w.iv)},k,b64(w.ct));return new TextDecoder().decode(p)}catch(e){}}}catch(e){}return null}
+function partnerForm(on){document.getElementById('pform').classList.toggle('hidden',!on);if(on)document.getElementById('pem').focus()}
+function showApp(){document.getElementById('gate').classList.add('hidden');document.getElementById('app').classList.remove('hidden');document.getElementById('nav').classList.remove('hidden');NPOS=null;navPill()}
+async function plogin(){const em=document.getElementById('pem').value.trim().toLowerCase(),pw=document.getElementById('ppw').value,er=document.getElementById('perr');er.classList.add('hidden');
+ try{skeleton(true);
+  const t=await fetch(SB+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:SBK,'Content-Type':'application/json'},body:JSON.stringify({email:em,password:pw})}).then(r=>r.json());
+  if(!t.access_token)throw 0;const h={apikey:SBK,Authorization:'Bearer '+t.access_token};
+  const k=await fetch(SB+'/rest/v1/portal_keys?business_id=eq.sesa&select=data_key',{headers:h}).then(r=>r.json());
+  if(!k||!k[0]||!k[0].data_key)throw 0;
+  let name=em;try{const p=await fetch(SB+'/rest/v1/profiles?select=name&id=eq.'+t.user.id,{headers:h}).then(r=>r.json());if(p[0]&&p[0].name)name=p[0].name}catch(e){}
+  USER={email:em,name};KEY=null;await load(k[0].data_key);skeleton(false);
+  try{localStorage.setItem('sesaUser',JSON.stringify(USER))}catch(e){}savePw('sesaPartner',k[0].data_key);showApp()}
+ catch(e){USER=null;KEY=null;skeleton(false);document.getElementById('app').classList.add('hidden');document.getElementById('gate').classList.remove('hidden');partnerForm(true);er.classList.remove('hidden')}}
+function logout(){forgetPw('sesaPartner');forgetPw('sesaRemember');try{localStorage.removeItem('sesaUser');sessionStorage.removeItem('sesaPw')}catch(e){}location.reload()}
 async function go(){const pw=document.getElementById('pw').value;document.getElementById('err').classList.add('hidden');
- try{skeleton(true);await load(pw);skeleton(false);try{sessionStorage.setItem('sesaPw',pw)}catch(e){}savePw('sesaRemember',pw);document.getElementById('gate').classList.add('hidden');document.getElementById('app').classList.remove('hidden');document.getElementById('nav').classList.remove('hidden');NPOS=null;navPill()}
+ try{skeleton(true);USER=null;try{localStorage.removeItem('sesaUser')}catch(e){}const dk=(await unwrap(pw))||pw;KEY=null;await load(dk);skeleton(false);try{sessionStorage.setItem('sesaPw',pw)}catch(e){}savePw('sesaRemember',pw);document.getElementById('gate').classList.add('hidden');document.getElementById('app').classList.remove('hidden');document.getElementById('nav').classList.remove('hidden');NPOS=null;navPill()}
  catch(e){KEY=null;skeleton(false);document.getElementById('app').classList.add('hidden');document.getElementById('app').innerHTML='';document.getElementById('gate').classList.remove('hidden');forgetPw('sesaRemember');document.getElementById('err').classList.remove('hidden');const g=document.getElementById('pw');g.classList.remove('shake');void g.offsetWidth;g.classList.add('shake')}}
 function ago(t){const m=Math.round((Date.now()-new Date(t))/60000);if(!isFinite(m))return 'recently';if(m<2)return 'just now';if(m<60)return m+' min ago';const h=Math.round(m/60);if(h<48)return h+'h ago';return Math.round(h/24)+' days ago'}
 function greet(){const h=new Date().getHours();return h<12?'Good morning':h<18?'Good afternoon':'Good evening'}
@@ -1145,7 +1175,7 @@ function nudgePrompt(id){const[t,pr]=findTask(id);const o=t&&person(ownerId(t));
 function nudge(id){const r=nudgePrompt(id)||nudgeUrl(id);if(!r)return;const w=window.open(r[0],'_blank');if(!w)location.href=r[0];toast(`Claude is ready to email ${first(r[1].name)} - tap Send`)}
 function render(){const d=DATA,o=allO();let h='';
  h+=`<div class="hero"><div class="top"><div class="brand"><b>SESA<i>.</i></b><small>ESTATES HUB</small></div><div class="upd"><i></i>${esc(ago(d.updated_at))}</div></div>
- <div class="hrow"><div><div class="hi">${greet()}, Eli</div><div class="hisub" id="hisub">${subline(o)}</div>${(()=>{try{const u=watchItems().filter(x=>x.k==='h').length;return u?`<button class="hurg" data-wh="h">${ic('bell',14,2.6)}<b>${u}</b> need${u===1?'s':''} action now</button>`:''}catch(e){return ''}})()}</div><div class="bigring" id="hring">${heroRing()}</div></div>
+ <div class="hrow"><div><div class="hi">${greet()}, ${esc(first((me()||{}).name)||'Eli')}${USER?` <button class="hout" onclick="logout()">Log out</button>`:''}</div><div class="hisub" id="hisub">${subline(o)}</div>${(()=>{try{const u=watchItems().filter(x=>x.k==='h').length;return u?`<button class="hurg" data-wh="h">${ic('bell',14,2.6)}<b>${u}</b> need${u===1?'s':''} action now</button>`:''}catch(e){return ''}})()}</div><div class="bigring" id="hring">${heroRing()}</div></div>
  <div class="stats"><div class="stat s1"><div class="v">${d.money?gbp(d.money.rent_total):'-'}</div><div class="l">Rent in</div></div><div class="stat s2"><div class="v" id="openN">${o}</div><div class="l">Jobs open</div></div>${(()=>{const rc=realCash(d.money);return `<div class="stat s3"><div class="v">${d.money?(rc&&rc.v!=null?'~'+gbp(rc.v):gbp(d.money.bank_balance)):'-'}</div><div class="l">Bank${rc&&rc.v!=null?' <i class="est">est.</i>':''}</div></div>`})()}</div></div>`;
  h+=`<div class="sec${SLIDE?' '+SLIDE:''}">`;
  if(TAB==='money'&&d.money)h+=money(d.money);else{const i=d.properties.findIndex(p=>p.id===TAB);if(i>=0)h+=prop(d.properties[i],i);else{TAB='home';h+=home(d)}}
@@ -1189,7 +1219,8 @@ document.addEventListener('click',e=>{if(e.target.id==='shade')return closeSheet
  if(t.id==='morebtn'){WX=!WX;const w=document.getElementById('watch');if(w)w.innerHTML=watchBlock();return}
  if(t.dataset.tab)setTab(t.dataset.tab)});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet();const f=e.target.closest&&e.target.closest('[data-fold]');if(f&&e.target===f&&(e.key==='Enter'||e.key===' ')){e.preventDefault();fold(f)}});
-(async()=>{let pw;try{pw=sessionStorage.getItem('sesaPw')}catch(e){}if(!pw)pw=remPw('sesaRemember');if(pw){document.getElementById('pw').value=pw;go()}})();
+(async()=>{const pk=USER&&remPw('sesaPartner');if(pk){try{skeleton(true);await load(pk);skeleton(false);showApp();return}catch(e){skeleton(false);KEY=null;USER=null;forgetPw('sesaPartner');try{localStorage.removeItem('sesaUser')}catch(e){};document.getElementById('app').classList.add('hidden');document.getElementById('gate').classList.remove('hidden');partnerForm(true)}return}
+ let pw;try{pw=sessionStorage.getItem('sesaPw')}catch(e){}if(!pw)pw=remPw('sesaRemember');if(pw){document.getElementById('pw').value=pw;go()}})();
 </script>
 </body>
 </html>

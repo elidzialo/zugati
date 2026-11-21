@@ -19,3 +19,9 @@ The page has tabs: Today, Money, one per property.
 `people[]`: {id, name, email, me?} - who tasks can be assigned to (Eli Dzialo is `me`). Keep this list; add a partner only if Eli asks.
 `tasks[].owner`: optional person id. Keep it when a task stays. Picks made on the page override it on that device only (localStorage `sesaOwners`, extra people in `sesaPeople`).
 The Nudge button opens Claude (claude.ai/new?q=...) with a one-line prompt to send the nudge email from eli@zelr.co.uk to the owner, cc Eli, subject "Sesa nudge: <task title>". Replies to those threads say whether the task is done - the refresh task reads them.
+
+## Logins (added 21 Nov)
+- `data.enc.json` is encrypted with its own data key (not Eli's password). The refresh task has the key.
+- `keys.json` holds that data key locked with Eli's password, so Eli's password still opens the page. Rebuild it with `SESA_PASSWORD=<Eli's password> SESA_KEY=<data key> node wrapkey.mjs` only if either changes.
+- Partners (e.g. Samuel Reich, Eli Sinitsky) tap "Partner? Log in with your email" and use their Eli Hub login (Supabase project eli-hub). The page reads the data key from the `portal_keys` table, which only users with Sesa access can read. They only ever get the Sesa page.
+- Never commit the data key or a plain data file.
