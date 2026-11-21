@@ -40,6 +40,29 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .story{background:var(--card);color:var(--ink);border:1px solid var(--line);border-left:6px solid var(--pink);border-radius:22px;padding:16px 18px;box-shadow:0 6px 18px rgba(29,29,31,.06)}
 .story small{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--pink)}
 .story p{margin:4px 0 0;font-size:17px;font-weight:600;line-height:1.4}
+/* D 21 Nov 15:47: Today's story became a tap-through Stories reel (headline, each property, money) */
+.sty{position:relative;display:grid;border-radius:24px;min-height:206px;overflow:hidden;color:#fff;box-shadow:0 10px 26px rgba(29,29,31,.18);user-select:none;-webkit-user-select:none;touch-action:manipulation;cursor:pointer;outline-offset:3px}
+.sty .sbars{position:absolute;top:10px;left:14px;right:14px;display:flex;gap:5px;z-index:3}
+.sty .sbars i{flex:1;height:4px;border-radius:4px;background:rgba(255,255,255,.32);overflow:hidden}
+.sty .sbars b{display:block;height:100%;width:0;background:#fff;border-radius:4px}
+.sty .sbars i.dn b{width:100%}.sty .sbars i.on b{animation:sfill 6s linear forwards}
+.sty.paused .sbars i.on b{animation-play-state:paused}
+@keyframes sfill{from{width:0}to{width:100%}}
+.sty .sl{grid-area:1/1;position:relative;min-width:0;padding:28px 18px 16px;display:flex;flex-direction:column;opacity:0;transform:translateX(18px) scale(.98);transition:opacity .35s,transform .35s;pointer-events:none}
+.sty .sl.on{opacity:1;transform:none;pointer-events:auto}.sty .sl.was{transform:translateX(-18px) scale(.98)}
+.sty .sk{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase}
+.sty .sk .bub{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;border:2px solid rgba(255,255,255,.55)}
+.sty .sk .ct{margin-left:auto;font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;opacity:.8}
+.sty .sx{margin:12px 0 0;font-size:19px;font-weight:700;line-height:1.32;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;position:relative;z-index:1;max-width:92%}
+.sty .sx em{font-style:normal;background:rgba(255,255,255,.24);border-radius:8px;padding:0 5px}
+.sty .sf{margin-top:auto;padding-top:12px;display:flex;align-items:center;gap:8px;position:relative;z-index:2}
+.sty .sgo{min-height:44px;border:0;border-radius:22px;background:#fff;color:#1d1d1f;font:600 14px Poppins,system-ui,sans-serif;padding:0 14px 0 16px;display:inline-flex;align-items:center;gap:4px;cursor:pointer}
+.sty .shint{font-size:12px;opacity:.75;margin-left:auto}
+.sty .bigi{position:absolute;right:-18px;bottom:-22px;opacity:.14;transform:rotate(-12deg);pointer-events:none}
+.sty .sdk{background:linear-gradient(135deg,#1D1D1F 0%,#3b2530 60%,#F07C8C 160%)}
+.sty .sdk .bub{background:#F07C8C;border-color:#fff}
+@media (min-width:900px){.sty{min-height:180px}.sty .sx{font-size:21px;max-width:80%}}
+@media (prefers-reduced-motion:reduce){.sty .sbars i.on b{animation:none;width:100%}.sty .sl{transition:none}}
 /* top 3 */
 .moves{display:grid;gap:10px}
 .move{border-radius:20px;padding:14px 12px 14px 16px;display:flex;align-items:center;gap:14px;position:relative;transition:transform .15s,opacity .3s}
@@ -853,8 +876,30 @@ function claim(id){const m=me();if(!m)return;OWN[id]=m.id;saveOwn();refreshTeam(
  toast('Yours now - nice one')}
 function gotoTask(id){const[t,pr]=findTask(id);if(!t)return;closeSheet();if(TAB!==pr.id){TAB=pr.id;render()}
  setTimeout(()=>{const c=document.querySelector(`.task [data-task="${CSS.escape(id)}"]`),e=c&&c.closest('.task');if(e){fold(e.querySelector('[data-fold]'),true);e.scrollIntoView({behavior:'smooth',block:'center'});e.classList.remove('flash');void e.offsetWidth;e.classList.add('flash')}},80)}
+/* D 21 Nov 15:47: Stories reel for Today's story - tap right for next, left for back, hold to pause */
+let STI=0;
+function stySlides(d){const S=[];
+ S.push({c:'sdk',k:"Today's story",i:'spark',t:d.headline||'All quiet. Nice.'});
+ d.properties.forEach((p,i)=>{if(p.event)S.push({c:GR[i%4],k:short(p.name),i:'bld',t:p.event,go:p.id,gl:'Open '+short(p.name)})});
+ if(d.money&&d.money.rent_total!=null)S.push({c:'g2',k:'Money',i:'pound',t:`${gbp(d.money.rent_total)} rent in since Sep`+(d.money.costs_total!=null?`, ${gbp(d.money.costs_total)} out`:''),go:'money',gl:'See money'});
+ return S}
+const hiMoney=t=>esc(t).replace(/£[\d,.]+/g,m=>`<em>${m}</em>`);
+function storyHtml(d){const S=stySlides(d),n=S.length;if(STI>=n)STI=0;
+ return `<div class="sty" id="sty" tabindex="0" role="region" aria-roledescription="stories" aria-label="Today's stories, ${n} cards. Tap or use arrow keys.">${n>1?`<div class="sbars">${S.map((x,j)=>`<i class="${j<STI?'dn':j===STI?'on':''}"><b></b></i>`).join('')}</div>`:''}
+ ${S.map((x,j)=>`<div class="sl ${x.c} ${j===STI?'on':''}" aria-hidden="${j!==STI}"><div class="sk"><span class="bub">${ic(x.i,16,2.4,'#fff')}</span>${esc(x.k)}${n>1?`<span class="ct">${j+1} of ${n}</span>`:''}</div><p class="sx">${hiMoney(x.t)}</p>
+ <div class="sf">${x.go?`<button class="sgo" data-tab="${esc(x.go)}"${j!==STI?' tabindex="-1"':''}>${esc(x.gl)} ${ic('arrow',16,2.6)}</button>`:''}${n>1&&j===0?`<span class="shint">Tap for more ${ic('arrow',12,2.6)}</span>`:''}</div>
+ <span class="bigi">${ic(x.i,130,1.6,'#fff')}</span></div>`).join('')}</div>`}
+function styGo(to){const el=document.getElementById('sty');if(!el)return;const sl=el.querySelectorAll('.sl'),bars=el.querySelectorAll('.sbars i'),n=sl.length;if(n<2)return;
+ to=(to+n)%n;sl.forEach((x,j)=>{x.classList.toggle('on',j===to);x.classList.toggle('was',j<to);x.setAttribute('aria-hidden',j!==to);const b=x.querySelector('.sgo');if(b)b.tabIndex=j===to?0:-1});
+ bars.forEach((x,j)=>{x.className=j<to?'dn':'';if(j===to){void x.offsetWidth;x.className='on'}});STI=to}
+function bindStory(){const el=document.getElementById('sty');if(!el)return;let held=false,ht=null;
+ el.querySelectorAll('.sbars i').forEach((b,j)=>b.addEventListener('animationend',()=>{if(j===STI&&STI<el.querySelectorAll('.sl').length-1)styGo(STI+1)}));
+ el.addEventListener('pointerdown',e=>{if(e.target.closest('[data-tab]'))return;held=false;ht=setTimeout(()=>{held=true;el.classList.add('paused')},260)});
+ const up=()=>{clearTimeout(ht);el.classList.remove('paused')};el.addEventListener('pointerup',up);el.addEventListener('pointerleave',up);el.addEventListener('pointercancel',up);
+ el.addEventListener('click',e=>{if(e.target.closest('[data-tab]'))return;if(held){held=false;return}const r=el.getBoundingClientRect();styGo(e.clientX-r.left<r.width/3?STI-1:STI+1)});
+ el.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();styGo(STI+1)}else if(e.key==='ArrowLeft'){e.preventDefault();styGo(STI-1)}})}
 function home(d){let h='';
- h+=`<div class="story"><small>Today's story</small><p>${esc(d.headline||'All quiet. Nice.')}</p></div>`;
+ h+=storyHtml(d);
  if(DIFF)h+=`<div style="margin-top:16px">${newsCard()}</div>`;
  if(d.top3.length){h+=`<h2>Your 3 things today <span class="cnt" id="t3c">${t3left()} left</span></h2><div id="stkw">${stackHtml()}</div>`}
  {const cd=comingUp(),cu=cd.length;h+=`<h2>Coming up${cu?` <span class="cnt">${cu} date${cu>1?'s':''}</span>`:''}</h2>${calStrip(cd)}`}
@@ -1058,7 +1103,7 @@ function render(){const d=DATA,o=allO();let h='';
  h+=`<div class="sec${SLIDE?' '+SLIDE:''}">`;
  if(TAB==='money'&&d.money)h+=money(d.money);else{const i=d.properties.findIndex(p=>p.id===TAB);if(i>=0)h+=prop(d.properties[i],i);else{TAB='home';h+=home(d)}}
  h+=`</div>`;
- document.getElementById('app').innerHTML=h;bindSwipe();
+ document.getElementById('app').innerHTML=h;bindSwipe();bindStory();
  const tabs=[['home','Today','home',0],...(d.money?[['money','Money','pound',0]]:[]),...d.properties.map(p=>[p.id,short(p.name),'bld',open_(p)])];
  document.getElementById('nav').innerHTML=tabs.map(([id,l,icn,n])=>`<button class="nb ${TAB===id?'on':''}" data-tab="${esc(id)}" ${TAB===id?'aria-current="page"':''}>${ic(icn,20)}<span>${esc(l)}</span>${n?`<b class="n" data-n="${esc(id)}">${n}</b>`:''}${propNews(id)?'<i class="nd" aria-label="Something new"></i>':''}</button>`).join('');navPill();
  requestAnimationFrame(()=>setTimeout(()=>{document.querySelectorAll('.bpair i').forEach(e=>e.style.height=e.dataset.h+'%');document.querySelectorAll('[data-w]').forEach(e=>e.style.width=e.dataset.w+'%');document.querySelectorAll('.rca').forEach(e=>e.style.strokeDashoffset=e.dataset.off)},40));countUp()}
