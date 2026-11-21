@@ -537,6 +537,24 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
 @media(max-width:600px){.roft{grid-template-columns:64px 1fr}.rofi{display:none}.rofr,.rofr svg{width:64px;height:64px}.rofr b{top:13px;font-size:24px}.rofr i{top:39px}}
 @media(prefers-reduced-motion:reduce){.rofa{animation:none}}
 .ov:not(.hidden)~.tip3,.bdr:not(.hidden)~.tip3{display:none}
+/* A2 21 Nov: payment stacks */
+.psum{padding:14px}.psumh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}.psumh b{font-size:19px}.psumh span{font-size:15px;font-weight:700;color:var(--muted)}
+.psbar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--greybg);margin:10px 0 12px}.psbar i{display:block;height:100%;animation:psgrow .9s ease-out both;transform-origin:left}
+@keyframes psgrow{from{transform:scaleX(0)}}
+.pstiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pstile{font:inherit;text-align:left;border:0;border-top:5px solid var(--c);background:var(--bg);border-radius:10px;padding:10px;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-height:44px;color:#0f1111;transition:transform .15s}
+.pstile:active{transform:scale(.97)}.pstile .psi{font-size:18px}.pstile .psl{font-size:13px;font-weight:700;color:var(--c)}.pstile b{font-size:22px;line-height:1.1}.pstile small{font-size:12px;color:#565959}.pstile .psu{color:var(--c)}
+.pinc{margin-top:10px;background:#e7f6ee;border-radius:10px;padding:10px 12px;font-size:14px;color:#0f1111}.pinc span{display:block;font-size:12px;color:#565959;margin-top:2px}
+.pstack{border-left:6px solid var(--c);background:var(--bg);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px;scroll-margin-top:70px}
+.pstack.flash{animation:psfl 1.2s}@keyframes psfl{30%{box-shadow:0 0 0 4px var(--c)}}
+.psth{display:flex;align-items:center;gap:10px}.psth .psi{font-size:22px}.psth div{flex:1;min-width:0}.psth b{display:block;font-size:18px;color:var(--c)}.psth small{font-size:13px;color:#565959}.pstt{font-size:22px;font-weight:800;color:var(--c)}
+.pshow{font:inherit;font-weight:700;font-size:14px;border:1px solid var(--c);color:var(--c);background:#fff;border-radius:20px;padding:10px;min-height:44px;cursor:pointer}
+.ppaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px}.ppaid summary{cursor:pointer;font-weight:700;color:var(--green);min-height:30px;display:flex;align-items:center}.ppaid .prow{margin-top:8px}
+@media(max-width:600px){.pstiles{gap:6px}.pstile{padding:8px}.pstile b{font-size:18px}.pstile .psl{font-size:12px}.pstt{font-size:19px}}
+@media(prefers-reduced-motion:reduce){.psbar i,.pstack.flash{animation:none}}
+@media(min-width:621px){.pstack .prow,.ppaid .prow{grid-template-columns:72px minmax(0,1fr) minmax(120px,200px)}.pstack .pamt{min-width:0}}
+/* A2 21 Nov: USA leak badge */
+.leakb{display:block;margin:8px 0 0;background:#fde8ec;color:#cc0c39;border:1px solid #f5b5c2;border-radius:8px;padding:8px 10px;font-size:13px;font-weight:700;line-height:1.35}.leakb b{font-weight:800}
 </style>
 </head>
 <body>
@@ -726,7 +744,7 @@ function forecast(p){
   let qty=Math.max(0,Math.ceil((needLead-have)/50)*50);
   /* A2 20 Nov: if new stock lands in time (gap <=2 days), judge the order on when the NEXT run-out is - stops 'order 1,550 now' on the doll set with 4,176 on the way */
   const nx0=run===null?null:AL.find(a=>a.i>=run)||null,lastA=AL.length?AL[AL.length-1].i:-1;let runD=run;
-  if(run!==null&&nx0&&nx0.i-run<=2){runD=null;for(let i=Math.max(lastA,run+1);i<line.length;i++){if(line[i]<=0&&rate(addD(t0,i))>0){runD=i;break}}}
+  if(run!==null&&nx0&&(nx0.i-run<=2||nx0.i<=lead)){/* A2 21 Nov: stock already on its way lands before a new order could (lead days) - a new order can't fill the gap, so judge on the run-out after it lands; the gap still shows as a warning */runD=null;for(let i=Math.max(lastA,run+1);i<line.length;i++){if(line[i]<=0&&rate(addD(t0,i))>0){runD=i;break}}}
   let reorderIn=runD===null?null:runD-lead;
   const vSi=Math.round((vS-t0)/DAY),vEi=Math.round((vE-t0)/DAY);
   if(valRate&&runD!==null&&runD<=vEi)reorderIn=Math.min(runD,vSi)-lead;
@@ -749,6 +767,7 @@ function orderLine(p,f){
   if(f.st==='now'&&!f.qty&&p.on_order){const a=(f.AL||[]).find(x=>x.src!=='inb');return n0(p.on_order)+' ordered'+(a&&a.src==='vo'?' - lands ~'+fmtD(addD(today(),a.i))+(f.gap>0?' - ask to send it sooner':''):' - make sure it ships now')}
   if(f.st==='now')return 'Order '+n0(f.qty)+' units now';
   if(f.st==='soon')return 'Order '+n0(f.qty)+' by '+fmtD(addD(today(),f.reorderIn));
+  if(f.nx&&f.gap>2&&f.nx.i<=(DATA.lead_days||45))return n0(f.have-(p.stock||0))+' on the way - lands ~'+fmtD(addD(today(),f.nx.i))+'. Short gap, no new order needed';
   if(f.reorderIn!=null)return 'Next order by '+fmtD(addD(today(),f.reorderIn));
   return 'Enough stock for 5 months+';
 }
@@ -812,6 +831,9 @@ function renderSort(){const d=[['urgent','⏰ Urgent'],['profit','💷 Profit'],
 function wireSearch(){const i=$('psq'),x=$('psx');if(!i||i._w)return;i._w=1;renderSort();
   i.oninput=()=>{PQ=i.value.trim();x.classList.toggle('hidden',!i.value);renderGrid()};
   x.onclick=e=>{e.preventDefault();i.value='';PQ='';x.classList.add('hidden');renderGrid();i.focus()}}
+/* A2 21 Nov: USA leak - account fees bigger than sales over 7 days; badge on US cards that still hold stock. Read-only. */
+function leakB(p){if(p.account!=='USA'||!(p.stock>0))return '';const a=DATA.accounts.USA;if(!a)return '';const w=a.periods.find(x=>x.key==='7d')||{};const fee=-(w.amazon_fees||0);
+  if(!((w.net_profit||0)<0&&fee>(w.sales||0)))return '';return '<span class="leakb">💸 <b>Costing you money</b> - the USA account paid '+money(fee,a.currency)+' in Amazon fees but sold only '+money(w.sales,a.currency)+' in 7 days.</span>'}
 function renderGrid(){
   wireSearch();const ord={now:0,soon:1,ok:2,slow:3,stop:4};
   const act=x=>x.f.st!=='now'?0:x.f.qty>0&&!x.f.nx?0:x.f.qty>0?1:2;const srt={urgent:(a,b)=>ord[a.f.st]-ord[b.f.st]||act(a)-act(b)||(a.f.left??1e9)-(b.f.left??1e9)||(b.p.profit30||0)-(a.p.profit30||0),profit:(a,b)=>(b.p.profit30||0)-(a.p.profit30||0),sold:(a,b)=>(b.p.per_day||0)-(a.p.per_day||0),az:(a,b)=>String(a.p.name).localeCompare(String(b.p.name))}[PSORT]||((a,b)=>0);
@@ -820,7 +842,7 @@ function renderGrid(){
     const [lab,cls]=ST[f.st];const left=f.left;const pct=left==null?0:Math.min(100,left/120*100);
     const RI=runInfo(p,f);const col=f.st==='now'||RI.c==='bad'?'var(--red)':f.st==='soon'||RI.c==='mid'?'var(--amber)':'var(--green)';
     return '<div class="pc" data-id="'+esc(p.id)+'"><div class="pimg"><img loading="lazy" src="'+img(p.img,400)+'" alt=""><span class="rib '+cls+'">'+lab+'</span><span class="mk">'+esc(p.market)+'</span>'+(p.valentine?'<span class="vtag">♥ Valentine\'s</span>':'')+'</div>'+
-    '<div class="pb"><div class="pn">'+esc(p.name)+'</div>'+
+    '<div class="pb"><div class="pn">'+esc(p.name)+'</div>'+leakB(p)+
     '<div class="big"><span class="num">'+n0(p.stock)+'</span><span class="u">in stock</span>'+inbPill(p)+'</div>'+
     '<div class="run"><i style="width:'+pct+'%;background:'+col+'"></i></div><div class="runl"><span class="ro '+RI.c+'">'+(RI.c==='bad'?'📅 ':'')+esc(RI.t)+'</span><span>'+(p.per_day?(p.per_day<1?p.per_day.toFixed(1):Math.round(p.per_day))+' sold / day':'')+'</span></div>'+(RI.s?'<div class="rosub '+RI.c+'">'+esc(RI.s)+'</div>':'')+
     '<div class="facts"><div class="fact">'+(p.valentine&&p.val_units?'<div class="k">Need until 14 Feb</div><div class="x">'+n0(f.needVal)+'</div>':'<div class="k">Next 60 days need</div><div class="x">'+n0(f.need60)+'</div>')+'</div><div class="fact"><div class="k">Profit 30 days</div><div class="x" style="color:'+((p.profit30||0)<0?'var(--red)':'var(--green)')+'">'+(p.profit30==null?'-':money(p.profit30,p.cur))+'</div></div></div>'+
@@ -887,10 +909,30 @@ function renderPay(){
   let DISP={};try{DISP=JSON.parse(localStorage.getItem('zdis')||'{}')}catch(e){}
   const P=(DATA.payments||[]).filter(x=>!DISP['p:'+x.id]).slice().sort((a,b)=>a.due<b.due?-1:1);
   const lab={unpaid:'Not paid',overdue:'Overdue',check:'Check if paid',planned:'Planned',later:'Later',forecast:'Not ordered yet',paid:'✓ Paid'};
-  $('pay').innerHTML=P.map(x=>{const d=new Date(x.due+'T00:00:00'),late=d<today()&&x.status!=='forecast';
+  const rowH=x=>{const d=new Date(x.due+'T00:00:00'),late=d<today()&&x.status!=='forecast';
    const pd=x.status==='paid';return '<div class="prow'+(pd?' paid':'')+'"><div class="pdate'+(late&&!pd?' late':'')+'"><div class="dd">'+d.getDate()+'</div><div class="mm">'+d.toLocaleDateString('en-GB',{month:'short'})+'</div></div>'+
    '<div><span class="pill p-'+esc(x.status)+'">'+(lab[x.status]||esc(x.status))+'</span><div class="pw">'+esc(x.what)+'</div><div class="pto">'+esc(x.to)+'</div><div class="pwhy">'+esc(x.why)+'</div></div>'+
-   '<div class="pamt"><div class="a">'+(x.amount!=null?money(x.amount,x.cur):'?')+'</div><div class="an">'+esc(x.amount_note||'')+'</div>'+(pd?'':'<div class="btns" style="justify-content:flex-end">'+(x.link?'<a class="btn" target="_blank" rel="noopener" href="'+esc(x.link)+'">Pay</a>':'')+(x.email?'<a class="btn ghost" target="_blank" rel="noopener" href="'+esc(x.email)+'">Email</a>':'')+'</div><div class="tact" style="justify-content:flex-end"><span class="tb ok" data-dis="p:'+esc(x.id)+'" data-st="paid" data-t="'+esc(x.what)+'">✓ Paid</span><span class="tb no" data-dis="p:'+esc(x.id)+'" data-st="not relevant" data-t="'+esc(x.what)+'">✕ Not relevant</span></div>')+'</div></div>'}).join('');wireDis($('pay'));
+   '<div class="pamt"><div class="a">'+(x.amount!=null?money(x.amount,x.cur):'?')+'</div><div class="an">'+esc(x.amount_note||'')+'</div>'+(pd?'':'<div class="btns" style="justify-content:flex-end">'+(x.link?'<a class="btn" target="_blank" rel="noopener" href="'+esc(x.link)+'">Pay</a>':'')+(x.email?'<a class="btn ghost" target="_blank" rel="noopener" href="'+esc(x.email)+'">Email</a>':'')+'</div><div class="tact" style="justify-content:flex-end"><span class="tb ok" data-dis="p:'+esc(x.id)+'" data-st="paid" data-t="'+esc(x.what)+'">✓ Paid</span><span class="tb no" data-dis="p:'+esc(x.id)+'" data-st="not relevant" data-t="'+esc(x.what)+'">✕ Not relevant</span></div>')+'</div></div>'};
+  /* A2 21 Nov: three coloured stacks with a £ total each - Pay now / Waiting for money / Later */
+  const isIn=x=>/money in\b|coming in|top-up/i.test((x.what||'')+' '+(x.amount_note||''));
+  const G={now:[],wait:[],later:[],paid:[],inc:[]};
+  P.forEach(x=>{if(isIn(x)){if(x.status!=='paid')G.inc.push(x)}else if(x.status==='paid')G.paid.push(x);else if(['unpaid','overdue','check'].includes(x.status))G.now.push(x);else if(x.status==='planned')G.wait.push(x);else G.later.push(x)});
+  G.now.sort((a,b)=>(a.status==='check')-(b.status==='check')||(a.due<b.due?-1:1));
+  const tot=L=>{let t=0,u=0;L.forEach(x=>{const g=payGbp(x);if(g>0)t+=g;else u++});return {t:Math.round(t),u}};
+  const DEF=[['now','🔴','Pay now','Not paid yet, or check if you already paid','#cc0c39','#fde8ec'],['wait','🟠','Waiting for money','Planned - pay when the cash lands','#c45500','#fff1dc'],['later','🔵','Later','Next month and beyond','#0b6fb3','#e6f1fa']];
+  const T={};DEF.forEach(d=>T[d[0]]=tot(G[d[0]]));const all=DEF.reduce((s,d)=>s+T[d[0]].t,0)||1;
+  const unk=u=>u?'<small class="psu">+ '+u+' with no amount yet</small>':'';
+  let ph='<div class="psum card"><div class="psumh"><b>What you owe</b><span>'+money(all,'GBP')+' in total</span></div>'+
+   '<div class="psbar">'+DEF.map(d=>T[d[0]].t?'<i style="width:'+(T[d[0]].t/all*100).toFixed(1)+'%;background:'+d[4]+'"></i>':'').join('')+'</div>'+
+   '<div class="pstiles">'+DEF.map(d=>'<button class="pstile" data-pgo="'+d[0]+'" style="--c:'+d[4]+';--bg:'+d[5]+'"><span class="psi">'+d[1]+'</span><span class="psl">'+d[2]+'</span><b>'+money(T[d[0]].t,'GBP')+'</b><small>'+G[d[0]].length+' item'+(G[d[0]].length===1?'':'s')+'</small>'+unk(T[d[0]].u)+'</button>').join('')+'</div>'+
+   G.inc.map(x=>'<div class="pinc">💚 <b>'+money(x.amount,x.cur)+' coming in</b> - '+esc(x.to)+'<span>'+esc(x.amount_note||x.why||'')+'</span></div>').join('')+'</div>';
+  DEF.forEach(d=>{const L=G[d[0]];if(!L.length)return;const cap=d[0]==='now'?99:2;
+   ph+='<div class="pstack" id="pst-'+d[0]+'" style="--c:'+d[4]+';--bg:'+d[5]+'"><div class="psth"><span class="psi">'+d[1]+'</span><div><b>'+d[2]+'</b><small>'+d[3]+'</small></div><span class="pstt">'+money(T[d[0]].t,'GBP')+'</span></div>'+
+    L.map((x,i)=>i<cap?rowH(x):'<div class="pmore hidden">'+rowH(x)+'</div>').join('')+(L.length>cap?'<button class="pshow" data-n="'+(L.length-cap)+'">Show '+(L.length-cap)+' more ▾</button>':'')+'</div>'});
+  if(G.paid.length)ph+='<details class="ppaid"><summary>✓ Paid recently ('+G.paid.length+')</summary>'+G.paid.map(rowH).join('')+'</details>';
+  $('pay').innerHTML=ph;wireDis($('pay'));
+  $('pay').querySelectorAll('.pshow').forEach(b=>b.onclick=()=>{const st=b.closest('.pstack'),open=b.dataset.o!=='1';st.querySelectorAll('.pmore').forEach(m=>m.classList.toggle('hidden',!open));b.dataset.o=open?'1':'';b.textContent=open?'Show less ▴':'Show '+b.dataset.n+' more ▾'});
+  $('pay').querySelectorAll('[data-pgo]').forEach(b=>b.onclick=()=>{const t=$('pst-'+b.dataset.pgo);if(t){t.scrollIntoView({behavior:'smooth',block:'start'});t.classList.remove('flash');void t.offsetWidth;t.classList.add('flash')}});
   // cash forecast
   const h=DATA.history;if(!h){$('cashchart').innerHTML='';return}
   const L=h.months.length,cur=h.payout[L-2],ly=h.payout[L-14];const ratio=ly?cur/ly:1;
