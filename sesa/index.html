@@ -340,6 +340,23 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 @media (prefers-color-scheme:dark){.streak{background:linear-gradient(135deg,#3a2a10,#3a1f1c);color:#f3f2ef;box-shadow:none}.streak:after{background:rgba(255,255,255,.05)}
 .flame{background:#2a2a2c}.sk-l,.dy{color:#e3c78a}.dy i{background:rgba(255,255,255,.1);color:#f3c46a}.dy.today i{border-color:#fff}.goal .gb{background:rgba(255,255,255,.12)}.pts{background:#fff;color:#1d1d1f}.pts b{color:#d4800c}}
 
+/* D 21 Nov 12:47: badge shelf in Your week */
+.bdg{margin-top:16px;position:relative;z-index:1}
+.bdg .bt{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;margin-bottom:8px}
+.bdg .bt em{font-style:normal;background:#1d1d1f;color:#ffcf5c;border-radius:10px;padding:2px 9px;font-size:12px}
+.brow{display:flex;gap:10px;overflow-x:auto;margin:0 -16px;padding:4px 16px 6px;scroll-snap-type:x mandatory;scrollbar-width:none}.brow::-webkit-scrollbar{display:none}
+.bd{flex:0 0 66px;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;min-height:44px}
+.bd .bc{width:56px;height:56px;border-radius:50%;padding:4px;background:conic-gradient(#F07C8C calc(var(--p)*1%),rgba(255,255,255,.7) 0);position:relative}
+.bd .bc i{display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;background:#fff;color:#c9b48a}
+.bd.got .bc{background:var(--g);box-shadow:0 6px 14px rgba(0,0,0,.16)}
+.bd.got .bc i{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.55)}
+.bd.got .bc:after{content:"";position:absolute;inset:0;border-radius:50%;background:linear-gradient(120deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);background-size:250% 100%;animation:shine 3.2s ease-in-out infinite}
+@keyframes shine{0%,60%{background-position:150% 0}100%{background-position:-100% 0}}
+.bd span{font-size:12px;font-weight:700;line-height:1.15;text-align:center;color:#6b5320;max-width:66px}
+.bd:not(.got) span{opacity:.75}.bd b{font-size:12px;font-weight:700;color:#b07a10;line-height:1}
+.bd.new .bc{animation:bpop .9s cubic-bezier(.2,1.6,.4,1)}@keyframes bpop{0%{transform:scale(.3) rotate(-30deg)}100%{transform:none}}
+@media (prefers-color-scheme:dark){.bdg .bt em{background:#fff;color:#1d1d1f}.bd .bc{background:conic-gradient(#F07C8C calc(var(--p)*1%),rgba(255,255,255,.12) 0)}.bd .bc i{background:#2a2a2c;color:#8a7a5a}.bd span{color:#e3c78a}.bd b{color:#f3c46a}}
+
 /* D 18 Nov 15:47: Coming up - calendar strip of dated items */
 .cal{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 16px;margin:0 -16px;padding:2px 16px 10px;scrollbar-width:none}
 .cal::-webkit-scrollbar{display:none}
@@ -598,6 +615,9 @@ const I={
  chat:'<path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h8M8 13h5"/>',
  cam:'<rect x="2.5" y="7" width="13" height="10" rx="2.5"/><path d="M15.5 11l6-3v8l-6-3z"/>',
  bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+ trophy:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/>',
+ sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+ star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
  doc:'<path d="M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6"/>',
  spark:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/>'};
 const TOPICS=[['decide',/\b(decide|decision|choose|offer|whether|leave flat)/i,'scale','Decide','tv'],
@@ -683,8 +703,36 @@ function streakCard(){const s=streakStats(),t=dkey(new Date()),L=['M','T','W','T
  const pc=Math.min(100,Math.round(s.wk/s.goal*100)),won=s.wk>=s.goal;
  return `<div class="sk-top"><div class="flame ${s.st?'lit':'off'}">${FLAME}</div><div>${head}</div><div class="pts"><b>${s.pts}</b><span>pts</span></div></div>
  <div class="week" aria-label="This week">${wk}</div>
- <div class="goal ${won?'won':''}"><div class="gt"><span>${won?'Weekly goal smashed!':'Weekly goal'}</span><span>${Math.min(s.wk,s.goal)}/${s.goal}</span></div><div class="gb"><i data-w="${pc}" style="width:0"></i></div></div>`}
+ <div class="goal ${won?'won':''}"><div class="gt"><span>${won?'Weekly goal smashed!':'Weekly goal'}</span><span>${Math.min(s.wk,s.goal)}/${s.goal}</span></div><div class="gb"><i data-w="${pc}" style="width:0"></i></div></div>${badgeShelf()}`}
 function refreshStreak(){const e=document.getElementById('streak');if(!e)return;e.innerHTML=streakCard();requestAnimationFrame(()=>e.querySelectorAll('[data-w]').forEach(x=>x.style.width=x.dataset.w+'%'))}
+/* D 21 Nov 12:47: badges. Earned ids per device in localStorage 'sesaBadges' */
+let BADGES=null;try{BADGES=JSON.parse(localStorage.getItem('sesaBadges')||'null')}catch(e){}
+function saveBadges(){try{localStorage.setItem('sesaBadges',JSON.stringify(BADGES))}catch(e){}}
+function badgeList(){const s=streakStats(),done=Object.keys(LOG).filter(k=>DONE[k]),perDay={};let early=0;
+ for(const k of done){const d=new Date(LOG[k]);if(isNaN(d))continue;const dk=dkey(d);perDay[dk]=(perDay[dk]||0)+1;if(d.getHours()<9)early=1}
+ const maxDay=Math.max(0,...Object.values(perDay)),urg=DATA.properties.flatMap(p=>p.tasks.filter(t=>t.level==='urgent')),urgD=urg.filter(t=>DONE[t.id]).length;
+ const sweep=Math.max(0,...DATA.properties.map(p=>p.tasks.length?(p.tasks.length-open_(p))/p.tasks.length:0)),t3=Math.min(3,DATA.top3.length),t3d=t3-t3left(),m=me();
+ const team=m&&DATA.properties.some(p=>p.tasks.some(t=>ownerId(t)===m.id&&DONE[t.id]))?1:0;
+ return [
+ {id:'first',n:'First tick',i:'check',g:'linear-gradient(135deg,#2f9a63,#5bd68b)',v:Math.min(done.length,1),of:1,how:'Tick any job'},
+ {id:'top3',n:'Top 3',i:'star',g:'linear-gradient(135deg,#F07C8C,#f5a07c)',v:t3d,of:t3||1,how:'Clear all 3 things today'},
+ {id:'hat',n:'Hat trick',i:'bolt',g:'linear-gradient(135deg,#ff9a3c,#ffcf5c)',v:Math.min(maxDay,3),of:3,how:'Clear 3 jobs in one day'},
+ {id:'fire',n:'On fire',i:'spark',g:'linear-gradient(135deg,#e0483a,#ff9a3c)',v:Math.min(s.st,3),of:3,how:'Tick something 3 days running'},
+ {id:'urgent',n:'Firefighter',i:'alert',g:'linear-gradient(135deg,#c0392b,#F07C8C)',v:urgD,of:urg.length||1,how:'Clear every do-now job'},
+ {id:'team',n:'Team player',i:'user',g:'linear-gradient(135deg,#4c7de0,#6a4bc4)',v:team,of:1,how:'Finish a job with your name on it'},
+ {id:'early',n:'Early bird',i:'sun',g:'linear-gradient(135deg,#f2b632,#ff8a3c)',v:early,of:1,how:'Tick a job before 9am'},
+ {id:'sweep',n:'Clean sweep',i:'home',g:'linear-gradient(135deg,#1f7a8c,#3bb3a8)',v:Math.round(sweep*100),of:100,how:'Clear every job at one property',pc:1},
+ {id:'goal',n:'Goal getter',i:'trophy',g:'linear-gradient(135deg,#1d1d1f,#5a4a2a)',v:Math.min(s.wk,s.goal),of:s.goal,how:'Hit the weekly goal'}
+ ].map(b=>({...b,got:b.v>=b.of||(BADGES||[]).includes(b.id)}))}
+function badgeShelf(){if(BADGES===null){BADGES=badgeList().filter(b=>b.got).map(b=>b.id);saveBadges()}const L=badgeList(),n=L.filter(b=>b.got).length;
+ return `<div class="bdg"><div class="bt"><span>Badges</span><em>${n}/${L.length}</em></div><div class="brow">${L.sort((a,b)=>(b.got-a.got)||(b.v/b.of-a.v/a.of)).map(b=>{const p=b.got?100:Math.round(b.v/b.of*100);
+ return `<button class="bd ${b.got?'got':''}" data-badge="${b.id}" style="--g:${b.g};--p:${p}" aria-label="${b.n}${b.got?' - earned':''}"><div class="bc"><i>${ic(b.i,22,2.4)}</i></div><span>${b.n}</span>${b.got?'':`<b>${b.pc?p+'%':b.v+'/'+b.of}</b>`}</button>`}).join('')}</div></div>`}
+function badgeCheck(){const L=badgeList(),got=L.filter(b=>b.got).map(b=>b.id);if(BADGES===null){BADGES=got;saveBadges();return}
+ const nw=L.filter(b=>b.got&&!BADGES.includes(b.id));if(!nw.length)return;BADGES=[...new Set([...BADGES,...got])];saveBadges();refreshStreak();
+ nw.forEach(b=>{const e=document.querySelector(`[data-badge="${b.id}"]`);if(e){e.classList.add('new');e.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'})}});
+ confetti();toast(`Badge unlocked: ${nw.map(b=>b.n).join(' + ')}!`)}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-badge]');if(!b)return;const x=badgeList().find(y=>y.id===b.dataset.badge);if(!x)return;
+ toast(x.got?`${x.n} - earned! ${x.how}`:`${x.n}: ${x.how}${x.pc?'':' ('+x.v+'/'+x.of+')'}`);b.classList.remove('new');void b.offsetWidth;b.classList.add('new')});
 /* D 18 Nov 15:47: Coming up strip - dates pulled from events, top 3, tasks, units, watch, money */
 const GC=['#F07C8C','#4c7de0','#2f9a63','#d48a1c'],GB=['linear-gradient(135deg,#F07C8C,#f5a07c)','linear-gradient(135deg,#4c7de0,#6a4bc4)','linear-gradient(135deg,#2f9a63,#1f7a45)','linear-gradient(135deg,#d48a1c,#b8641a)'];
 function clauseDates(txt){const base=new Date(DATA.updated_at||Date.now()),out=[];const cls=String(txt||'').split(/\s+-\s+|[.;!?](?:\s+|$)|\s*\|\|\s*/).filter(x=>x.trim());
@@ -1010,7 +1058,7 @@ function refresh(){const o=allO(),$=id=>document.getElementById(id);refreshTeam(
  if($('openN'))$('openN').textContent=o;if($('hring'))$('hring').innerHTML=heroRing();if($('hisub'))$('hisub').textContent=subline(o);if($('t3c'))$('t3c').textContent=t3left()+' left';
  document.querySelectorAll('[data-n]').forEach(n=>{const p=DATA.properties.find(x=>x.id===n.dataset.n);if(p){const k=open_(p);n.textContent=k;n.style.display=k?'':'none'}});
  const p=DATA.properties.find(x=>x.id===TAB);if(p){if($('po'))$('po').textContent=open_(p);if($('pc'))$('pc').textContent=`${p.tasks.length-open_(p)}/${p.tasks.length} done`;if($('jmix'))$('jmix').outerHTML=jobMix(p);document.querySelectorAll('[data-lvl]').forEach(e=>{const n=lvlLeft(p,e.dataset.lvl);e.textContent=n?n+' left':'all done'})}}
-function tick(key,el,kind){const wk0=streakStats().wk;DONE[key]=!DONE[key];if(!DONE[key]){delete DONE[key];delete LOG[key]}else LOG[key]=new Date().toISOString();saveDone();saveLog();refreshStreak();const row=el.closest(kind==='t3'?'.move,.sdp':'.task');if(row){row.classList.toggle('done',!!DONE[key]);row.classList.remove('pop');void row.offsetWidth;row.classList.add('pop')}refresh();
+function tick(key,el,kind){const wk0=streakStats().wk;setTimeout(badgeCheck,1500);DONE[key]=!DONE[key];if(!DONE[key]){delete DONE[key];delete LOG[key]}else LOG[key]=new Date().toISOString();saveDone();saveLog();refreshStreak();const row=el.closest(kind==='t3'?'.move,.sdp':'.task');if(row){row.classList.toggle('done',!!DONE[key]);row.classList.remove('pop');void row.offsetWidth;row.classList.add('pop')}refresh();
  if(kind==='t3'){if(DONE[key]&&row&&row.classList.contains('sc'))row.classList.add('fly-r');setTimeout(reStack,DONE[key]?300:0)}
  if(!DONE[key])return;try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}
  const ss=streakStats();if(wk0<ss.goal&&ss.wk>=ss.goal){confetti();toast(`Weekly goal hit! +${ptsFor(key)} pts`);return}
