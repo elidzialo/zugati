@@ -275,6 +275,14 @@ svg text{font-family:inherit}
 @keyframes ydraw{to{stroke-dashoffset:0}}
 .ydt{color:#888;font-weight:400}
 @media(max-width:600px){.ydt{display:none}.yoy .legend{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px}}
+.smt{margin-top:10px;background:var(--greybg);border-radius:12px;padding:12px 14px}
+.smt-h{font-weight:800;font-size:14px;margin-bottom:8px}
+.smr{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;margin:6px 0;font-size:14px}
+.sml{color:var(--muted);font-weight:700;font-size:13px}
+.smb{position:relative;height:16px;background:#fff;border-radius:8px;overflow:hidden}
+.smb div{position:absolute;left:0;top:0;bottom:0;border-radius:8px;transition:width .6s ease}
+.smb .ghost{background:repeating-linear-gradient(45deg,rgba(35,47,62,.18) 0 4px,rgba(35,47,62,.06) 4px 8px)}
+.smn{font-size:14px;line-height:1.45;margin-top:8px;color:#333}
 .vpk{margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
 .vpk-h{font-weight:800;font-size:14px;color:#b0254d;margin-bottom:6px}
 .vrow{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:4px 0}
@@ -1087,12 +1095,16 @@ function renderWk(){const {W}=cashWeeks();const rows=W.slice(1,11);
 /* ---------- monthly history (up to 39 months) ---------- */
 function monthColour(mo){return mo===1||mo===2?'#e8436a':mo===11||mo===12?'#1d8f5f':'#ff9900'}
 function monthlySvg(p,mode){const M=p.monthly;const vals=mVals(p,mode);const N=vals.length;
-  const sm=window.innerWidth<600,W=sm?400:860,H=sm?230:230,pl=4,pr=4,pt=26,pb=40,mx=Math.max(...vals,1),mn=Math.min(0,...vals),rng=mx-mn||1;
+  const sm=window.innerWidth<600,W=sm?400:860,H=sm?250:250,pl=4,pr=4,pt=46,pb=40,mx=Math.max(...vals,1),mn=Math.min(0,...vals),rng=mx-mn||1;
   const slot=(W-pl-pr)/N,bw=Math.max(slot*0.72,6),Y=v=>pt+(mx-v)/rng*(H-pt-pb);let g='';
   // season bands behind bars
   M.months.forEach((k,i)=>{const mo=+k.slice(5);if(mo===1||mo===2||mo===11||mo===12)g+='<rect x="'+(pl+i*slot)+'" y="'+(pt-20)+'" width="'+slot+'" height="'+(H-pb-pt+20)+'" fill="'+(mo<3?'rgba(232,67,106,.07)':'rgba(29,143,95,.07)')+'"/>'});
   g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="#ccc"/>';
-  let best=0;vals.forEach((v,i)=>{if(v>vals[best])best=i});
+  let best=0;vals.forEach((v,i)=>{if(v>vals[best])best=i});const ly=N-13;
+  // same month last year + this month: highlighted columns with labels
+  [[ly,'#007185','Last year'],[N-1,'#232f3e','Now']].forEach(([i,c,t])=>{if(i<0)return;const cx=pl+i*slot+slot/2;
+    g+='<rect x="'+(pl+i*slot+0.5)+'" y="23" width="'+(slot-1)+'" height="'+(H-pb-19)+'" rx="5" fill="'+c+'" fill-opacity=".08" stroke="'+c+'" stroke-width="1.6" stroke-dasharray="4 3"/>';
+    const lw=t.length*6.6+14,lx=Math.min(Math.max(cx-lw/2,pl),W-pr-lw);g+='<rect x="'+lx+'" y="4" width="'+lw+'" height="17" rx="8.5" fill="'+c+'"/><text x="'+(lx+lw/2)+'" y="16" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">'+t+'</text>'});
   vals.forEach((v,i)=>{const k=M.months[i],mo=+k.slice(5),x=pl+i*slot+(slot-bw)/2,y0=Y(0),y=Y(v),last=i===N-1&&M.partial_last;
     const col=mode==='profit'&&v<0?'#cc0c39':monthColour(mo);
     g+='<rect class="mbar" style="animation-delay:'+(i*18)+'ms" x="'+x+'" y="'+Math.min(y,y0)+'" width="'+bw+'" height="'+Math.max(Math.abs(y0-y),1.5)+'" rx="3" fill="'+col+'"'+(last?' fill-opacity=".45" stroke="'+col+'" stroke-dasharray="3 2"':'')+'><title>'+mLabel(k)+(last?' (so far)':'')+': '+(mode==='units'?n0(v)+' sold':money(v,p.cur))+'</title></rect>';
@@ -1101,6 +1113,17 @@ function monthlySvg(p,mode){const M=p.monthly;const vals=mVals(p,mode);const N=v
     else if(!(sm&&(mo===12||mo===2)))g+='<text x="'+(x+bw/2)+'" y="'+(H-pb+16)+'" text-anchor="middle" font-size="10" fill="#aaa">'+'JFMAMJJASOND'[mo-1]+'</text>';
   });
   return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" class="msvg">'+g+'</svg>'}
+function sameMonth(p,mode){const M=p.monthly,V=mVals(p,mode),N=V.length,ly=N-13;if(ly<0)return '';
+  const k=M.months[N-1],mo=+k.slice(5),y=+k.slice(0,4),mn=new Date(k+'-01T00:00:00').toLocaleDateString('en-GB',{month:'long'});
+  const t=today(),dim=new Date(y,mo,0).getDate(),part=M.partial_last&&t.getFullYear()===y&&t.getMonth()+1===mo,day=part?Math.max(1,t.getDate()-1):dim;
+  const a=V[ly]||0,b=V[N-1]||0,proj=part?b/day*dim:b,mx=Math.max(a,proj,b,1),w=v=>Math.max(2,Math.max(v,0)/mx*100).toFixed(1);
+  const nx=ly+1<N?V[ly+1]:null,nm=ly+1<N?new Date(M.months[ly+1]+'-01T00:00:00').toLocaleDateString('en-GB',{month:'long'}):'';
+  let verdict='';if(a>0){const r=proj/a;verdict=r>=1.1?'<span class="up">ahead of last year</span>':r>=0.9?'about the same as last year':'<span class="down">behind last year</span>'}else if(proj>0)verdict='<span class="up">better than last year</span>';
+  return '<div class="smt"><div class="smt-h">'+mn+' - this year vs last year</div>'+
+   '<div class="smr"><span class="sml">'+mn.slice(0,3)+' '+(y-1)+'</span><div class="smb"><div style="width:'+w(a)+'%;background:#007185"></div></div><b>'+mFmt(p,mode,a)+'</b></div>'+
+   '<div class="smr"><span class="sml">'+mn.slice(0,3)+' '+y+'</span><div class="smb">'+(part?'<div class="ghost" style="width:'+w(proj)+'%"></div>':'')+'<div style="width:'+w(b)+'%;background:#232f3e"></div></div><b>'+mFmt(p,mode,b)+'</b></div>'+
+   '<div class="smn">'+(part?'So far this month. On track for about <b>'+mFmt(p,mode,proj)+'</b> - '+verdict+'.':'Full month - '+verdict+'.')+
+   (nx!=null&&nx>0?' Last '+nm+' you '+(mode==='units'?'sold <b>'+n0(nx)+'</b>':mode==='profit'?'made <b>'+mFmt(p,mode,nx)+'</b> profit':'took <b>'+mFmt(p,mode,nx)+'</b>')+' - that is what is coming next.':'')+'</div></div>'}
 function mLabel(k){return new Date(k+'-01T00:00:00').toLocaleDateString('en-GB',{month:'long',year:'numeric'})}
 function monthlyStory(p){const M=p.monthly,U=M.units,N=U.length;if(!U.some(v=>v>0))return 'No sales yet.';
   let best=0;U.forEach((v,i)=>{if(v>U[best])best=i});
@@ -1115,9 +1138,9 @@ function mFmt(p,mode,v){return mode==='units'?n0(v):money(v,p.cur)}
 function yearsCovered(p){const n=p.monthly.months.length;return n>=34?'last 3 years':n>=22?'last 2 years':'since launch'}
 function monthlySection(p){if(!p.monthly||!p.monthly.units)return '<div class="msec"><h4>Month by month</h4><div class="note">Monthly history is being added.</div></div>';
   const hasS=!!p.monthly.sales;
-  return yoySection(p)+'<div class="msec"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h4 style="margin:0">Month by month - '+yearsCovered(p)+'</h4><div class="mtog" data-t="m"><button class="on" data-m="units">Units</button>'+(hasS?'<button data-m="sales">Sales</button>':'')+'<button data-m="profit">Profit</button></div></div>'+
+  return yoySection(p)+'<div class="msec"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h4 style="margin:0">Month by month - '+yearsCovered(p)+'</h4><div class="mtog" data-t="m">'+(hasS?'<button class="on" data-m="sales">'+sym(p.cur)+' Sales</button>':'')+'<button'+(hasS?'':' class="on"')+' data-m="units">Units</button><button data-m="profit">Profit</button></div></div>'+
    '<div class="legend" style="margin-top:8px"><span><i style="background:#e8436a"></i>Valentine\'s (Jan-Feb)</span><span><i style="background:#1d8f5f"></i>Christmas (Nov-Dec)</span><span><i style="background:#ff9900"></i>Rest of year</span></div>'+
-   '<div id="mchart">'+monthlySvg(p,'units')+'</div><div class="note">'+monthlyStory(p)+' The last bar is this month so far.</div></div>'}
+   '<div id="mchart">'+monthlySvg(p,hasS?'sales':'units')+'</div><div id="msm">'+sameMonth(p,hasS?'sales':'units')+'</div><div class="note">'+monthlyStory(p)+' The last bar is this month so far.</div></div>'}
 /* ---------- this year vs last year (gift seasons Sep-Aug) ---------- */
 const SEAS_M=[9,10,11,12,1,2,3,4,5,6,7,8],SEAS_COL=['#ff9900','#007185','#8d9696','#c3c9c9'];
 function seasons(p,mode){const M=p.monthly,V=mVals(p,mode),S={};
@@ -1154,7 +1177,7 @@ function yoySection(p){const hasS=!!p.monthly.sales,m0=hasS?'sales':'units';if(s
   return '<div class="msec yoy"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h4 style="margin:0">This year vs last year</h4><div class="mtog" data-t="y">'+(hasS?'<button class="on" data-m="sales">Sales</button>':'')+'<button'+(hasS?'':' class="on"')+' data-m="units">Units</button><button data-m="profit">Profit</button></div></div>'+
    '<div class="ystory">'+yoyStory(p)+'</div>'+SS_leg(seasons(p,'units'))+'<div id="ychart">'+yoySvg(p,m0)+'</div><div id="ypk">'+peakTiles(p,m0)+'</div><div class="note">Each line is one gift season, September to August, so Christmas and Valentine\'s line up. Hollow dot = this month so far.</div></div>'}
 function wireMonthly(p){$('md').querySelectorAll('.mtog').forEach(t=>t.querySelectorAll('button').forEach(b=>b.onclick=()=>{t.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
-  if(t.dataset.t==='y'){$('ychart').innerHTML=yoySvg(p,b.dataset.m);$('ypk').innerHTML=peakTiles(p,b.dataset.m)}else $('mchart').innerHTML=monthlySvg(p,b.dataset.m)}))}
+  if(t.dataset.t==='y'){$('ychart').innerHTML=yoySvg(p,b.dataset.m);$('ypk').innerHTML=peakTiles(p,b.dataset.m)}else{$('mchart').innerHTML=monthlySvg(p,b.dataset.m);$('msm').innerHTML=sameMonth(p,b.dataset.m)}}))}
 
 
 /* ---------- today strip ---------- */
