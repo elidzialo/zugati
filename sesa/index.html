@@ -147,6 +147,41 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .hot{position:absolute;top:-5px;right:-5px;width:17px;height:17px;border-radius:50%;background:var(--red);color:#fff;font-style:normal;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--card)}
 .alert .ic.tg,.alert.r .ic.tg{background:var(--grnbg);color:var(--grn)}.alert .ic.ta,.alert.r .ic.ta{background:var(--ambbg);color:var(--amb)}.alert .ic.tv,.alert.r .ic.tv{background:var(--violetbg);color:var(--violet)}.alert .ic.tk,.alert.r .ic.tk{background:#e0f4f4;color:#16797a}.alert .ic.ts,.alert.r .ic.ts{background:var(--soft);color:var(--muted)}.alert .ic.tb,.alert.r .ic.tb{background:var(--bluebg);color:var(--blue)}.alert .ic.tp,.alert.r .ic.tp{background:var(--pinkbg);color:#b34657}
 .alert .tlab{display:flex}.tlab .mi{display:none}
+/* D 21 Nov: Heads up radar */
+.hu{background:var(--dark);color:#fff;border-radius:24px;padding:16px 16px 14px;position:relative;overflow:hidden;margin-bottom:10px}
+.hu:after{content:"";position:absolute;right:-50px;top:-70px;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,rgba(240,124,140,.35),transparent 70%)}
+.hu .hut{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
+.hu .rad{width:52px;height:52px;flex:0 0 52px;position:relative}
+.hu .rad svg{display:block}
+.hu .rad b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800}
+.hu .rad:before{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(240,124,140,.5);animation:huping 2.4s ease-out infinite}
+@keyframes huping{0%{transform:scale(.85);opacity:.9}100%{transform:scale(1.25);opacity:0}}
+.hu .hl{font-size:17px;font-weight:700;line-height:1.25}.hu .sl{font-size:13px;opacity:.75}
+.hu .hbar{display:flex;height:12px;border-radius:99px;overflow:hidden;margin:14px 0 8px;gap:3px;position:relative;z-index:1}
+.hu .hbar i{display:block;border-radius:99px;transform-origin:left;animation:hugrow .7s cubic-bezier(.2,.9,.3,1.2) both}
+.hu .hbar i:nth-child(2){animation-delay:.12s}.hu .hbar i:nth-child(3){animation-delay:.24s}
+@keyframes hugrow{from{transform:scaleX(0)}}
+.hu .key{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;font-weight:600;position:relative;z-index:1}
+.hu .key span{display:inline-flex;align-items:center;gap:6px}.hu .key span:before{content:"";width:9px;height:9px;border-radius:50%;background:var(--d)}
+.hz{--hc:#e5533d;--hb:#ffe3dd}.hz.s{--hc:#e89a1c;--hb:#fff0d4}.hz.c{--hc:#4c7de0;--hb:#e4eefb}
+@media (prefers-color-scheme:dark){.hz{--hb:#3a1c17}.hz.s{--hb:#382a10}.hz.c{--hb:#16263c}}
+.wfs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 8px;padding:2px 16px}.wfs::-webkit-scrollbar{display:none}
+.wf{border:1px solid var(--line);background:var(--card);color:var(--ink);font-family:inherit;font-size:13px;font-weight:600;border-radius:999px;min-height:44px;padding:6px 13px 6px 9px;display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;cursor:pointer;transition:transform .15s,background .2s}
+.wf:active{transform:scale(.94)}.wf b{font-weight:800}
+.wf.on{background:var(--dark);color:#fff;border-color:var(--dark)}
+@media (prefers-color-scheme:dark){.wf.on{background:#fff;color:#1d1d1f;border-color:#fff}}
+.alert.hz{border-left:5px solid var(--hc);padding-left:12px;animation:hzin .35s ease both}
+@keyframes hzin{from{opacity:0;transform:translateY(6px)}}
+.alert .hrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:4px}
+.alert .hrow .tlab{margin:0}
+.hpill{font-size:12px;font-weight:800;border-radius:999px;padding:2px 9px;background:var(--hb);color:var(--hc);display:inline-flex;align-items:center;gap:5px}
+.hz:not(.s):not(.c) .hpill:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--hc);animation:hublink 1.2s infinite}
+@keyframes hublink{50%{opacity:.25}}
+.hdate{font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;background:var(--soft);color:var(--muted);display:inline-flex;align-items:center;gap:4px}
+.hdate.f{background:var(--dark);color:#fff}
+@media (prefers-color-scheme:dark){.hdate.f{background:#fff;color:#1d1d1f}}
+.alert .amt{font-weight:800;background:var(--hb);color:var(--hc);border-radius:6px;padding:0 3px}
+@media (prefers-reduced-motion:reduce){.hu .rad:before,.hz .hpill:before,.hu .hbar i,.alert.hz{animation:none}}
 @media (max-width:520px){.task .tico{display:none}.task .tlab .mi{display:inline-flex}.task .tlab{border-radius:999px;padding:3px 9px 3px 7px;margin-bottom:5px}.task .tlab.tg{background:var(--grnbg)!important}.task .tlab.ta{background:var(--ambbg)!important}.task .tlab.tv{background:var(--violetbg)!important}.task .tlab.tb{background:var(--bluebg)!important}.task .tlab.tp{background:var(--pinkbg)!important}.task .tlab.ts{background:var(--soft)!important}.task .tlab.tk{background:#e0f4f4!important}}
 @media (max-width:520px) and (prefers-color-scheme:dark){.task .tlab.tk{background:#123134!important}}
 /* D 20 Nov 15:47: Jobs board - pressure bar, level pills, fold-up job cards */
@@ -768,10 +803,37 @@ function home(d){let h='';
   h+=`</div>`}
  if(d.money){const ms=d.money.months,mx=Math.max(...ms.map(x=>x.rent||0),1);
   h+=`<h2>Money</h2><button class="mt" data-tab="money"><div class="ic">${ic('pound',24,2.4)}</div><div><div class="v">${gbp(d.money.rent_total)}</div><div class="l">Rent in since Sep</div></div><div class="spark" aria-hidden="true">${ms.map(x=>`<span class="${x.partial?'pt':''}"><i style="height:${Math.max(4,Math.round((x.rent||0)/mx*34))}px"></i>${esc(String(x.m||'').charAt(0))}</span>`).join('')}</div></button>`}
- if(d.watch.length){const n=d.watch.length;
-  h+=`<h2>Watch out <span class="cnt">${n}</span></h2><div class="alerts" id="alerts">${d.watch.slice(0,3).map((w,i)=>alertCard(w,i)).join('')}</div>${n>3?`<button class="more" id="morebtn">Show ${n-3} more</button>`:''}`}
+ if(d.watch.length)h+=`<h2>Heads up <span class="cnt">${d.watch.length}</span></h2><div id="watch">${watchBlock()}</div>`
  return h}
-function alertCard(w,i){const tp=topic(w);return `<div class="alert ${i===0?'r':''}"><div class="ic tico ${tp.c}">${ic(tp.i,19,2.1)}${i===0?'<em class="hot">!</em>':''}</div><div><i class="tlab ${tp.c}">${tp.l}</i>${esc(w)}</div></div>`}
+/* D 21 Nov 09:47: Heads up radar - heat (act now / soon / keep in mind) from wording and dates, topic filter, date countdowns */
+let WF='all',WX=false;
+const HEAT=[['h','Act now'],['s','Soon'],['c','Keep in mind']];
+function heatOf(w){const s=String(w),t0=new Date();t0.setHours(0,0,0,0);
+ const ds=clauseDates(s).map(x=>x.d),fut=ds.filter(d=>d>=t0).sort((a,b)=>a-b)[0],past=ds.filter(d=>d<t0).sort((a,b)=>b-a)[0];
+ const dd=fut?Math.round((fut-t0)/864e5):null;let k='c';
+ if(/\b(bounced|failed|missed|overdue|expires?|expired|stuck|late|urgent)\b|pay it fast/i.test(s)||(dd!==null&&dd<=3))k='h';
+ else if(/hasn't|has not|not landed|still empty|owes|\bcheck\b|\bdue\b|\bchas(e|ed|ing)\b/i.test(s)||(dd!==null&&dd<=14))k='s';
+ return{k,fut,past,dd}}
+function dchip(x){const f=d=>d.getDate()+' '+MON[d.getMonth()].replace(/^./,c=>c.toUpperCase());
+ if(x.fut)return `<span class="hdate f">${ic('cal',12,2.6)}${f(x.fut)} - ${x.dd===0?'today':x.dd===1?'tomorrow':'in '+x.dd+' days'}</span>`;
+ if(x.past)return `<span class="hdate">since ${f(x.past)}</span>`;return ''}
+function watchItems(){const r={h:0,s:1,c:2};return DATA.watch.map((w,i)=>({w,i,tp:topic(w),...heatOf(w)})).sort((a,b)=>r[a.k]-r[b.k]||(a.dd??99)-(b.dd??99)||a.i-b.i)}
+function watchBlock(){const all=watchItems(),n=all.length,c={h:0,s:0,c:0};all.forEach(x=>c[x.k]++);
+ const R=20,C=2*Math.PI*R;let off=0;const arcs=[['h','#e5533d'],['s','#e89a1c'],['c','#4c7de0']].map(([k,col])=>{const l=c[k]/n*C,a=`<circle r="${R}" cx="26" cy="26" fill="none" stroke="${col}" stroke-width="7" stroke-dasharray="${Math.max(0,l-2)} ${C}" stroke-dashoffset="${-off}" transform="rotate(-90 26 26)"/>`;off+=l;return c[k]?a:''}).join('');
+ const hl=c.h?`${c.h} need${c.h===1?'s':''} action now`:c.s?`${c.s} coming up soon`:'All calm - just keep in mind';
+ let h=`<div class="hu"><div class="hut"><div class="rad"><svg width="52" height="52" viewBox="0 0 52 52" aria-hidden="true"><circle r="${R}" cx="26" cy="26" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="7"/>${arcs}</svg><b>${c.h||c.s||n}</b></div><div><div class="hl">${hl}</div><div class="sl">${n} things to keep an eye on</div></div></div>
+ <div class="hbar" role="img" aria-label="${c.h} act now, ${c.s} soon, ${c.c} keep in mind">${HEAT.map(([k])=>c[k]?`<i class="hz ${k==='h'?'':k}" style="flex:${c[k]};background:var(--hc)"></i>`:'').join('')}</div>
+ <div class="key">${HEAT.map(([k,l])=>c[k]?`<span style="--d:${k==='h'?'#e5533d':k==='s'?'#e89a1c':'#4c7de0'}">${c[k]} ${l}</span>`:'').join('')}</div></div>`;
+ const tc={},to=[];all.forEach(x=>{if(!tc[x.tp.k]){tc[x.tp.k]={...x.tp,n:0};to.push(tc[x.tp.k])}tc[x.tp.k].n++});to.sort((a,b)=>b.n-a.n);
+ if(to.length>1)h+=`<div class="wfs" role="group" aria-label="Filter by topic"><button class="wf ${WF==='all'?'on':''}" data-wf="all" aria-pressed="${WF==='all'}"><b>${n}</b> All</button>${to.map(t=>`<button class="wf ${WF===t.k?'on':''}" data-wf="${t.k}" aria-pressed="${WF===t.k}"><span class="tico ${t.c}" style="width:26px;height:26px;flex:0 0 26px;border-radius:9px;align-self:center">${ic(t.i,14,2.3)}</span><b>${t.n}</b> ${t.l}</button>`).join('')}</div>`;
+ const list=all.filter(x=>WF==='all'||x.tp.k===WF),show=WX||WF!=='all'?list:list.slice(0,3);
+ h+=`<div class="alerts" id="alerts">${show.map(alertCard).join('')}</div>`;
+ if(list.length>show.length)h+=`<button class="more" id="morebtn">Show ${list.length-show.length} more</button>`;
+ else if(WX&&WF==='all'&&n>3)h+=`<button class="more" id="morebtn">Show less</button>`;
+ return h}
+function alertCard(x){const tp=x.tp,lab=HEAT.find(z=>z[0]===x.k)[1];
+ const txt=esc(x.w).replace(/£[\d,]+(?:\.\d+)?k?/g,m=>`<span class="amt">${m}</span>`);
+ return `<div class="alert hz ${x.k==='h'?'':x.k}"><div class="ic tico ${tp.c}">${ic(tp.i,19,2.1)}${x.k==='h'?'<em class="hot">!</em>':''}</div><div><div class="hrow"><span class="hpill">${lab}</span><i class="tlab ${tp.c}">${tp.l}</i>${dchip(x)}</div>${txt}</div></div>`}
 function rentOf(p){const m=DATA.money;if(!m||!m.payments)return{sum:0,n:0,last:null};const k=short(p.name).toLowerCase();const ps=m.payments.filter(x=>String(x.property||'').toLowerCase().includes(k));
  return{sum:ps.reduce((a,x)=>a+(+x.amount||0),0),n:ps.length,last:ps.map(x=>x.date).sort().pop()||null}}
 function dShort(d){return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
@@ -963,9 +1025,10 @@ document.addEventListener('click',e=>{if(e.target.id==='shade')return closeSheet
  {const m=e.target.closest('[data-team],[data-claim],[data-goto]');if(m){if(m.dataset.claim)return claim(m.dataset.claim);if(m.dataset.goto)return gotoTask(m.dataset.goto);return teamSheet(m.dataset.team)}}
  {const c=e.target.closest('[data-topic]');if(c){const ts=[...document.querySelectorAll(`.task[data-tp="${c.dataset.topic}"]`)];const t=ts.find(x=>!x.classList.contains('done'))||ts[0];if(t){t.scrollIntoView({behavior:'smooth',block:'center'});t.classList.remove('flash');void t.offsetWidth;t.classList.add('flash')}return}}
  {const f=e.target.closest('[data-fold]');if(f&&!e.target.closest('button,a'))return fold(f)}
+ {const f=e.target.closest('[data-wf]');if(f){WF=f.dataset.wf;WX=false;const w=document.getElementById('watch');if(w)w.innerHTML=watchBlock();return}}
  const t=e.target.closest('[data-tab],[data-task],[data-t3],#morebtn');if(!t)return;
  if(t.dataset.task)return tick(t.dataset.task,t,'task');if(t.dataset.t3)return tick(t.dataset.t3,t,'t3');
- if(t.id==='morebtn'){document.getElementById('alerts').innerHTML=DATA.watch.map((w,i)=>alertCard(w,i)).join('');t.remove();return}
+ if(t.id==='morebtn'){WX=!WX;const w=document.getElementById('watch');if(w)w.innerHTML=watchBlock();return}
  if(t.dataset.tab)setTab(t.dataset.tab)});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet();const f=e.target.closest&&e.target.closest('[data-fold]');if(f&&e.target===f&&(e.key==='Enter'||e.key===' ')){e.preventDefault();fold(f)}});
 (async()=>{let pw;try{pw=sessionStorage.getItem('sesaPw')}catch(e){}if(!pw)pw=remPw('sesaRemember');if(pw){document.getElementById('pw').value=pw;go()}})();
