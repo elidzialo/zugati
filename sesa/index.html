@@ -606,8 +606,29 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 @media (prefers-reduced-motion:reduce){.nind{transition:none}}
 /* O 20 Nov: chunkier money bars on wide screens */
 @media (min-width:700px){.bpair i{max-width:52px;border-radius:12px 12px 4px 4px}.bpair{gap:6px}.bar b{font-size:15px}}
-.tile .stale{font-style:normal;font-size:12px;font-weight:600;margin-top:4px;padding:3px 8px;border-radius:99px;background:rgba(255,255,255,.6);align-self:flex-start;opacity:.9}
+.tile .stale{font-style:normal;font-size:12px;font-weight:600;margin-top:4px;padding:3px 8px;border-radius:10px;line-height:1.35;background:rgba(255,255,255,.6);align-self:flex-start;opacity:.9}
 .stat .est{font-style:normal;font-size:12px;font-weight:700;background:rgba(0,0,0,.08);border-radius:99px;padding:1px 6px;margin-left:2px}
+/* A2 21 Nov: property weather */
+.wx{margin-top:14px;border-radius:22px;padding:16px;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center;color:#1d1d1f;box-shadow:var(--shadow)}
+.wx.k-sun{background:linear-gradient(135deg,#fff3c9,#ffd9a0)}.wx.k-cloud{background:linear-gradient(135deg,#e7ecf3,#c9d3e2)}.wx.k-storm{background:linear-gradient(135deg,#3b4252,#1d1d1f);color:#fff}
+.wxi{width:76px;height:76px}.wxb{min-width:0}.wxl{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;opacity:.7}
+.wxt{font-size:26px;font-weight:700;line-height:1.1}.wxt span{display:block;font-size:14px;font-weight:500;opacity:.8;margin-top:2px}
+.wxm{height:10px;border-radius:5px;background:rgba(0,0,0,.1);margin-top:8px;overflow:hidden}.k-storm .wxm{background:rgba(255,255,255,.15)}
+.wxm i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#F07C8C,#ffb347,#2f9a63);background-size:300px 100%;animation:wxg .9s ease-out both}.k-storm .wxm i{background:#F07C8C}
+@keyframes wxg{from{width:0}}
+.wxs{font-size:12px;font-weight:600;opacity:.75;margin-top:3px}
+.wxw{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.wxr{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.75);color:#1d1d1f}
+.wxr.ok svg{color:var(--grn)}.wxr b{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;font-size:11px;color:#fff;background:#e3a32e}.wxr.bad b{background:#c2412d}
+.k-storm .wxr{background:rgba(255,255,255,.12);color:#fff}
+.wsun{transform-box:fill-box;transform-origin:center;animation:wspin 18s linear infinite}@keyframes wspin{to{transform:rotate(360deg)}}
+.wcl{animation:wdrift 4s ease-in-out infinite alternate}@keyframes wdrift{to{transform:translateX(3px)}}
+.wrn{animation:wrain 1s linear infinite}@keyframes wrain{0%{opacity:0;transform:translateY(-4px)}40%{opacity:1}100%{opacity:0;transform:translateY(6px)}}
+.wbt{animation:wbolt 3s infinite}@keyframes wbolt{0%,86%,100%{opacity:0}88%,92%{opacity:1}}
+.wxpop{animation:wxpop .6s ease-out}@keyframes wxpop{0%{transform:scale(.96)}60%{transform:scale(1.02)}100%{transform:none}}
+.chip.wxc{gap:4px;padding-left:4px}.chip.wxc svg{flex:none}
+@media(min-width:760px){.wx{grid-template-columns:auto minmax(0,260px) 1fr}.wxw{grid-column:auto;margin-top:0}}
+@media (prefers-reduced-motion:reduce){.wsun,.wcl,.wrn,.wbt,.wxm i,.wxpop{animation:none}.wbt{opacity:1}}
 </style>
 </head>
 <body>
@@ -919,7 +940,7 @@ function home(d){let h='';
   d.properties.forEach((p,i)=>{const t=p.tasks.length,dn=t-open_(p),att=p.units.filter(u=>u.tag!=='ok').length;
    h+=`<button class="pc ${GR[i%4]}" data-tab="${esc(p.id)}"><div class="row"><div><div class="pn">${esc(p.name)}</div><div class="pa">${esc(p.area||'')}</div></div><div class="go">${ic('arrow',18,2.6)}</div></div>
    <div class="pbar"><i style="width:${t?Math.round(dn/t*100):0}%"></i></div>
-   <div class="pmeta"><span class="chip">${ic('check',14,3)} ${dn}/${t} jobs</span>${att?`<span class="chip">${att} need a look</span>`:''}${(n=>n?`<span class="chip nwc">${n} new</span>`:'')(propNews(p.id))}${p.units.length?`<span class="faces">${p.units.map(u=>mini(u.tag)).join('')}</span>`:''}</div></button>`});
+   <div class="pmeta">${(w=>`<span class="chip wxc">${wxIcon(w.k,20)}${w.l}</span>`)(wxOf(p))}<span class="chip">${ic('check',14,3)} ${dn}/${t} jobs</span>${att?`<span class="chip">${att} need a look</span>`:''}${(n=>n?`<span class="chip nwc">${n} new</span>`:'')(propNews(p.id))}${p.units.length?`<span class="faces">${p.units.map(u=>mini(u.tag)).join('')}</span>`:''}</div></button>`});
   h+=`</div>`}
  if(d.money){const ms=d.money.months,mx=Math.max(...ms.map(x=>x.rent||0),1);
   h+=`<h2>Money</h2><button class="mt" data-tab="money"><div class="ic">${ic('pound',24,2.4)}</div><div><div class="v">${gbp(d.money.rent_total)}</div><div class="l">Rent in since Sep</div></div><div class="spark" aria-hidden="true">${ms.map(x=>`<span class="${x.partial?'pt':''}"><i style="height:${Math.max(4,Math.round((x.rent||0)/mx*34))}px"></i>${esc(String(x.m||'').charAt(0))}</span>`).join('')}</div></button>`}
@@ -1038,9 +1059,25 @@ function whoMini(x){const o=person(ownerId(x));return o?`<span class="whom">${av
 const CHEV='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
 function fold(tx,force){const t=tx.closest('.task');if(!t)return;const on=force??!t.classList.contains('open');t.classList.toggle('open',on);tx.setAttribute('aria-expanded',on);const m=t.querySelector('.tmore small');if(m)m.textContent=on?'Less':'More'}
 function syncRow(id){const c=document.querySelector(`.task [data-task="${CSS.escape(id)}"]`),r=c&&c.closest('.task');if(!r)return;const[t]=findTask(id);const w=r.querySelector('.whom'),n=whoMini(t);if(w)w.outerHTML=n;else if(n)r.querySelector('.tl1 .tmore').insertAdjacentHTML('beforebegin',n)}
+/* A2 21 Nov: property weather - one look tells you how a property is doing (rent, urgent jobs, tenants), updates as you tick */
+function wxOf(p){let sc=100;const why=[];const op=p.tasks.filter(x=>!DONE[x.id]),u=op.filter(x=>lvOf(x)==='urgent').length,hi=op.filter(x=>lvOf(x)==='high').length,nm=op.length-u-hi;
+ sc-=Math.min(45,u*8+hi*4+nm);why.push(u?{c:'bad',t:`${u} urgent job${u>1?'s':''}`}:op.length?{c:'warn',t:`${op.length} job${op.length>1?'s':''} left, none urgent`}:{c:'ok',t:'All jobs done'});
+ const bad=p.units.filter(x=>tagOf(x)==='bad').length,wt=p.units.filter(x=>tagOf(x)==='warn').length;sc-=Math.min(35,bad*8+wt*3);
+ if(p.units.length)why.push(bad?{c:'bad',t:`${bad} problem${bad>1?'s':''} with ${bad>1?'units':'a unit'}`}:wt?{c:'warn',t:`${wt} waiting on ${wt>1?'tenants':'a tenant'}`}:{c:'ok',t:'Every unit happy'});
+ if(DATA.money){const r=rentOf(p);let d=null;if(r.last){const t0=new Date();t0.setHours(0,0,0,0);const l=new Date(r.last);l.setHours(0,0,0,0);d=Math.round((t0-l)/864e5)}
+  if(d===null){sc-=20;why.push({c:'bad',t:'No rent in yet'})}else if(d>45){sc-=12;why.push({c:'bad',t:`Rent late - ${d} days`})}else if(d>31){sc-=6;why.push({c:'warn',t:'Rent due now'})}else why.push({c:'ok',t:`Rent in ${d} day${d===1?'':'s'} ago`})}
+ sc=Math.max(0,Math.min(100,Math.round(sc)));const k=sc>=70?'sun':sc>=40?'cloud':'storm';
+ return {sc,k,l:{sun:'Sunny',cloud:'Cloudy',storm:'Stormy'}[k],s:{sun:'Running nicely',cloud:'A few things to sort',storm:'Needs you this week'}[k],why}}
+function wxIcon(k,z){const sun=(cx,cy,r)=>`<g class="wsun"><circle cx="${cx}" cy="${cy}" r="${r}" fill="#FFC94D"/>${[0,45,90,135,180,225,270,315].map(a=>`<line x1="${cx}" y1="${cy-r-4}" x2="${cx}" y2="${cy-r-10}" stroke="#FFC94D" stroke-width="4" stroke-linecap="round" transform="rotate(${a} ${cx} ${cy})"/>`).join('')}</g>`;
+ const cloud=(f)=>`<path class="wcl" d="M18 52h40a12 12 0 0 0 0-24 16 16 0 0 0-30-4 11 11 0 0 0-10 28z" fill="${f}"/>`;
+ const inner=k==='sun'?sun(32,32,14):k==='cloud'?sun(42,22,10)+cloud('#fff'):cloud('#cfd3da')+[18,32,46].map((x,i)=>`<line class="wrn" style="animation-delay:${i*.25}s" x1="${x}" y1="58" x2="${x-4}" y2="66" stroke="#7fb2f0" stroke-width="3.5" stroke-linecap="round"/>`).join('')+`<path class="wbt" d="M36 54l-5 9h6l-4 9" fill="none" stroke="#FFC94D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+ return `<svg width="${z}" height="${z}" viewBox="0 0 72 72" aria-hidden="true">${inner}</svg>`}
+function wxCard(p){const w=wxOf(p);return `<div class="wx k-${w.k}" id="wx"><div class="wxi">${wxIcon(w.k,76)}</div><div class="wxb"><div class="wxl">Property weather</div><div class="wxt">${w.l}<span>${w.s}</span></div><div class="wxm" role="img" aria-label="Health ${w.sc} out of 100"><i style="width:${w.sc}%"></i></div><div class="wxs">${w.sc}/100</div></div>
+ <div class="wxw">${w.why.map(x=>`<span class="wxr ${x.c}">${x.c==='ok'?ic('check',14,3):'<b>!</b>'}${esc(x.t)}</span>`).join('')}</div></div>`}
 function prop(p,i){let h='';const t=p.tasks.length,o=open_(p),att=p.units.filter(u=>u.tag!=='ok').length;
  h+=`<div class="pban ${GR[i%4]}"><div class="t">${esc(p.name)}</div><div class="a">${esc(p.area||'')}</div>${p.status?`<div class="s">${esc(p.status)}</div>`:''}${p.event?`<div class="ev">${ic('cal',16)} ${esc(String(p.event).replace(/^([A-Z])([A-Z]{3,})\b/,(m,a,b)=>a+b.toLowerCase()))}</div>`:''}${DATA.money?(()=>{const x=rentOf(p);return `<div class="rentchip">${ic('pound',14,2.4)} ${x.sum?`${gbp(x.sum)} rent in since Sep`:'No rent in yet'}</div>`})():''}
  <div class="pstats"><div><b id="po">${o}</b><span>Jobs left</span></div><div><b>${p.units.length}</b><span>Units</span></div><div><b>${att}</b><span>Need a look</span></div></div></div>`;
+ h+=wxCard(p);
  h+=`<h2>Jobs <span class="cnt" id="pc">${t-o}/${t} done</span></h2>`;if(t)h+=jobMix(p);if(t)h+=topicMix(p.tasks.filter(x=>!DONE[x.id]).length?p.tasks.filter(x=>!DONE[x.id]):p.tasks);
  if(!t)h+=`<div class="alldone">Nothing to do here<small>Enjoy it while it lasts</small></div>`;
  for(const [lv,name,col] of LVLS){const ts=p.tasks.filter(x=>lvOf(x)===lv);if(!ts.length)continue;const lf=lvlLeft(p,lv);
@@ -1120,7 +1157,7 @@ function render(){const d=DATA,o=allO();let h='';
 function refresh(){const o=allO(),$=id=>document.getElementById(id);refreshTeam();
  if($('openN'))$('openN').textContent=o;if($('hring'))$('hring').innerHTML=heroRing();if($('hisub'))$('hisub').textContent=subline(o);if($('t3c'))$('t3c').textContent=t3left()+' left';
  document.querySelectorAll('[data-n]').forEach(n=>{const p=DATA.properties.find(x=>x.id===n.dataset.n);if(p){const k=open_(p);n.textContent=k;n.style.display=k?'':'none'}});
- const p=DATA.properties.find(x=>x.id===TAB);if(p){if($('po'))$('po').textContent=open_(p);if($('pc'))$('pc').textContent=`${p.tasks.length-open_(p)}/${p.tasks.length} done`;if($('jmix'))$('jmix').outerHTML=jobMix(p);document.querySelectorAll('[data-lvl]').forEach(e=>{const n=lvlLeft(p,e.dataset.lvl);e.textContent=n?n+' left':'all done'})}}
+ const p=DATA.properties.find(x=>x.id===TAB);if(p){if($('po'))$('po').textContent=open_(p);if($('pc'))$('pc').textContent=`${p.tasks.length-open_(p)}/${p.tasks.length} done`;if($('jmix'))$('jmix').outerHTML=jobMix(p);if($('wx')){const n=wxOf(p),w0=$('wx');if(!w0.classList.contains('k-'+n.k)){w0.outerHTML=wxCard(p);const w1=$('wx');if(w1){w1.classList.add('wxpop')}}else w0.outerHTML=wxCard(p)}document.querySelectorAll('[data-lvl]').forEach(e=>{const n=lvlLeft(p,e.dataset.lvl);e.textContent=n?n+' left':'all done'})}}
 function tick(key,el,kind){const wk0=streakStats().wk;setTimeout(badgeCheck,1500);DONE[key]=!DONE[key];if(!DONE[key]){delete DONE[key];delete LOG[key]}else LOG[key]=new Date().toISOString();saveDone();saveLog();refreshStreak();const row=el.closest(kind==='t3'?'.move,.sdp':'.task');if(row){row.classList.toggle('done',!!DONE[key]);row.classList.remove('pop');void row.offsetWidth;row.classList.add('pop')}refresh();
  if(kind==='t3'){if(DONE[key]&&row&&row.classList.contains('sc'))row.classList.add('fly-r');setTimeout(reStack,DONE[key]?300:0)}
  if(!DONE[key])return;try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}
