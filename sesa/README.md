@@ -25,3 +25,7 @@ The Nudge button opens Claude (claude.ai/new?q=...) with a one-line prompt to se
 - `keys.json` holds that data key locked with Eli's password, so Eli's password still opens the page. Rebuild it with `SESA_PASSWORD=<Eli's password> SESA_KEY=<data key> node wrapkey.mjs` only if either changes.
 - Partners (e.g. Samuel Reich, Eli Sinitsky) tap "Partner? Log in with your email" and use their Eli Hub login (Supabase project eli-hub). The page reads the data key from the `portal_keys` table, which only users with Sesa access can read. They only ever get the Sesa page.
 - Never commit the data key or a plain data file.
+
+## Rules from Eli (22 Nov)
+- The Pozitive Energy / Foxglove Energy Supply Direct Debit (£377.55) is NOT for the Castleford HMO. Do not add it to the Castleford HMO (units, tasks, event, watch, top3 or money).
+- Tasks can be deleted on the page (Delete button on an open task). Deletes are stored on that device only (localStorage `sesaDel`, by task id), so keep task ids stable - a deleted id stays hidden even if the refresh keeps it.
