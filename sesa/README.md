@@ -35,3 +35,9 @@ The Nudge button opens Claude (claude.ai/new?q=...) with a one-line prompt to se
 - The page pulls it on load, every 30 seconds and when the tab comes back into view.
 - Password-only logins have no account, so they keep the old on-this-device behaviour (localStorage `sesaDone`, `sesaOwners`, `sesaDel`).
 - Refresh task: tasks with `deleted = true` in hub_state were deleted by a partner - drop them from data.json instead of re-adding them.
+
+## Added tasks, edits and notes (22 Nov)
+- Email-logged-in users can add tasks (+ Add task under Jobs), edit any task (title, details, urgency) and post notes on a task. All saved for everyone.
+- New tasks: `hub_state` rows with `custom = true` (item_id starts with `u`, `prop` = property id). Edits to refresh-made tasks: `edited = true` with the new `title` / `detail` / `level` - the page shows these over data.json.
+- Notes: table `public.hub_notes` (business_id, item_id, body, author_name, author_email, created_at). Same access rules; people can delete their own notes.
+- Refresh task: read hub_notes for progress on tasks (e.g. "paid", "booked") and respect edited titles; never delete custom tasks.

@@ -245,7 +245,14 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .task .av{color:#fff;display:inline-flex;margin:0;font-size:12px}
 .own,.nudge{min-height:44px;border-radius:20px;border:1px solid var(--line);background:var(--soft);font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:7px;padding:4px 14px 4px 6px;cursor:pointer;position:relative}
 .own.none{padding-left:12px;color:var(--muted);border-style:dashed;background:none}
-.own.del{margin-left:auto}.own.del:hover{color:#d33;border-color:#d33}.own.undel{margin:0 0 10px;min-height:36px;font-size:12px}
+.own.del{margin-left:auto}
+.jbar{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}.jbar .own{min-height:36px;font-size:12px;margin:0}.own.addt{color:var(--ink);border-style:solid}
+.other textarea{font:15px Poppins,sans-serif;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--soft);color:var(--ink);width:100%;resize:vertical}
+.lvpick{display:flex;gap:6px}.lvb{flex:1;min-height:44px;border-radius:14px;border:1px solid var(--line);background:var(--card);font-weight:600;font-size:14px;cursor:pointer;color:var(--ink)}
+.lvb.on.urgent{background:#e5484d;border-color:#e5484d;color:#fff}.lvb.on.high{background:#f5a524;border-color:#f5a524;color:#1d1d1f}.lvb.on.normal{background:var(--dark);border-color:var(--dark);color:#fff}
+.nlist{max-height:46vh;overflow:auto;margin-bottom:10px;display:grid;gap:8px}.note{background:var(--soft);border-radius:14px;padding:10px 12px}.note p{margin:4px 0 0;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.nh{display:flex;align-items:center;gap:8px;font-size:13px}.nh small{color:var(--muted)}.ndel{margin-left:auto;border:0;background:none;color:var(--muted);cursor:pointer;min-width:32px;min-height:32px}
+.nempty{color:var(--muted);font-size:14px;padding:8px 0}.nmini{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--muted);margin-right:4px}.own.del:hover{color:#d33;border-color:#d33}.own.undel{margin:0 0 10px;min-height:36px;font-size:12px}
 .nudge{background:var(--pinkbg);border-color:transparent;color:#b34657;padding-left:10px}
 @media (prefers-color-scheme:dark){.nudge{color:var(--pink)}}
 .av{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex:0 0 28px}
@@ -724,7 +731,7 @@ let DEL={};try{DEL=JSON.parse(localStorage.getItem('sesaDel')||'{}')}catch(e){}
 function saveDel(){try{localStorage.setItem('sesaDel',JSON.stringify(DEL))}catch(e){}}
 async function deriveKey(pw,salt,iter){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:iter,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt'])}
 let RAW='';
-async function load(pw){const r=await fetch('data.enc.json?t='+Date.now(),{cache:'no-store'});const e=await r.json();if(!KEY||pw)KEY=await deriveKey(pw,b64(e.salt),e.iter);const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(e.iv)},KEY,b64(e.ct));RAW=new TextDecoder().decode(p);if(SHARED())await pullState();DATA=JSON.parse(RAW);norm(DATA);try{seenInit()}catch(e){DIFF=null}render()}
+async function load(pw){const r=await fetch('data.enc.json?t='+Date.now(),{cache:'no-store'});const e=await r.json();if(!KEY||pw)KEY=await deriveKey(pw,b64(e.salt),e.iter);const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(e.iv)},KEY,b64(e.ct));RAW=new TextDecoder().decode(p);if(SHARED())await pullState();DATA=JSON.parse(RAW);norm(DATA);applyShared(DATA);try{seenInit()}catch(e){DIFF=null}render()}
 function norm(d){d.properties=d.properties||[];d.top3=d.top3||[];d.watch=d.watch||[];d.properties.forEach(p=>{p.units=p.units||[];p.tasks=(p.tasks||[]).filter(t=>!DEL[t.id]);p.name=p.name||'Property'});if(d.money){const m=d.money;m.months=m.months||[];m.payments=m.payments||[];m.costs_top=m.costs_top||[];m.expected=m.expected||[]}}
 function remPw(k){try{const o=JSON.parse(localStorage.getItem(k)||'null');if(o&&o.pw&&Date.now()-o.t<6048e5){o.t=Date.now();localStorage.setItem(k,JSON.stringify(o));return o.pw}localStorage.removeItem(k)}catch(e){}return null}
 function savePw(k,pw){try{localStorage.setItem(k,JSON.stringify({pw:pw,t:Date.now()}))}catch(e){}}
@@ -741,7 +748,35 @@ let SESS=null;try{SESS=JSON.parse(localStorage.getItem('sesaSess')||'null')}catc
 function saveSess(t){SESS={a:t.access_token,r:t.refresh_token,x:t.expires_at||Math.floor(Date.now()/1000)+(t.expires_in||3600)};try{localStorage.setItem('sesaSess',JSON.stringify(SESS))}catch(e){}}
 async function sbTok(){if(!SESS)return null;if(SESS.x-60>Date.now()/1000)return SESS.a;
  try{const t=await fetch(SB+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:SBK,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:SESS.r})}).then(r=>r.json());if(t.access_token){saveSess(t);return SESS.a}}catch(e){}return null}
-const SHARED=()=>!!(USER&&SESS);let SIG='';
+const SHARED=()=>!!(USER&&SESS);let SIG='',ROWS=[],NOTES={};
+/* Added and edited tasks (22 Nov): rows with custom=true are new tasks, edited=true override the title, detail and urgency */
+function applyShared(d){if(!SHARED()||!d)return;const byId={};d.properties.forEach(p=>p.tasks.forEach(t=>byId[t.id]=t));
+ ROWS.forEach(r=>{if(r.deleted)return;if(r.custom&&!byId[r.item_id]){const pr=d.properties.find(p=>p.id===r.prop)||d.properties[0];if(!pr)return;const t={id:r.item_id,level:r.level||'normal',title:r.title||'New task',detail:r.detail||'',custom:true};pr.tasks.push(t);byId[t.id]=t;return}
+  const t=byId[r.item_id];if(t&&r.edited){if(r.title)t.title=r.title;if(r.detail!=null)t.detail=r.detail;if(r.level)t.level=r.level}})}
+function myName(){const m=me();return m&&m.name||USER&&USER.name||USER&&USER.email||'Someone'}
+function needEmail(){toast('Log in with your email to add tasks, edit and post notes');return true}
+function rebuild(){const y=scrollY;DATA=JSON.parse(RAW);norm(DATA);applyShared(DATA);render();scrollTo(0,y)}
+function newId(){return 'u'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function taskSheet(prop,id){if(!SHARED())return needEmail();const[t]=id?findTask(id):[];const lv=t?lvOf(t):'high',sh=document.getElementById('shade');
+ sh.innerHTML=`<div class="sheet" role="dialog" aria-label="${t?'Edit task':'Add a task'}"><div class="grab"></div><h3>${t?'Edit task':'Add a task'}</h3><div class="sub">${t?'Changes save for everyone':'Everyone on the hub will see it'}</div>
+ <div class="other"><input id="tt" maxlength="140" placeholder="What needs doing?" value="${esc(t?t.title:'')}" autocomplete="off"><textarea id="td" rows="3" maxlength="1500" placeholder="Details (optional)">${esc(t?t.detail||'':'')}</textarea>
+ <div class="lvpick">${[['urgent','Urgent'],['high','High'],['normal','Normal']].map(([k,n])=>`<button class="lvb ${k} ${k===lv?'on':''}" data-lvb="${k}">${n}</button>`).join('')}</div>
+ <button class="btn" data-savetask="${esc(id||'')}" data-prop="${esc(prop||'')}">${t?'Save changes':'Add task'}</button><button class="btn ghost" data-closesh="1">Cancel</button></div></div>`;
+ sh.classList.remove('hidden');setTimeout(()=>{const i=document.getElementById('tt');if(i)i.focus()},50)}
+async function saveTask(id,prop){const ti=document.getElementById('tt').value.trim(),de=document.getElementById('td').value.trim(),b=document.querySelector('.lvb.on'),lv=b?b.dataset.lvb:'normal';
+ if(!ti){toast('Give the task a title');return}const btn=document.querySelector('[data-savetask]');if(btn)btn.disabled=true;
+ let row;if(id){const[t,pr]=findTask(id);row={item_id:id,title:ti,detail:de,level:lv};if(t&&!t.custom)row.edited=true}else{row={item_id:newId(),custom:true,title:ti,detail:de,level:lv,prop,created_by_name:myName()}}
+ const ok=await sendState([row]);if(!ok){if(btn)btn.disabled=false;return}await pullState();closeSheet();rebuild();toast(id?'Saved for everyone':'Task added for everyone')}
+function noteMini(x){const n=(NOTES[x.id]||[]).length;return n?`<span class="nmini" aria-label="${n} notes">${ic('chat',12,2.4)}${n}</span>`:''}
+function notesSheet(id){if(!SHARED())return needEmail();const[t]=findTask(id);const sh=document.getElementById('shade'),ns=NOTES[id]||[],uid=USER&&SESS?JSON.parse(atob(SESS.a.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))).sub:'';
+ sh.innerHTML=`<div class="sheet" role="dialog" aria-label="Notes"><div class="grab"></div><h3>Notes</h3><div class="sub">${esc(t?t.title:'')}</div>
+ <div class="nlist">${ns.length?ns.map(n=>`<div class="note"><div class="nh"><b>${esc(n.author_name||n.author_email||'Someone')}</b><small>${ago(n.created_at)}</small>${n.user_id===uid?`<button class="ndel" data-delnote="${n.id}" data-for="${esc(id)}" aria-label="Delete note">${ic('trash',14)}</button>`:''}</div><p>${esc(n.body)}</p></div>`).join(''):'<div class="nempty">No notes yet - add the first update</div>'}</div>
+ <div class="other"><textarea id="nb" rows="3" maxlength="4000" placeholder="Write an update everyone can see"></textarea><button class="btn" data-postnote="${esc(id)}">Post note</button></div></div>`;
+ sh.classList.remove('hidden');const l=sh.querySelector('.nlist');if(l)l.scrollTop=l.scrollHeight}
+async function postNote(id){const b=document.getElementById('nb').value.trim();if(!b){toast('Write something first');return}const tk=await sbTok();if(!tk)return toast('Log in again to post');
+ const r=await fetch(SB+'/rest/v1/hub_notes',{method:'POST',headers:{apikey:SBK,Authorization:'Bearer '+tk,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({business_id:'sesa',item_id:id,body:b,author_name:myName(),author_email:USER.email})}).catch(()=>null);
+ if(!r||!r.ok)return toast('Could not post - check your connection');await pullState();rebuild();notesSheet(id);toast('Note posted')}
+async function delNote(nid,id){if(!confirm('Delete this note?'))return;const tk=await sbTok();if(!tk)return;await fetch(SB+'/rest/v1/hub_notes?id=eq.'+nid,{method:'DELETE',headers:{apikey:SBK,Authorization:'Bearer '+tk}}).catch(()=>null);await pullState();rebuild();notesSheet(id)}
 async function pullState(){const tk=await sbTok();if(!tk)return false;
  try{const r=await fetch(SB+'/rest/v1/hub_state?business_id=eq.sesa&select=*',{headers:{apikey:SBK,Authorization:'Bearer '+tk},cache:'no-store'});if(!r.ok)return false;const rows=await r.json();
   let mig=false;try{mig=localStorage.getItem('sesaShared')==='1'}catch(e){}
@@ -750,7 +785,9 @@ async function pullState(){const tk=await sbTok();if(!tk)return false;
    for(const k in DEL)if(!have.has(k))up.push({item_id:k,deleted:true,title:DEL[k].title,prop:DEL[k].prop});
    for(const k in OWN)if(!have.has(k)&&!up.some(u=>u.item_id===k)){const pp=person(OWN[k]);up.push({item_id:k,owner_set:true,owner:OWN[k]||null,owner_name:pp&&pp.name||null,owner_email:pp&&pp.email||null})}
    if(up.length){const z={done:false,done_at:null,deleted:false,title:null,prop:null,owner_set:false,owner:null,owner_name:null,owner_email:null};await sendState(up.map(u=>Object.assign({},z,u)));return pullState()}}
-  const sig=JSON.stringify(rows.map(x=>[x.item_id,x.done,x.deleted,x.owner_set,x.owner]).sort());const ch=sig!==SIG;SIG=sig;
+  let notes=[];try{const nr=await fetch(SB+'/rest/v1/hub_notes?business_id=eq.sesa&select=id,item_id,body,author_name,author_email,user_id,created_at&order=created_at.asc',{headers:{apikey:SBK,Authorization:'Bearer '+tk},cache:'no-store'});if(nr.ok)notes=await nr.json()}catch(e){}
+  const N={};notes.forEach(n=>(N[n.item_id]=N[n.item_id]||[]).push(n));NOTES=N;ROWS=rows;
+  const sig=JSON.stringify([rows.map(x=>[x.item_id,x.done,x.deleted,x.owner_set,x.owner,x.custom,x.edited,x.title,x.detail,x.level,x.prop]).sort(),notes.map(n=>n.id)]);const ch=sig!==SIG;SIG=sig;
   const D={},O={},X={};rows.forEach(x=>{if(x.deleted)X[x.item_id]={title:x.title,prop:x.prop,at:x.updated_at};if(x.done){D[x.item_id]=true;if(!LOG[x.item_id])LOG[x.item_id]=x.done_at||x.updated_at}
    if(x.owner_set){O[x.item_id]=x.owner||null;if(x.owner&&x.owner_email&&!(DATA&&DATA.people||[]).some(p=>p.id===x.owner)&&!EXTRA.some(p=>p.id===x.owner))EXTRA.push({id:x.owner,name:x.owner_name||x.owner_email,email:x.owner_email})}});
   DONE=D;OWN=O;DEL=X;saveDone();saveLog();saveOwn();saveDel();return ch}catch(e){return false}}
@@ -759,7 +796,7 @@ async function sendState(list){const tk=await sbTok();if(!tk){toast('Not saved f
  if(!r||!r.ok){toast('Could not save for everyone - check your connection');return false}return true}
 function pushState(id,patch){if(!SHARED())return;sendState([Object.assign({item_id:id},patch)]).then(ok=>{if(ok)pullState()})}
 async function livePull(){if(!SHARED()||!RAW||document.hidden)return;const ch=await pullState();if(!ch)return;const sh=document.getElementById('shade');if(sh&&!sh.classList.contains('hidden'))return;
- const y=scrollY;DATA=JSON.parse(RAW);norm(DATA);render();scrollTo(0,y)}
+ rebuild()}
 setInterval(livePull,30000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)livePull()});
 async function unwrap(pw){try{const r=await fetch('keys.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return null;const j=await r.json();
  for(const w of j.wraps||[]){try{const k=await deriveKey(pw,b64(w.salt),w.iter);const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(w.iv)},k,b64(w.ct));return new TextDecoder().decode(p)}catch(e){}}}catch(e){}return null}
@@ -1141,10 +1178,10 @@ function prop(p,i){let h='';const t=p.tasks.length,o=open_(p),att=p.units.filter
  h+=`<div class="pban ${GR[i%4]}"><div class="t">${esc(p.name)}</div><div class="a">${esc(p.area||'')}</div>${p.status?`<div class="s">${esc(p.status)}</div>`:''}${p.event?`<div class="ev">${ic('cal',16)} ${esc(String(p.event).replace(/^([A-Z])([A-Z]{3,})\b/,(m,a,b)=>a+b.toLowerCase()))}</div>`:''}${DATA.money?(()=>{const x=rentOf(p);return `<div class="rentchip">${ic('pound',14,2.4)} ${x.sum?`${gbp(x.sum)} rent in since Sep`:'No rent in yet'}</div>`})():''}
  <div class="pstats"><div><b id="po">${o}</b><span>Jobs left</span></div><div><b>${p.units.length}</b><span>Units</span></div><div><b>${att}</b><span>Need a look</span></div></div></div>`;
  h+=wxCard(p);
- h+=`<h2>Jobs <span class="cnt" id="pc">${t-o}/${t} done</span></h2>`;{const nd=Object.values(DEL).filter(v=>v.prop===p.id).length;if(nd)h+=`<button class="own none undel" data-undel="1">${nd} deleted - bring back</button>`}if(t)h+=jobMix(p);if(t)h+=topicMix(p.tasks.filter(x=>!DONE[x.id]).length?p.tasks.filter(x=>!DONE[x.id]):p.tasks);
+ h+=`<h2>Jobs <span class="cnt" id="pc">${t-o}/${t} done</span></h2>`;{const nd=Object.values(DEL).filter(v=>v.prop===p.id).length;h+=`<div class="jbar"><button class="own none addt" data-addtask="${esc(p.id)}">+ Add task</button>${nd?`<button class="own none undel" data-undel="1">${nd} deleted - bring back</button>`:''}</div>`}if(t)h+=jobMix(p);if(t)h+=topicMix(p.tasks.filter(x=>!DONE[x.id]).length?p.tasks.filter(x=>!DONE[x.id]):p.tasks);
  if(!t)h+=`<div class="alldone">Nothing to do here<small>Enjoy it while it lasts</small></div>`;
  for(const [lv,name,col] of LVLS){const ts=p.tasks.filter(x=>lvOf(x)===lv);if(!ts.length)continue;const lf=lvlLeft(p,lv);
-  h+=`<div class="lvl pl ${lv}"><i style="background:${col}"></i>${name}<em data-lvl="${lv}">${lf?lf+' left':'all done'}</em></div><div class="tasks">`+ts.map(x=>{const tp=topic(x.title+' '+(x.detail||''));return `<div class="task ${lv} ${DONE[x.id]?'done':''}" data-tp="${tp.k}"><div class="tico ${tp.c}">${ic(tp.i,20,2.1)}</div><div class="tx" data-fold="${esc(x.id)}" role="button" tabindex="0" aria-expanded="false"><div class="tl1"><i class="tlab ${tp.c}"><span class="mi">${ic(tp.i,13,2.4)}</span>${tp.l}</i>${whoMini(x)}<span class="tmore" aria-hidden="true">${CHEV}</span></div><b>${isNew(x.id)?'<em class="newb">NEW</em>':isUpd(x.id)?'<em class="newb up">UPDATED</em>':''}${esc(x.title)}</b>${x.detail?`<span>${esc(x.detail)}</span>`:''}<div class="acts">${actsD(x)}</div></div><button class="chk" data-task="${esc(x.id)}" aria-label="Mark done">${tickIcon()}</button></div>`}).join('')+`</div>`}
+  h+=`<div class="lvl pl ${lv}"><i style="background:${col}"></i>${name}<em data-lvl="${lv}">${lf?lf+' left':'all done'}</em></div><div class="tasks">`+ts.map(x=>{const tp=topic(x.title+' '+(x.detail||''));return `<div class="task ${lv} ${DONE[x.id]?'done':''}" data-tp="${tp.k}"><div class="tico ${tp.c}">${ic(tp.i,20,2.1)}</div><div class="tx" data-fold="${esc(x.id)}" role="button" tabindex="0" aria-expanded="false"><div class="tl1"><i class="tlab ${tp.c}"><span class="mi">${ic(tp.i,13,2.4)}</span>${tp.l}</i>${whoMini(x)}${noteMini(x)}<span class="tmore" aria-hidden="true">${CHEV}</span></div><b>${isNew(x.id)?'<em class="newb">NEW</em>':isUpd(x.id)?'<em class="newb up">UPDATED</em>':''}${esc(x.title)}</b>${x.detail?`<span>${esc(x.detail)}</span>`:''}<div class="acts">${actsD(x)}</div></div><button class="chk" data-task="${esc(x.id)}" aria-label="Mark done">${tickIcon()}</button></div>`}).join('')+`</div>`}
  h+=slotBoard(p);
  if(p.units.length)h+=`<h2>Who's who <span class="cnt">${p.units.length}</span></h2>${unitMix(p.units)}<div class="units">${p.units.map(unitCard).join('')}</div>`;
  return h}
@@ -1184,10 +1221,10 @@ function slotBoard(p){const txt=[p.event,p.status,...p.tasks.map(t=>t.title+' '+
 function acts(x){const o=person(ownerId(x));
  return o?`<button class="own" data-assign="${esc(x.id)}" aria-label="Assigned to ${esc(o.name)} - change">${avatar(o)}${esc(o.me?'Me':o.name)}</button>${o.email&&!DONE[x.id]?`<button class="nudge" data-nudge="${esc(x.id)}">${ic('bell',16)} Nudge</button>`:''}`
   :`<button class="own none" data-assign="${esc(x.id)}">${ic('user',16)} Assign</button>`}
-function actsD(x){return acts(x)+`<button class="own none del" data-del="${esc(x.id)}" aria-label="Delete task: ${esc(x.title)}">${ic('trash',16)} Delete</button>`}
+function actsD(x){const n=(NOTES[x.id]||[]).length;return acts(x)+`<button class="own none" data-notes="${esc(x.id)}">${ic('chat',16)} Notes${n?' ('+n+')':''}</button><button class="own none" data-edit="${esc(x.id)}">${ic('doc',16)} Edit</button><button class="own none del" data-del="${esc(x.id)}" aria-label="Delete task: ${esc(x.title)}">${ic('trash',16)} Delete</button>`}
 function delTask(id){const[t,p]=findTask(id);if(!t)return;if(!confirm((SHARED()?'Delete this task for everyone?':'Delete this task on this device?')+'\n\n'+t.title))return;
  DEL[id]={title:t.title,prop:p.id,at:new Date().toISOString()};saveDel();pushState(id,{deleted:true,title:t.title,prop:p.id});p.tasks=p.tasks.filter(x=>x.id!==id);delete DONE[id];saveDone();render();toast(SHARED()?'Task deleted for everyone':'Task deleted on this device')}
-async function undel(){const ids=Object.keys(DEL);DEL={};saveDel();if(SHARED()&&ids.length)await sendState(ids.map(k=>({item_id:k,deleted:false})));if(SHARED())await pullState();DATA=JSON.parse(RAW);norm(DATA);render();toast('Deleted tasks are back')}
+async function undel(){const ids=Object.keys(DEL);DEL={};saveDel();if(SHARED()&&ids.length)await sendState(ids.map(k=>({item_id:k,deleted:false})));if(SHARED())await pullState();DATA=JSON.parse(RAW);norm(DATA);applyShared(DATA);render();toast('Deleted tasks are back')}
 function findTask(id){for(const p of DATA.properties){const t=p.tasks.find(t=>t.id===id);if(t)return[t,p]}return[]}
 function openSheet(id){const[t]=findTask(id);if(!t)return;const cur=ownerId(t),sh=document.getElementById('shade');
  sh.innerHTML=`<div class="sheet" role="dialog" aria-label="Assign task"><div class="grab"></div><h3>Who's on it?</h3><div class="sub">${esc(t.title)}</div>
@@ -1246,6 +1283,10 @@ document.addEventListener('click',e=>{if(e.target.id==='shade')return closeSheet
    const pid='x_'+em.toLowerCase();if(!people().some(p=>p.id===pid))EXTRA.push({id:pid,name:n,email:em});return assign(a.dataset.addp,pid)}
   return assign(a.dataset.for,a.dataset.pick)}
  {const d=e.target.closest('[data-del]');if(d)return delTask(d.dataset.del)}
+ {const q=e.target.closest('[data-addtask],[data-edit],[data-notes],[data-savetask],[data-postnote],[data-delnote],[data-lvb],[data-closesh]');if(q){const ds=q.dataset;
+  if(ds.closesh)return closeSheet();if(ds.lvb){document.querySelectorAll('.lvb').forEach(b=>b.classList.toggle('on',b===q));return}
+  if(ds.addtask!==undefined)return taskSheet(ds.addtask);if(ds.edit)return taskSheet(null,ds.edit);if(ds.notes)return notesSheet(ds.notes);
+  if(ds.savetask!==undefined)return saveTask(ds.savetask,ds.prop);if(ds.postnote)return postNote(ds.postnote);if(ds.delnote)return delNote(ds.delnote,ds.for)}}
  {const u=e.target.closest('[data-undel]');if(u)return undel()}
  {const l=e.target.closest('[data-later]');if(l)return later(l.dataset.later)}
  {const m=e.target.closest('[data-team],[data-claim],[data-goto]');if(m){if(m.dataset.claim)return claim(m.dataset.claim);if(m.dataset.goto)return gotoTask(m.dataset.goto);return teamSheet(m.dataset.team)}}
