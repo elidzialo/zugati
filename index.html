@@ -823,7 +823,7 @@ function render(){
   $('upd').innerHTML='<span class="dot'+(age>2?' old':'')+'"></span>Last update '+esc(upd.toLocaleString('en-GB',{timeZone:'Europe/London',weekday:'short',hour:'2-digit',minute:'2-digit'}));
   const h=new Date().getHours();$('greet').textContent=(h<12?'Good morning':h<18?'Good afternoon':'Good evening')+', Eli';
   $('todaydate').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
-  renderKpis();renderActs();renderCfo();try{renderPayin()}catch(e){console.error(e)}try{renderToday()}catch(e){console.error(e)}renderBar();setupAsk();renderChips();renderGrid();renderPay();renderWin();renderYear();renderVal();try{renderVTL()}catch(e){console.error(e)}try{renderBF()}catch(e){console.error(e)}try{renderROF()}catch(e){console.error(e)}try{tip3()}catch(e){}
+  renderKpis();renderActs();renderCfo();try{renderPayin()}catch(e){console.error(e)}loadPayx();try{renderToday()}catch(e){console.error(e)}renderBar();setupAsk();renderChips();renderGrid();renderPay();renderWin();renderYear();renderVal();try{renderVTL()}catch(e){console.error(e)}try{renderBF()}catch(e){console.error(e)}try{renderROF()}catch(e){console.error(e)}try{tip3()}catch(e){}
 }
 function per(k){const a=DATA.accounts[ACC];return a&&a.periods.find(p=>p.key===k)||{}}
 function renderKpis(){
@@ -1306,6 +1306,11 @@ function mustDrafts(x){const D=(x.drafts||[]).filter(d=>d&&d.url);if(!D.length)r
 
 /* ---- Amazon money coming in: when payouts land in Wise ---- */
 let PI_ALL=false;
+async function loadPayx(){// fresher payouts written by the Coming-in task (locked with the public key, opened with keys.payouts)
+ try{const k=DATA.keys&&DATA.keys.payouts;if(!k)return;const e=await fetch('payouts.enc.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null);if(!e)return;
+  const pk=await crypto.subtle.importKey('jwk',k,{name:'RSA-OAEP',hash:'SHA-256'},false,['decrypt']);const raw=await crypto.subtle.decrypt({name:'RSA-OAEP'},pk,b64(e.ek));
+  const ak=await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['decrypt']);const x=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(e.iv)},ak,b64(e.ct))));
+  if(!DATA.payouts||new Date(x.as_of)>=new Date(DATA.payouts.as_of)){window.PAYX=x;renderPayin()}}catch(err){console.error(err)}}
 function piHol(){return new Set(((DATA.payouts||{}).rule||{}).holidays||[])}
 function piLand(req){// UK rule learnt from your history: before cutoff -> N working days, after -> N+1, lands ~04:15
  const R=(DATA.payouts||{}).rule||{cutoff:'14:00',before:3,after:4,land_time:'04:15'},H=piHol();
@@ -1317,7 +1322,7 @@ function piDay(d){return d.toLocaleDateString('en-GB',{weekday:'long',day:'numer
 function piTime(d){return d.toLocaleTimeString('en-GB',{hour:'numeric',minute:'2-digit'}).replace(':00','').replace(' ','')}
 function piLon(iso){const x=new Date(iso);return new Date(x.toLocaleString('en-US',{timeZone:'Europe/London'}))}
 function piCount(d){const ms=d-new Date(new Date().toLocaleString('en-US',{timeZone:'Europe/London'}));if(ms<=0)return 'any minute';const h=Math.round(ms/36e5);return h<24?h+' hours':Math.round(h/24)+(Math.round(h/24)===1?' day':' days')}
-function renderPayin(){const el=$('payin');if(!el)return;const P=DATA.payouts;if(!P){el.innerHTML='';return}
+function renderPayin(){const el=$('payin');if(!el)return;const P=window.PAYX||DATA.payouts;if(!P){el.innerHTML='';return}
  const R=P.rule||{},nowL=new Date(new Date().toLocaleString('en-US',{timeZone:'Europe/London'}));
  // what's expected: on its way (UK, exact) + Europe (pattern)
  const exp=[];(P.on_way||[]).forEach(x=>exp.push({t:x.expected?piLon(x.expected):piLand(new Date(x.requested)),amt:x.amount,cur:x.cur||'GBP',k:'uk',lab:'UK payout',sure:true,req:x.requested}));
