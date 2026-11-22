@@ -78,7 +78,7 @@ h2{font-size:21px;margin:30px 0 4px;font-weight:700}
 .rib{position:absolute;top:10px;left:0;padding:5px 12px 5px 10px;font-size:12px;font-weight:800;color:#fff;border-radius:0 14px 14px 0;text-transform:uppercase;letter-spacing:.4px}
 .mk{position:absolute;top:10px;right:10px;background:var(--nav);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px}
 .vtag{position:absolute;bottom:8px;right:10px;font-size:11px;font-weight:700;color:#b0123b;background:#fde8ec;padding:2px 8px;border-radius:10px}
-.s-now{background:var(--red)}.s-soon{background:var(--amber)}.s-ok{background:var(--green)}.s-stop{background:var(--grey)}.s-slow{background:#8a8f8f}
+.s-now{background:var(--red)}.s-soon{background:var(--amber)}.s-ok{background:var(--green)}.s-stop{background:var(--grey)}.s-slow{background:#8a8f8f}.s-clear{background:#6b4fa3}
 .pb{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;flex:1}
 .pn{font-weight:700;font-size:16px;line-height:1.25}
 .big{display:flex;align-items:baseline;gap:6px}
@@ -754,7 +754,7 @@ async function load(pw){const r=await fetch('data.enc.json?t='+Date.now(),{cache
 /* A2: per_day sometimes comes from one marketplace row only - never let it fall far below last 30 days' real sales */
 function fixRates(D){(D.products||[]).forEach(p=>{const r30=(p.units30||0)/30;if(p.per_day_raw==null&&r30>0&&r30>(p.per_day||0)*1.5){p.per_day_raw=p.per_day||0;p.per_day=Math.round(r30*100)/100}})}
 /* A2 19 Nov: 'Runs out ~date' on every card - red when it runs out before new stock lands */
-function runInfo(p,f){const t0=today(),calm=f.st==='stop'||f.st==='slow';
+function runInfo(p,f){const t0=today(),calm=f.st==='stop'||f.st==='slow'||f.st==='clear';
   if(f.run===null)return {t:lastsTxt(f.left,p),c:calm?'':'ok',s:''};
   const d=addD(t0,f.run),t=f.run<=1?(p.stock>0?'Runs out now':'Out of stock now'):'Runs out ~'+fmtD(d);
   if(calm)return {t,c:'',s:''};
@@ -786,6 +786,8 @@ function arrivals(p){const lead=DATA.lead_days||45,t0=today(),A=[];let inb=p.inb
   if(inb>0)A.push({i:wait?lead:14,q:inb,src:'inb',wait,est:true});
   if(ord>0)A.push({i:lead,q:ord,src:'ord',est:true});
   return A.sort((a,b)=>a.i-b.i)}
+/* A1 22 Nov: products on the clear-out list never say 'Order now' (A4: US Gold Card stock shows 0 while Amazon moves it) */
+function clearItem(p){const C=DATA.clearout;if(!C||!C.items)return null;if(C.date&&daysTo(C.date)<-100)return null;return C.items.find(it=>(it.ids||[]).includes(p.id))||null}
 function forecast(p){
   const lead=DATA.lead_days||45,t0=today(),yr=t0.getFullYear();
   const vS=new Date((t0.getMonth()>2?yr+1:yr)+'-01-15T00:00:00'),vE=new Date((t0.getMonth()>2?yr+1:yr)+'-02-14T00:00:00');
@@ -819,15 +821,17 @@ function forecast(p){
   else if(runD!==null&&reorderIn<=0)st='now';
   else if(runD!==null&&reorderIn<=21)st='soon';
   else st='ok';
-  if(st==='stop'||st==='slow')qty=0;
+  const clr=clearItem(p);if(clr)st='clear';
+  if(st==='stop'||st==='slow'||st==='clear')qty=0;
   let left=p.per_day>0?Math.round(((p.stock||0)+(p.inbound||0))/p.per_day):null;if(run!==null&&(left===null||run<left))left=run;
   if(st==='now'&&!qty&&!p.on_order)qty=Math.max(50,Math.ceil(need60/50)*50);
   const nx=run===null?null:AL.find(a=>a.i>run)||null,gap=run!==null&&nx?nx.i-run:null;
-  return {AL,nx,gap,line,run,needVal:Math.round(needVal),need60:Math.round(need60),need90:Math.round(need90),qty,reorderIn,st,left,have,vS,vE,xS};
+  return {clr,AL,nx,gap,line,run,needVal:Math.round(needVal),need60:Math.round(need60),need90:Math.round(need90),qty,reorderIn,st,left,have,vS,vE,xS};
 }
-const ST={now:['Order now','s-now'],soon:['Order soon','s-soon'],ok:['Healthy','s-ok'],stop:["Don't reorder",'s-stop'],slow:['Slow seller','s-slow']};
+const ST={now:['Order now','s-now'],soon:['Order soon','s-soon'],ok:['Healthy','s-ok'],stop:["Don't reorder",'s-stop'],slow:['Slow seller','s-slow'],clear:['Clearing out','s-clear']};
 function orderLine(p,f){
   if(f.st==='stop')return 'Losing money - sell down, don\'t reorder';
+  if(f.st==='clear')return 'Clearing out - sell down, don\'t reorder';
   if(f.st==='slow')return 'Selling slowly - no order needed';
   if(f.st==='now'&&!f.qty&&p.on_order){const a=(f.AL||[]).find(x=>x.src!=='inb');return n0(p.on_order)+' ordered'+(a&&a.src==='vo'?' - lands ~'+fmtD(addD(today(),a.i))+(f.gap>0?' - ask to send it sooner':''):' - make sure it ships now')}
   if(f.st==='now')return 'Order '+n0(f.qty)+' units now';
@@ -883,7 +887,7 @@ function renderActs(){
 }
 function list(){return DATA.products.filter(p=>p.account===ACC).map(p=>({p,f:forecast(p)}))}
 function renderChips(){
-  const L=list(),c=k=>L.filter(x=>k==='all'||(k==='val'?x.p.valentine:k==='attention'?['now','soon'].includes(x.f.st):x.f.st===k)).length;
+  const L=list(),c=k=>L.filter(x=>k==='all'||(k==='val'?x.p.valentine:k==='attention'?['now','soon'].includes(x.f.st):k==='stop'?['stop','clear'].includes(x.f.st):x.f.st===k)).length;
   const defs=[['all','All'],['now','Order now'],['soon','Order soon'],['ok','Healthy'],['val','Valentine\'s'],['stop','Don\'t reorder']];
   $('chips').innerHTML=defs.map(([k,l])=>'<span class="chip'+(FILTER===k?' on':'')+'" data-k="'+k+'">'+l+'<b>'+c(k)+'</b></span>').join('');
   $('chips').querySelectorAll('.chip').forEach(x=>x.onclick=()=>{FILTER=x.dataset.k;renderChips();renderGrid()});
@@ -900,9 +904,9 @@ function wireSearch(){const i=$('psq'),x=$('psx');if(!i||i._w)return;i._w=1;rend
 function leakB(p){if(p.account!=='USA'||!(p.stock>0))return '';const a=DATA.accounts.USA;if(!a)return '';const w=a.periods.find(x=>x.key==='7d')||{};const fee=-(w.amazon_fees||0);
   if(!((w.net_profit||0)<0&&fee>(w.sales||0)))return '';return '<span class="leakb">💸 <b>Costing you money</b> - the USA account paid '+money(fee,a.currency)+' in Amazon fees but sold only '+money(w.sales,a.currency)+' in 7 days.</span>'}
 function renderGrid(){
-  wireSearch();const ord={now:0,soon:1,ok:2,slow:3,stop:4};
+  wireSearch();const ord={now:0,soon:1,ok:2,slow:3,clear:4,stop:5};
   const act=x=>x.f.st!=='now'?0:x.f.qty>0&&!x.f.nx?0:x.f.qty>0?1:2;const srt={urgent:(a,b)=>ord[a.f.st]-ord[b.f.st]||act(a)-act(b)||(a.f.left??1e9)-(b.f.left??1e9)||(b.p.profit30||0)-(a.p.profit30||0),profit:(a,b)=>(b.p.profit30||0)-(a.p.profit30||0),sold:(a,b)=>(b.p.per_day||0)-(a.p.per_day||0),az:(a,b)=>String(a.p.name).localeCompare(String(b.p.name))}[PSORT]||((a,b)=>0);
-  const L=list().filter(x=>FILTER==='all'||(FILTER==='val'?x.p.valentine:x.f.st===FILTER)).filter(x=>pMatch(x.p,PQ)).sort(srt);
+  const L=list().filter(x=>FILTER==='all'||(FILTER==='val'?x.p.valentine:FILTER==='stop'?['stop','clear'].includes(x.f.st):x.f.st===FILTER)).filter(x=>pMatch(x.p,PQ)).sort(srt);
   $('grid').innerHTML=L.map(({p,f})=>{
     const [lab,cls]=ST[f.st];const left=f.left;const pct=left==null?0:Math.min(100,left/120*100);
     const RI=runInfo(p,f);const col=f.st==='now'||RI.c==='bad'?'var(--red)':f.st==='soon'||RI.c==='mid'?'var(--amber)':'var(--green)';
@@ -945,7 +949,8 @@ function barsSvg(items,cur){
 function openP(id){
   const p=DATA.products.find(x=>x.id===id);if(!p)return;const f=forecast(p);const [lab,cls]=ST[f.st];
   let rec;
-  if(f.st==='stop')rec='<b>Don\'t reorder this one.</b><br>'+esc(p.note||'It is losing money on each sale right now.');
+  if(f.st==='clear')rec='<b>Clearing out - don\'t reorder.</b><br>'+esc(f.clr.deal||'')+' '+esc(f.clr.keep||'')+(p.stock>0?'':' Amazon may still be moving the last few into stock, so 0 here can be temporary.');
+  else if(f.st==='stop')rec='<b>Don\'t reorder this one.</b><br>'+esc(p.note||'It is losing money on each sale right now.');
   else if(f.st==='slow')rec='<b>No order needed.</b><br>It sells slowly. '+esc(p.note||'');
   else if(f.st==='now'&&!f.qty&&p.on_order)rec='<b>'+n0(p.on_order)+' already ordered - make sure it ships now.</b><br>'+(f.run!=null?'At the current pace you could run out around '+fmtD(addD(today(),f.run))+', before it lands. ':'')+esc(p.note||'');
   else if(f.st==='now')rec='<b>Order '+n0(f.qty)+' units now.</b><br>'+(!(p.stock||0)&&!(p.inbound||0)?'You have none in stock right now. ':f.run!=null?'At the current pace you run out around '+fmtD(addD(today(),f.run))+', and new stock takes about '+(DATA.lead_days||45)+' days to arrive. ':'')+esc(p.note||'');
@@ -1027,7 +1032,7 @@ function recFor(p){const M=p.monthly,t0=today();let ly=0,g=1;
     for(let i=0;i<90;i++){const d=addD(t0,i-365),k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'),j=M.months.indexOf(k);if(j<0||(j===N-1&&M.partial_last))continue;ly+=M.units[j]/new Date(d.getFullYear(),d.getMonth()+1,0).getDate()}
     const a=M.units.slice(N-4,N-1).reduce((s,v)=>s+v,0),b=M.units.slice(N-16,N-13).reduce((s,v)=>s+v,0);if(a>30&&b>30)g=Math.min(1.6,Math.max(0.4,a/b))}
   const pace=(p.per_day||0)*90,est=Math.max(ly*g,pace,forecast(p).need90||0),have=(p.stock||0)+(p.inbound||0)+(p.on_order||0);
-  const fq=forecast(p),sug=Math.max(r50(est*1.1-have),fq.st==='stop'||fq.st==='slow'?0:(fq.qty||0));
+  const fq=forecast(p),sug=Math.max(r50(est*1.1-have),fq.st==='stop'||fq.st==='slow'||fq.st==='clear'?0:(fq.qty||0));
   // hot season
   const S=DATA.season||{},t=today();let hot=null;
   const dv=S.valentines?Math.round((new Date(S.valentines.peak_from+'T00:00:00')-t)/DAY):999,dx=S.christmas?Math.round((new Date(S.christmas.peak_from+'T00:00:00')-t)/DAY):999;
