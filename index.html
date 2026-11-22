@@ -589,6 +589,35 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
 .pili .m{flex:1}.pili .v{font-weight:800;font-size:15px}
 .pili .bar{height:6px;border-radius:3px;background:rgba(255,255,255,.12);margin-top:4px;overflow:hidden}.pili .bar i{display:block;height:100%;border-radius:3px}
 .pimore{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:999px;padding:8px 14px;margin-top:10px;font:inherit;font-size:13px;cursor:pointer}
+
+.fivek:empty{display:none}
+.fivek{margin-top:14px;background:#fff;border-radius:12px;padding:16px;border:2px solid var(--orange);box-shadow:0 4px 14px rgba(255,153,0,.18);animation:tsin .5s ease both;transition:border-color .4s,background .4s}
+.fivek.in{border-color:var(--green);background:linear-gradient(135deg,#fff 0%,var(--greenbg) 100%);box-shadow:0 4px 14px rgba(6,125,98,.18)}
+.fivek .fkh{display:flex;gap:14px;align-items:center}
+.fivek .fkd{flex:0 0 auto;width:66px;height:66px;border-radius:50%;background:var(--nav);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;position:relative}
+.fivek .fkd small{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;opacity:.8}.fivek .fkd b{font-size:26px;color:var(--orange)}
+.fivek .fkd:after{content:'';position:absolute;inset:-5px;border-radius:50%;border:3px solid var(--orange);opacity:.5;animation:fkp 2.2s ease-in-out infinite}
+.fivek.in .fkd{background:var(--green)}.fivek.in .fkd b{color:#fff;font-size:30px}.fivek.in .fkd:after{border-color:var(--green);animation:none;opacity:.35}
+@keyframes fkp{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.08);opacity:.15}}
+.fivek .fkt{font-size:19px;font-weight:800;line-height:1.2}.fivek .fks{font-size:14px;color:var(--muted);margin-top:3px;line-height:1.35}
+.fivek .fkbar{display:flex;height:26px;border-radius:13px;overflow:hidden;background:var(--greybg);margin:14px 0 6px;position:relative}
+.fivek .fkbar i{display:flex;align-items:center;justify-content:center;font-style:normal;font-size:12px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;border-right:2px solid #fff;transition:background .4s;animation:fkgrow .8s ease both}
+.fivek .fkbar i.s1{background:var(--orange2)}.fivek .fkbar i.s2{background:var(--teal)}.fivek .fkbar i.s3{background:var(--blue)}.fivek .fkbar i.ok{background:var(--green)}
+.fivek .fkbar i.left{background:repeating-linear-gradient(45deg,#e3e6e6 0 6px,#f0f2f2 6px 12px);color:var(--muted);border-right:0}
+@keyframes fkgrow{from{max-width:0}to{max-width:100%}}
+.fivek .fkl{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);font-weight:700}
+.fivek .fkp{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.fivek .fki{display:flex;gap:9px;align-items:center;border-radius:10px;padding:9px 10px;background:var(--greybg);border-left:5px solid var(--grey);position:relative;transition:background .4s}
+.fivek .fki .n{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:var(--nav);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+.fivek .fki .w{font-weight:800;font-size:14px;line-height:1.2}.fivek .fki .a{font-size:13px;color:var(--muted)}
+.fivek .fki.c1{border-left-color:var(--orange2)}.fivek .fki.c2{border-left-color:var(--teal)}.fivek .fki.c3{border-left-color:var(--blue)}
+.fivek .fki.ok{background:var(--greenbg);border-left-color:var(--green)}.fivek .fki.ok .n{background:var(--green)}.fivek .fki.ok .w{text-decoration:line-through;text-decoration-color:rgba(6,125,98,.5)}
+.fivek .fki .bk{margin-left:auto;flex:0 0 auto;font-size:12px;font-weight:800;border-radius:16px;padding:5px 9px;background:#fff;color:var(--green);border:1px solid var(--green);cursor:pointer}
+.fivek .fkn{margin-top:10px;font-size:13px;color:var(--muted)}
+@media(max-width:620px){.fivek{padding:12px;margin-left:-4px;margin-right:-4px}.fivek .fkp{grid-template-columns:1fr}.fivek .fkt{font-size:17px}.fivek .fkd{width:58px;height:58px}.fivek .fkbar i{font-size:11px}}
+.bfc .bfk .keep{background:var(--amberbg);color:#7a3500}
+.bfc .bfpl{margin-top:6px;font-size:14.5px;font-weight:800;line-height:1.3}
+.bfc .bfus{margin:8px 0 2px;background:var(--redbg);color:#7a0721;border-radius:8px;padding:8px 11px;font-size:14px;font-weight:700;line-height:1.35}
 </style>
 </head>
 <body>
@@ -614,6 +643,7 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
   <div class="wrap">
     <section id="today">
       <div class="hello"><h1 id="greet">Hello Eli</h1><div class="note" id="todaydate"></div></div>
+      <div class="fivek" id="fivek"></div>
       <div class="tstrip" id="tstrip"></div>
       <div class="kpis" id="kpis"></div>
       <div class="season" id="seasonbar"></div>
@@ -1259,8 +1289,25 @@ function wireMonthly(p){$('md').querySelectorAll('.mtog').forEach(t=>t.querySele
 
 /* ---------- today strip ---------- */
 function safeSpend(){const c=DATA.cfo;if(!c)return 0;const {low}=cashWeeks();return Math.max(0,Math.floor((low-c.floor)/500)*500)}
+function renderFiveK(){const el=$('fivek');if(!el)return;const F=DATA.fivek;if(!F||!(F.unlocks||[]).length){el.innerHTML='';return}
+  let D={};try{D=JSON.parse(localStorage.getItem('zdis')||'{}')||{}}catch(e){}
+  const P=id=>(DATA.payments||[]).find(p=>p.id===id),isPaid=id=>{const x=P(id),l=D['p:'+id];return !!((x&&x.status==='paid')||(l&&l.st==='paid'))};
+  const inx=P(F.in_id),landed=isPaid(F.in_id)||!!(inx&&/^(in|landed|received)$/.test(inx.status||''));
+  const day=Math.max(1,Math.floor((today()-new Date(F.from+'T00:00:00'))/DAY)+1),tot=F.amount||5000;
+  const L=F.unlocks.map((u,i)=>{const x=P(u.id);const g=u.gbp!=null?u.gbp:(x?payGbp(x):0);return {u,x,g,i,ok:isPaid(u.id)}});
+  const used=L.reduce((a,r)=>a+r.g,0),left=Math.max(0,tot-used),done=L.filter(r=>r.ok).length,allDone=done===L.length;
+  const nxt=L.find(r=>!r.ok);
+  const title=!landed?'Waiting on the '+money(tot,'GBP'):allDone?'All 3 paid - well done':'The '+money(tot,'GBP')+' is in - pay these in order';
+  const sub=!landed?'Once it lands it unlocks these 3 payments, in this order. Nothing can be paid until then.':allDone?money(left,'GBP')+' of it is left over as a cushion.':'Next: <b>'+esc(nxt.u.label)+'</b> (about '+money(nxt.g,'GBP')+'). '+done+' of '+L.length+' paid.';
+  el.className='fivek'+(landed?' in':'');
+  el.innerHTML='<div class="fkh"><div class="fkd">'+(landed?'<b>'+(allDone?'✓':'£')+'</b><small>'+(allDone?'done':'in')+'</small>':'<small>day</small><b>'+day+'</b>')+'</div><div style="min-width:0"><div class="fkt">'+(landed?'✅ ':'⏳ ')+title+'</div><div class="fks">'+sub+'</div></div></div>'+
+   '<div class="fkbar" role="img" aria-label="'+money(used,'GBP')+' of '+money(tot,'GBP')+' already planned">'+L.map(r=>'<i class="'+(r.ok?'ok':'s'+(r.i+1))+'" style="width:'+(r.g/tot*100)+'%;animation-delay:'+(r.i*.15)+'s">'+(r.ok?'✓ ':'')+esc(r.u.icon||'')+' '+money(r.g,'GBP')+'</i>').join('')+(left>0?'<i class="left" style="width:'+(left/tot*100)+'%">spare</i>':'')+'</div>'+
+   '<div class="fkl"><span>'+money(used,'GBP')+' of '+money(tot,'GBP')+' already spoken for</span><span>'+money(left,'GBP')+' spare</span></div>'+
+   '<div class="fkp">'+L.map(r=>'<div class="fki c'+(r.i+1)+(r.ok?' ok':'')+'"><span class="n">'+(r.ok?'✓':r.i+1)+'</span><div style="min-width:0"><div class="w">'+esc(r.u.icon||'')+' '+esc(r.u.label)+'</div><div class="a">'+(r.ok?'Paid':'About '+money(r.g,'GBP'))+'</div></div>'+(!r.ok&&landed&&r===nxt&&r.x?'<span class="bk" data-dis="p:'+esc(r.u.id)+'" data-st="paid" data-t="'+esc(r.x.what||r.u.label)+'">✓ Paid</span>':'')+'</div>').join('')+'</div>'+
+   (F.note?'<div class="fkn">'+esc(F.note)+'</div>':'');
+  wireDis(el)}
 function payGbp(x){const c=DATA.cfo||{};return x.gbp?x.gbp:(x.amount!=null?(x.cur==='USD'?x.amount*(c.usd_gbp||.79):x.cur==='EUR'?x.amount*.86:x.amount):0)}
-function renderToday(){const el=$('tstrip');if(!el)return;const c=DATA.cfo;if(!c){el.classList.add('hidden');return}
+function renderToday(){try{renderFiveK()}catch(e){console.error(e)}const el=$('tstrip');if(!el)return;const c=DATA.cfo;if(!c){el.classList.add('hidden');return}
   let DIS={};try{DIS=JSON.parse(localStorage.getItem('zdis')||'{}')}catch(e){}
   const t0=today(),wk=addD(t0,7),{start}=cashWeeks(),safe=safeSpend();
   const due=(DATA.payments||[]).filter(x=>['unpaid','overdue'].includes(x.status)&&!DIS['p:'+x.id]&&new Date(x.due+'T00:00:00')<=wk).sort((a,b)=>a.due<b.due?-1:1);
@@ -1500,17 +1547,21 @@ function vtlCalc(o){const S=DATA.shipping||{},M=(S.methods||{})[o.ship||'air']||
 function renderBF(){const el=$('bfc');if(!el)return;const C=DATA.clearout;if(!C||!(C.items||[]).length){el.innerHTML='';return}
   const day=new Date(C.date+'T00:00:00'),dl=Math.round((day-today())/DAY);if(dl<-3){el.innerHTML='';return}
   const fx=FXU(),P=id=>DATA.products.find(p=>p.id===id);let tot=0,anyEst=false;
+  const U7=((DATA.accounts||{}).USA||{}).periods?(DATA.accounts.USA.periods.find(x=>x.key==='7d')||{}):{},usFee=Math.abs(U7.amazon_fees||0)*fx,usStock=DATA.products.filter(p=>p.market==='USA'||p.account==='USA').reduce((a,p)=>a+(p.stock||0)+(p.inbound||0),0);
   const rows=C.items.map(it=>{const ps=(it.ids||[]).map(P).filter(Boolean);if(!ps.length)return null;const stock=ps.reduce((a,p)=>a+(p.stock||0)+(p.inbound||0),0),pd=ps.reduce((a,p)=>a+(p.per_day||0),0);
     const gbp=it.cost_usd!=null?stock*it.cost_usd*fx:null;if(gbp)tot+=gbp;if(it.est)anyEst=true;const days=pd>0?stock/pd:Infinity,mo=days/30.4;
     const tl=!isFinite(days)?'No sales - would never sell':mo<1.5?'Gone in ~'+Math.round(days)+' days':mo<18?'~'+Math.round(mo)+' months to sell at today\'s speed':'~'+Math.round(mo/12)+' years to sell at today\'s speed';
     const pct=!isFinite(days)?100:Math.min(100,mo/24*100),col=mo<=3?'var(--green)':mo<=9?'var(--amber)':'var(--red)';
-    return {it,ps,stock,gbp,tl,pct,col}}).filter(Boolean);
+    const us=ps.some(p=>p.account==='USA'||p.market==='USA'),wk=us&&usStock>0?usFee*stock/usStock:null;
+    const keep=wk!=null&&wk>=1?'💸 ~'+money(wk,'GBP')+' a week to keep':'🕒 small storage fee each month';
+    const plain=it.plain||(us&&wk>=1?'Every week this sits costs you about '+money(wk,'GBP')+' - selling cheap is better than waiting.':!isFinite(days)||mo>=18?'Far too much stock for how it sells - turn it into cash now.':'A deal gets this money back before Valentine\'s.');
+    return {it,ps,stock,gbp,tl,pct,col,keep,plain}}).filter(Boolean);
   if(!rows.length){el.innerHTML='';return}
   const when=dl>1?'in '+dl+' days':dl===1?'tomorrow':dl===0?'today':'this weekend';
   el.innerHTML='<div class="bfh"><div class="bfd"><small>'+esc(C.label||'Black Friday')+'</small><b>'+day.getDate()+'</b><small>'+day.toLocaleDateString('en-GB',{month:'short'})+'</small></div><div class="bfs"><div class="bft">🏷️ Clear-out ideas · '+when+'</div>About <span style="color:var(--orange)">'+money(tot,'GBP')+'</span> of your money is sitting in slow stock. A deal turns it back into cash for Valentine\'s.</div></div>'+
-  '<div class="bfg">'+rows.map((r,i)=>{const p=r.ps[0];return '<div class="bfr" data-bf="'+esc(p.id)+'" style="animation-delay:'+(i*.06)+'s"><img loading="lazy" src="'+img(p.img,200)+'" alt="" onerror="this.style.visibility=\'hidden\'"><div style="min-width:0"><div class="bfn">'+esc(r.it.title)+' <small>'+esc(p.market)+'</small></div>'+
-    '<div class="bfk"><span>📦 '+n0(r.stock)+' sitting</span>'+(r.gbp!=null?'<span class="tie">💷 ≈'+money(r.gbp,'GBP')+' tied up'+(r.it.est?'*':'')+'</span>':'')+'</div>'+
-    '<div class="bfbar"><i style="width:'+r.pct+'%;background:'+r.col+'"></i></div><div class="bfl">'+esc(r.tl)+'</div>'+
+  (usFee>=1?'<div class="bfus">🇺🇸 Your USA account is costing about '+money(usFee,'GBP')+' a week in Amazon fees while this stock sits there - it sold only '+money((U7.sales||0)*fx,'GBP')+' last week.</div>':'')+'<div class="bfg">'+rows.map((r,i)=>{const p=r.ps[0];return '<div class="bfr" data-bf="'+esc(p.id)+'" style="animation-delay:'+(i*.06)+'s"><img loading="lazy" src="'+img(p.img,200)+'" alt="" onerror="this.style.visibility=\'hidden\'"><div style="min-width:0"><div class="bfn">'+esc(r.it.title)+' <small>'+esc(p.market)+'</small></div>'+
+    '<div class="bfk"><span>📦 '+n0(r.stock)+' sitting</span>'+(r.gbp!=null?'<span class="tie">💷 ≈'+money(r.gbp,'GBP')+' tied up'+(r.it.est?'*':'')+'</span>':'')+'<span class="keep">'+esc(r.keep)+'</span></div>'+
+    '<div class="bfbar"><i style="width:'+r.pct+'%;background:'+r.col+'"></i></div><div class="bfl">'+esc(r.tl)+'</div>'+'<div class="bfpl">'+esc(r.plain)+'</div>'+
     '<div class="bfi"><b>Idea:</b> '+esc(r.it.deal)+(r.it.keep?'<div>'+esc(r.it.keep)+'</div>':'')+'</div></div></div>'}).join('')+
   '<div class="bff">Ideas only - nothing changes on Amazon unless you set the deal up in Seller Central.'+(anyEst?' * cost per unit is a guess (Sellerboard has no product costs for these).':'')+'</div></div>';
   el.querySelectorAll('[data-bf]').forEach(r=>r.onclick=()=>openP(r.dataset.bf))}
