@@ -28,4 +28,10 @@ The Nudge button opens Claude (claude.ai/new?q=...) with a one-line prompt to se
 
 ## Rules from Eli (22 Nov)
 - The Pozitive Energy / Foxglove Energy Supply Direct Debit (£377.55) is NOT for the Castleford HMO. Do not add it to the Castleford HMO (units, tasks, event, watch, top3 or money).
-- Tasks can be deleted on the page (Delete button on an open task). Deletes are stored on that device only (localStorage `sesaDel`, by task id), so keep task ids stable - a deleted id stays hidden even if the refresh keeps it.
+- Tasks can be deleted on the page (Delete button on an open task). Keep task ids stable - a deleted id stays hidden even if the refresh keeps it.
+
+## Shared state (22 Nov)
+- When signed in with email (Eli Hub / Supabase project eli-hub), Done ticks, assignments and deletes are saved for everyone in table `public.hub_state` (business_id 'sesa', item_id = task id or top3 hash). RLS: admins and partners with Sesa membership can read and write; staff cannot.
+- The page pulls it on load, every 30 seconds and when the tab comes back into view.
+- Password-only logins have no account, so they keep the old on-this-device behaviour (localStorage `sesaDone`, `sesaOwners`, `sesaDel`).
+- Refresh task: tasks with `deleted = true` in hub_state were deleted by a partner - drop them from data.json instead of re-adding them.
