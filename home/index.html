@@ -206,7 +206,11 @@ function fillProp(id,d,doneKey){let done={};try{done=JSON.parse(localStorage.get
  $('s-'+id).innerHTML=`<span>${props.length} ${props.length===1?'property':'properties'}</span><span>${open} jobs</span>`+(urgent?`<span style="background:rgba(255,120,120,.25)">${urgent} urgent</span>`:'')}
 
 async function agents(pw){
- try{AG=JSON.parse(await openBox(await getJ('agents.enc.json'),pw))}catch(e){$('v-agents').innerHTML='<p class="sub">Could not load the agents list.</p>';return}
+ try{const e=await getJ('agents.enc.json');
+  if(e.v===2){const pk=await crypto.subtle.importKey('jwk',KEYS.board,{name:'RSA-OAEP',hash:'SHA-256'},false,['decrypt']);
+   const raw=await crypto.subtle.decrypt({name:'RSA-OAEP'},pk,b64(e.ek));const ak=await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['decrypt']);
+   AG=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(e.iv)},ak,b64(e.ct))))}
+  else AG=JSON.parse(await openBox(e,pw))}catch(e){console.error(e);$('v-agents').innerHTML='<p class="sub">Could not load the agents list.</p>';return}
  const live=AG.agents.filter(a=>a.status!=='paused');$('m-ag').textContent=live.length+' working for you';
  $('foot').textContent='Agents list updated '+ago(AG.updated_at)+'. Refreshed 3 times a day.';
  drawAgents();
