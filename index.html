@@ -555,6 +555,40 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
 @media(min-width:621px){.pstack .prow,.ppaid .prow{grid-template-columns:72px minmax(0,1fr) minmax(120px,200px)}.pstack .pamt{min-width:0}}
 /* A2 21 Nov: USA leak badge */
 .leakb{display:block;margin:8px 0 0;background:#fde8ec;color:#cc0c39;border:1px solid #f5b5c2;border-radius:8px;padding:8px 10px;font-size:13px;font-weight:700;line-height:1.35}.leakb b{font-weight:800}
+
+/* Amazon money coming in (payouts) */
+.pi{background:linear-gradient(135deg,#0f2a1f,#123b2b);color:#fff;border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.pi h3{margin:0 0 2px;font-size:19px}.pi .pis{color:#b9dccb;font-size:14px;margin-bottom:14px}
+.pihero{display:flex;gap:14px;align-items:center;background:rgba(255,255,255,.08);border-radius:16px;padding:14px;margin-bottom:12px}
+.pihero .coin{width:54px;height:54px;flex:none;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe08a,#ff9900 60%,#c66f00);display:flex;align-items:center;justify-content:center;font-weight:800;color:#5a3500;font-size:22px;box-shadow:0 0 0 4px rgba(255,153,0,.25);animation:pibob 2.4s ease-in-out infinite}
+@keyframes pibob{50%{transform:translateY(-4px)}}
+.pihero .amt{font-size:28px;font-weight:800;line-height:1.1}
+.pihero .when{color:#d6efe3;font-size:15px}
+.pihero .cd{margin-left:auto;text-align:right;font-size:13px;color:#b9dccb}.pihero .cd b{display:block;font-size:20px;color:#fff}
+.piweek{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:6px 0 12px}
+.piday{background:rgba(255,255,255,.06);border-radius:12px;padding:8px 4px;text-align:center;min-height:92px;font-size:12px;color:#b9dccb}
+.piday.t{outline:2px solid #ff9900}
+.piday b{display:block;color:#fff;font-size:15px}
+.pichip{display:block;margin:5px 2px 0;border-radius:8px;padding:3px 2px;font-weight:700;font-size:11.5px;color:#10261c}
+.pichip.uk{background:#ffcf6b}.pichip.eu{background:#9fd4ff}.pichip.eur{background:#c8b6ff}.pichip.maybe{opacity:.7;border:1px dashed rgba(255,255,255,.6)}
+.pireq{background:#fff;color:#0f1111;border-radius:16px;padding:14px;margin-bottom:12px}
+.pireq .q{font-weight:800;font-size:16px;margin-bottom:6px}
+.pireq .row{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid #eee;font-size:14.5px}
+.pireq .row:first-of-type{border-top:0}
+.pireq .tag{flex:none;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700;background:#e6f4f1;color:#067d62}
+.pireq .tag.late{background:#fff4e5;color:#c45500}
+.pirules{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:12px}
+@media(min-width:760px){.pirules{grid-template-columns:repeat(3,1fr)}.piday{min-height:100px}}
+.pirule{background:rgba(255,255,255,.07);border-radius:14px;padding:12px;font-size:13.5px;color:#d6efe3}
+.pirule b{color:#fff;font-size:15px;display:block;margin-bottom:2px}
+.pirule i{font-style:normal;display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.pilist{background:rgba(255,255,255,.05);border-radius:14px;padding:6px 12px}
+.pili{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:13.5px}
+.pili:last-child{border-bottom:0}
+.pili .d{width:54px;flex:none;color:#b9dccb}.pili .d b{display:block;color:#fff;font-size:15px}
+.pili .m{flex:1}.pili .v{font-weight:800;font-size:15px}
+.pili .bar{height:6px;border-radius:3px;background:rgba(255,255,255,.12);margin-top:4px;overflow:hidden}.pili .bar i{display:block;height:100%;border-radius:3px}
+.pimore{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:999px;padding:8px 14px;margin-top:10px;font:inherit;font-size:13px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -571,7 +605,7 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
   <div class="nav"><div class="in">
     <div class="logo">zugati<small>portal</small></div>
     <div class="links">
-      <a href="#today"><i>🏠</i>Today</a><a href="#products"><i>📦</i>Products</a><a href="#askc"><i>✦</i>Ask Claude</a><a href="#cfo"><i>💷</i>Money</a><a href="#payments"><i>🧾</i>Payments</a><a href="#winners"><i>🏆</i>Going well</a><a href="#seasons"><i>❤️</i>Seasons</a>
+      <a href="#today"><i>🏠</i>Today</a><a href="#products"><i>📦</i>Products</a><a href="#askc"><i>✦</i>Ask Claude</a><a href="#cfo"><i>💷</i>Money</a><a href="#payin"><i>💰</i>Coming in</a><a href="#payments"><i>🧾</i>Payments</a><a href="#winners"><i>🏆</i>Going well</a><a href="#seasons"><i>❤️</i>Seasons</a>
     </div>
     <div class="acc"><button data-acc="UK" class="on">UK / EU</button><button data-acc="USA">USA</button></div>
   </div></div>
@@ -612,6 +646,7 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
     <section id="cfo">
       <h2>Your money - CFO view</h2>
       <p class="h2sub">Where the cash is, what's coming in, what's going out, and how much you can safely spend on stock.</p>
+      <div id="payin"></div>
       <div class="card dip" id="dip" style="margin-bottom:14px"></div>
       <div class="kpis" id="cfokpis"></div>
       <div id="othercash"></div>
@@ -705,7 +740,7 @@ const DAY=864e5;
 const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
 const addD=(d,n)=>new Date(d.getTime()+n*DAY);
 const fmtD=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-const sym=c=>c==='USD'?'$':c==='CNY'?'¥':'£';
+const sym=c=>c==='USD'?'$':c==='CNY'?'¥':c==='EUR'?'€':'£';
 const money=(v,c,dp)=>v==null||isNaN(v)?'-':(v<0?'-':'')+sym(c)+Math.abs(v).toLocaleString('en-GB',{maximumFractionDigits:dp||0,minimumFractionDigits:dp||0});
 const n0=v=>v==null||isNaN(v)?'-':Math.round(v).toLocaleString('en-GB');
 const img=(id,size)=>'https://m.media-amazon.com/images/I/'+encodeURIComponent(id)+'._AC_SL'+(size||500)+'_.jpg';
@@ -788,7 +823,7 @@ function render(){
   $('upd').innerHTML='<span class="dot'+(age>2?' old':'')+'"></span>Last update '+esc(upd.toLocaleString('en-GB',{timeZone:'Europe/London',weekday:'short',hour:'2-digit',minute:'2-digit'}));
   const h=new Date().getHours();$('greet').textContent=(h<12?'Good morning':h<18?'Good afternoon':'Good evening')+', Eli';
   $('todaydate').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
-  renderKpis();renderActs();renderCfo();try{renderToday()}catch(e){console.error(e)}renderBar();setupAsk();renderChips();renderGrid();renderPay();renderWin();renderYear();renderVal();try{renderVTL()}catch(e){console.error(e)}try{renderBF()}catch(e){console.error(e)}try{renderROF()}catch(e){console.error(e)}try{tip3()}catch(e){}
+  renderKpis();renderActs();renderCfo();try{renderPayin()}catch(e){console.error(e)}try{renderToday()}catch(e){console.error(e)}renderBar();setupAsk();renderChips();renderGrid();renderPay();renderWin();renderYear();renderVal();try{renderVTL()}catch(e){console.error(e)}try{renderBF()}catch(e){console.error(e)}try{renderROF()}catch(e){console.error(e)}try{tip3()}catch(e){}
 }
 function per(k){const a=DATA.accounts[ACC];return a&&a.periods.find(p=>p.key===k)||{}}
 function renderKpis(){
@@ -1268,6 +1303,54 @@ function mustPay(x){if(!x.link)return '';const {start}=cashWeeks(),need=payGbp(x
   return '<a class="tmpay'+(short?' wait':'')+'" target="_blank" rel="noopener" href="'+esc(x.link)+'"><span class="pi">'+(short?'⏳':'💳')+'</span><span>'+esc(x.pay_label||'Pay now')+' ↗<small>'+(short?'The bank has '+money(start,'GBP')+' right now - pay when the money is in':'Opens the payment page - you press Pay')+'</small></span></a>'}
 function mustDrafts(x){const D=(x.drafts||[]).filter(d=>d&&d.url);if(!D.length)return '';
   return (D.length>1?'<div class="tmdq">Pick one - each opens a ready email in Gmail (nothing is sent until you press Send):</div>':'')+'<div class="tmd">'+D.map((d,i)=>'<a class="'+(i?'hd':'pt')+'" target="_blank" rel="noopener" href="'+esc(d.url)+'">'+(D.length===1?'✉ ':i?'✋ ':'💳 ')+esc(d.label||'Open draft')+(d.note?'<small>'+esc(d.note)+'</small>':'')+'</a>').join('')+'</div>'}
+
+/* ---- Amazon money coming in: when payouts land in Wise ---- */
+let PI_ALL=false;
+function piHol(){return new Set(((DATA.payouts||{}).rule||{}).holidays||[])}
+function piLand(req){// UK rule learnt from your history: before cutoff -> N working days, after -> N+1, lands ~04:15
+ const R=(DATA.payouts||{}).rule||{cutoff:'14:00',before:3,after:4,land_time:'04:15'},H=piHol();
+ const lon=new Date(req.toLocaleString('en-US',{timeZone:'Europe/London'}));const ch=+R.cutoff.split(':')[0];
+ let k=lon.getHours()<ch?R.before:R.after;const d=new Date(lon.getFullYear(),lon.getMonth(),lon.getDate());
+ while(k){d.setDate(d.getDate()+1);const iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');if(d.getDay()%6&&!H.has(iso))k--}
+ const [hh,mm]=(R.land_time||'04:15').split(':');d.setHours(+hh,+mm);return d}
+function piDay(d){return d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})}
+function piTime(d){return d.toLocaleTimeString('en-GB',{hour:'numeric',minute:'2-digit'}).replace(':00','').replace(' ','')}
+function piLon(iso){const x=new Date(iso);return new Date(x.toLocaleString('en-US',{timeZone:'Europe/London'}))}
+function piCount(d){const ms=d-new Date(new Date().toLocaleString('en-US',{timeZone:'Europe/London'}));if(ms<=0)return 'any minute';const h=Math.round(ms/36e5);return h<24?h+' hours':Math.round(h/24)+(Math.round(h/24)===1?' day':' days')}
+function renderPayin(){const el=$('payin');if(!el)return;const P=DATA.payouts;if(!P){el.innerHTML='';return}
+ const R=P.rule||{},nowL=new Date(new Date().toLocaleString('en-US',{timeZone:'Europe/London'}));
+ // what's expected: on its way (UK, exact) + Europe (pattern)
+ const exp=[];(P.on_way||[]).forEach(x=>exp.push({t:x.expected?piLon(x.expected):piLand(new Date(x.requested)),amt:x.amount,cur:x.cur||'GBP',k:'uk',lab:'UK payout',sure:true,req:x.requested}));
+ if(P.eu_gbp&&P.eu_gbp.next){let t=piLon(P.eu_gbp.next);while(t<nowL)t=new Date(t.getTime()+P.eu_gbp.every_days*864e5);exp.push({t,amt:P.eu_gbp.typical,cur:'GBP',k:'eu',lab:'Europe (in £)',sure:false});exp.push({t:new Date(t.getTime()+P.eu_gbp.every_days*864e5),amt:P.eu_gbp.typical,cur:'GBP',k:'eu',lab:'Europe (in £)',sure:false})}
+ if(P.eu_eur&&P.eu_eur.next){let t=piLon(P.eu_eur.next);while(t<nowL)t=new Date(t.getTime()+7*864e5);exp.push({t,amt:P.eu_eur.typical,cur:'EUR',k:'eur',lab:'Europe (in €)',sure:false})}
+ exp.sort((a,b)=>a.t-b.t);const nx=exp.find(x=>x.t>nowL);
+ let h='<div class="pi"><h3>💰 Amazon money coming in</h3><div class="pis">When Amazon pays you, and when it actually lands in Wise.</div>';
+ if(nx)h+='<div class="pihero"><div class="coin">'+(nx.cur==='EUR'?'€':'£')+'</div><div><div class="amt">'+(nx.sure?money(nx.amt,nx.cur,2):'~'+money(nx.amt,nx.cur))+'</div><div class="when">'+(nx.sure?'Lands ':'Likely ')+esc(piDay(nx.t))+', about '+piTime(nx.t)+'</div><div class="when" style="font-size:13px;opacity:.8">'+esc(nx.lab)+(nx.sure?' - Amazon has sent it':' - usual pattern, no email from Amazon')+'</div></div><div class="cd">in<b>'+piCount(nx.t)+'</b></div></div>';
+ // 7-day strip
+ h+='<div class="piweek">';for(let i=0;i<7;i++){const d=new Date(nowL.getFullYear(),nowL.getMonth(),nowL.getDate()+i);const its=exp.filter(x=>x.t.toDateString()===d.toDateString());
+  h+='<div class="piday'+(i===0?' t':'')+'">'+(i===0?'Today':d.toLocaleDateString('en-GB',{weekday:'short'}))+'<b>'+d.getDate()+'</b>'+its.map(x=>'<span class="pichip '+x.k+(x.sure?'':' maybe')+'">'+(x.sure?'':'~')+money(x.amt,x.cur)+'</span>').join('')+'</div>'}
+ h+='</div>';
+ // request calculator
+ const now=new Date(),cut=+(R.cutoff||'14:00').split(':')[0],lateNow=nowL.getHours()>=cut;
+ const a=piLand(now);const t2=new Date(nowL.getFullYear(),nowL.getMonth(),nowL.getDate()+(lateNow?1:0),10,0);const b=piLand(new Date(t2.toLocaleString('en-US')));
+ h+='<div class="pireq"><div class="q">Thinking of pressing "Request payment" in Seller Central?</div>'+
+  '<div class="row"><span class="tag'+(lateNow?' late':'')+'">Now</span><span>Lands <b>'+esc(piDay(a))+'</b> about '+piTime(a)+'</span></div>'+
+  (lateNow?'<div class="row"><span class="tag">Tomorrow before '+cut+':00</span><span>Lands <b>'+esc(piDay(b))+'</b> - same as now'+(b.toDateString()===a.toDateString()?'':'')+'</span></div>':'<div class="row"><span class="tag late">After '+cut+':00 today</span><span>One day later: <b>'+esc(piDay(piLand(new Date(new Date().setHours(cut+1)))))+'</b></span></div>')+
+  '<div style="color:#565959;font-size:13px;padding-top:8px;border-top:1px solid #eee">Tip: request <b>before '+cut+':00</b> UK time to save a day. Weekends and bank holidays don\'t count.</div></div>';
+ // rules learnt
+ const okp=R.of?Math.round(R.hits/R.of*100):0;
+ h+='<div class="pirules"><div class="pirule"><b><i style="background:#ffcf6b"></i>UK (£) - when you request</b>'+R.before+' working days if requested before '+R.cutoff+', '+R.after+' after. Lands about '+piTime(piLon('2026-01-05T'+(R.land_time||'04:15')))+'. Right '+R.hits+' out of '+R.of+' times ('+okp+'%).</div>'+
+  (P.eu_gbp?'<div class="pirule"><b><i style="background:#9fd4ff"></i>Europe (£) - automatic</b>'+esc(P.eu_gbp.note||'')+'. Usually about '+money(P.eu_gbp.typical,'GBP')+'.</div>':'')+
+  (P.eu_eur?'<div class="pirule"><b><i style="background:#c8b6ff"></i>Europe (€) - into Wise euro</b>'+esc(P.eu_eur.note||'')+'. Usually about '+money(P.eu_eur.typical,'EUR')+'.</div>':'')+'</div>';
+ // landed list
+ const Lnd=(P.landed||[]),show=PI_ALL?Lnd:Lnd.slice(0,8),mx=Math.max(...Lnd.map(x=>x.cur==='EUR'?x.amount*(P.eu_eur&&P.eu_eur.eur_gbp||.87):x.amount),1);
+ const cutoff30=new Date(Date.now()-30*864e5),tot=Lnd.filter(x=>new Date(x.landed)>cutoff30).reduce((s,x)=>s+(x.cur==='EUR'?x.amount*(P.eu_eur&&P.eu_eur.eur_gbp||.87):x.amount),0);
+ h+='<div style="display:flex;align-items:baseline;justify-content:space-between;margin:4px 2px 6px"><b>Landed recently</b><span style="color:#b9dccb;font-size:13px">Last 30 days: about '+money(tot,'GBP')+'</span></div><div class="pilist">'+show.map(x=>{const d=piLon(x.landed),c=x.cur==='EUR'?'#c8b6ff':x.src==='EU'?'#9fd4ff':'#ffcf6b',g=x.cur==='EUR'?x.amount*(P.eu_eur&&P.eu_eur.eur_gbp||.87):x.amount;
+  const m=x.requested?('Asked '+piLon(x.requested).toLocaleDateString('en-GB',{weekday:'short'})+' '+piTime(piLon(x.requested))+' - took '+x.wdays+' working days'+(x.on_time===false?' (later than usual)':'')):(x.src==='EU'?'Europe, automatic':'UK, automatic');
+  return '<div class="pili"><div class="d">'+d.toLocaleDateString('en-GB',{weekday:'short'})+'<b>'+d.getDate()+' '+d.toLocaleDateString('en-GB',{month:'short'})+'</b></div><div class="m">'+esc(m)+'<div class="bar"><i style="width:'+(g/mx*100).toFixed(1)+'%;background:'+c+'"></i></div></div><div class="v">'+money(x.amount,x.cur,2)+'</div></div>'}).join('')+'</div>'+
+  (Lnd.length>8?'<button class="pimore" onclick="PI_ALL=!PI_ALL;renderPayin()">'+(PI_ALL?'Show less':'Show all '+Lnd.length)+'</button>':'');
+ h+='<div style="color:#8fb8a5;font-size:12px;margin-top:10px">From your Amazon "payment on the way" emails and Wise. Updated '+esc(new Date(P.as_of).toLocaleString('en-GB',{weekday:'short',hour:'2-digit',minute:'2-digit'}))+'.</div></div>';
+ el.innerHTML=h}
 function renderLeaks(){const el=$('leaks');if(!el)return;const L=((DATA.cfo||{}).leaks||[]).slice().sort((a,b)=>a.date<b.date?1:-1);if(!L.length){el.innerHTML='';return}
   const tin=L.reduce((s,x)=>s+(+x.in||0),0),tout=L.reduce((s,x)=>s+(+x.out||0),0),mx=Math.max(...L.map(x=>Math.max(+x.in||0,+x.out||0)),1),net=tin-tout;
   const say=net<0?'More went out than came in this week - '+money(-net,'GBP')+' more out.':net>0?'More came in than went out this week - '+money(net,'GBP')+' ahead.':'What came in this week all went straight back out.';
