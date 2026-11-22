@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#111318">
+<title>Eli HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f2ee;--card:#fff;--ink:#16181d;--muted:#6b6f78;--line:#e6e2da;--soft:#f8f6f2;
+--zug:#232f3e;--zug2:#ff9900;--sesa:#1d1d1f;--sesa2:#F07C8C;--zalo:#173d2c;--zalo2:#3fbf7f;--plumb:#0b1f33;--plumb2:#4aa3ff;--brief:#4b2a7b;--brief2:#b18cff;--admin:#3a3f47;--admin2:#9aa3ae;
+--ok:#1f9d5a;--okbg:#e5f5ec;--warn:#c47a00;--warnbg:#fff3df;--off:#8a8f98;--offbg:#eef0f2;--one:#2f6fd6;--onebg:#e6eefc;--shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px rgba(0,0,0,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#181b21;--ink:#eef0f3;--muted:#9aa0aa;--line:#262a32;--soft:#1d2027;--okbg:#14301f;--warnbg:#33270f;--offbg:#23262d;--onebg:#172540;--shadow:0 1px 2px rgba(0,0,0,.3)}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 Poppins,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer}
+.hidden{display:none!important}
+/* gate */
+.gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 20% 10%,#2a2f3a 0,#111318 55%)}
+.gbox{width:100%;max-width:360px;color:#fff;text-align:center}
+.mark{font-weight:800;font-size:34px;letter-spacing:-1px}
+.mark i{font-style:normal;color:var(--zug2)}
+.gbox p{color:#aab0bb;margin:6px 0 26px}
+.gbox input{width:100%;padding:15px 16px;border-radius:14px;border:1px solid #333a46;background:#1a1e26;color:#fff;font:inherit;font-size:16px;outline:none}
+.gbox input:focus{border-color:var(--zug2)}
+.gbox button{width:100%;margin-top:12px;padding:15px;border:0;border-radius:14px;background:var(--zug2);color:#16181d;font-weight:700;font-size:16px}
+.err{color:#ff8a8a;font-size:14px;margin-top:12px}
+.shake{animation:sh .35s}@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+/* app */
+.top{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top .in{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:12px 16px}
+.top .mark{font-size:22px;color:var(--ink)}
+.tabs{display:flex;gap:4px;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:4px;margin-left:auto}
+.tabs button{border:0;background:none;color:var(--muted);padding:8px 16px;border-radius:999px;font-weight:600;font-size:14px;min-height:38px}
+.tabs button.on{background:var(--ink);color:var(--bg)}
+.lo{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:999px;padding:8px 12px;font-size:13px;min-height:38px}
+main{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:26px;letter-spacing:-.5px;margin:4px 0 2px}
+.sub{color:var(--muted);margin:0 0 18px}
+/* hub tiles */
+.tiles{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:760px){.tiles{grid-template-columns:repeat(3,1fr)}}
+.tile{position:relative;display:flex;flex-direction:column;border-radius:22px;padding:20px;min-height:200px;color:#fff;overflow:hidden;box-shadow:var(--shadow);transition:transform .15s}
+.tile:active{transform:scale(.98)}
+@media(hover:hover){.tile:hover{transform:translateY(-3px)}}
+.tile:before{content:"";position:absolute;right:-40px;top:-40px;width:170px;height:170px;border-radius:50%;background:var(--a2);opacity:.22}
+.tile .k{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.75;font-weight:600}
+.tile .n{font-size:26px;font-weight:800;letter-spacing:-.5px;margin:2px 0 10px;display:flex;align-items:center;gap:8px}
+.tile .n b{width:10px;height:10px;border-radius:50%;background:var(--a2);display:inline-block}
+.tile .h{font-size:14px;opacity:.92;flex:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tile .st{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.tile .st span{background:rgba(255,255,255,.14);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:600}
+.tile .go{position:absolute;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--a2);color:#111;display:flex;align-items:center;justify-content:center}
+.t-zug{background:linear-gradient(140deg,#232f3e,#131921);--a2:var(--zug2)}
+.t-sesa{background:linear-gradient(140deg,#2a2a2d,#141416);--a2:var(--sesa2)}
+.t-zalo{background:linear-gradient(140deg,#1d4a35,#0f2a1e);--a2:var(--zalo2)}
+.mini{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px}
+@media(min-width:760px){.mini{grid-template-columns:repeat(4,1fr)}}
+.mtile{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:4px;min-height:92px;box-shadow:var(--shadow)}
+.mtile .ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:4px}
+.mtile b{font-size:15px}.mtile small{color:var(--muted);font-size:12.5px}
+.sec{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:26px 0 10px}
+/* agents */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:var(--shadow)}
+.stat .v{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1.1}
+.stat .l{color:var(--muted);font-size:13px}
+.stat.g .v{color:var(--ok)}
+.now{background:linear-gradient(120deg,#1a1e26,#262b36);color:#fff;border-radius:20px;padding:16px 18px;margin-bottom:16px;display:flex;gap:14px;align-items:center}
+.now .dot{flex:none}
+.now b{display:block;font-size:15px}.now small{color:#aab0bb;font-size:13px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font-weight:600;font-size:13.5px;min-height:40px;display:flex;align-items:center;gap:7px}
+.chip i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.grp{margin-top:18px}
+.gh{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.gh .ic{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;background:var(--c)}
+.gh b{font-size:17px}.gh small{color:var(--muted);margin-left:auto;font-size:13px}
+.cards{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:760px){.cards{grid-template-columns:repeat(2,1fr)}}
+.ag{position:relative;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 14px 14px 18px;box-shadow:var(--shadow);overflow:hidden;animation:up .35s both}
+@keyframes up{from{opacity:0;transform:translateY(8px)}}
+.ag:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--c)}
+.ag.paused{opacity:.62}.ag.paused:before{background:var(--off)}
+.ag .r1{display:flex;align-items:center;gap:8px}
+.ag .nm{font-weight:700;font-size:15px;flex:1}
+.ag .wh{color:var(--muted);font-size:13.5px;margin:4px 0 10px}
+.ag .r2{display:flex;gap:6px;flex-wrap:wrap}
+.pill{font-size:12px;font-weight:600;border-radius:999px;padding:4px 9px;background:var(--soft);color:var(--muted);display:inline-flex;align-items:center;gap:5px}
+.pill.ok{background:var(--okbg);color:var(--ok)}.pill.bad{background:var(--warnbg);color:var(--warn)}.pill.one{background:var(--onebg);color:var(--one)}.pill.off{background:var(--offbg);color:var(--off)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--ok);position:relative;flex:none}
+.dot.live:after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--ok);animation:pulse 2s infinite;opacity:0}
+@keyframes pulse{0%{transform:scale(.6);opacity:.8}100%{transform:scale(1.6);opacity:0}}
+.dot.off{background:var(--off)}.dot.one{background:var(--one)}.dot.run{background:var(--zug2)}
+.dot.run:after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--zug2);animation:pulse 1.2s infinite}
+.timeline{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;box-shadow:var(--shadow);margin-bottom:6px}
+.tl{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.tl:last-child{border-bottom:0}
+.tl time{font-weight:700;width:58px;flex:none;font-variant-numeric:tabular-nums}
+.tl i{width:9px;height:9px;border-radius:50%;background:var(--c);flex:none}
+.tl span{flex:1}
+.foot{color:var(--muted);font-size:12.5px;text-align:center;margin-top:26px}
+</style>
+</head>
+<body>
+<div id="gate" class="gate">
+ <div class="gbox">
+  <div class="mark">Eli<i>.</i>HQ</div>
+  <p>One login for Zugati, Sesa and Zalo</p>
+  <input id="pw" type="password" autocomplete="current-password" placeholder="Password" aria-label="Password" onkeydown="if(event.key==='Enter')go()">
+  <button onclick="go()">Open</button>
+  <div id="err" class="err hidden">Wrong password - try again.</div>
+ </div>
+</div>
+
+<div id="app" class="hidden">
+ <header class="top"><div class="in">
+  <div class="mark">Eli<i style="font-style:normal;color:var(--zug2)">.</i>HQ</div>
+  <nav class="tabs"><button id="tb-hubs" class="on" onclick="show('hubs')">Hubs</button><button id="tb-agents" onclick="show('agents')">Agents</button></nav>
+  <button class="lo" onclick="logout()" aria-label="Log out">Log out</button>
+ </div></header>
+ <main>
+  <section id="v-hubs"></section>
+  <section id="v-agents" class="hidden"></section>
+  <div class="foot" id="foot"></div>
+ </main>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const WEEK=6048e5;
+async function deriveKey(pw,salt,iter){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:iter,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt'])}
+async function openBox(e,pw){const k=await deriveKey(pw,b64(e.salt),e.iter);const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(e.iv)},k,b64(e.ct));return new TextDecoder().decode(p)}
+async function getJ(u){const r=await fetch(u+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error(u);return r.json()}
+function remPw(k){try{const o=JSON.parse(localStorage.getItem(k)||'null');if(o&&o.pw&&Date.now()-o.t<WEEK){o.t=Date.now();localStorage.setItem(k,JSON.stringify(o));return o.pw}localStorage.removeItem(k)}catch(e){}return null}
+function savePw(k,pw){try{localStorage.setItem(k,JSON.stringify({pw:pw,t:Date.now()}))}catch(e){}}
+
+let KEYS=null,AG=null,FILTER='all';
+const BIZ={
+ brief:{n:'Daily briefs',c:'#7b4fd0',ic:'M12 3v2m0 14v2M5 12H3m18 0h-2M6.3 6.3 4.9 4.9m14.2 14.2-1.4-1.4M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z'},
+ zugati:{n:'Zugati Amazon',c:'#ff9900',ic:'M3 6h18l-2 12H5L3 6zm5 0a4 4 0 0 1 8 0'},
+ web:{n:'Zugati website',c:'#e06c9f',ic:'M4 5h16v11H4zM8 20h8M12 16v4'},
+ sesa:{n:'Sesa Estates',c:'#F07C8C',ic:'M3 11l9-7 9 7v9H3zM9 20v-6h6v6'},
+ zalo:{n:'Zalo Estates',c:'#2fae6e',ic:'M3 11l9-7 9 7v9H3zM10 20v-5h4v5'},
+ plumb:{n:'Plumb Rescue 24',c:'#3b8eea',ic:'M14 3l7 7-4 4-7-7zM10 7 3 14v7h7l7-7'},
+ admin:{n:'Inbox and admin',c:'#8a94a3',ic:'M3 6h18v12H3zM3 7l9 6 9-6'}
+};
+const ORDER=['brief','zugati','web','sesa','zalo','plumb','admin'];
+const svg=(d,s=18,c='currentColor')=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
+
+async function go(){
+ const pw=$('pw').value;$('err').classList.add('hidden');
+ try{
+  KEYS=JSON.parse(await openBox(await getJ('keys.enc.json'),pw));
+  savePw('eliHome',pw);try{sessionStorage.setItem('eliHomePw',pw)}catch(e){}
+  // fill every hub's own remember slot so they open without asking (7 days, same as before)
+  savePw('zugatiRemember',KEYS.zugati);savePw('sesaRemember',KEYS.sesa);savePw('zaloRemember',KEYS.zalo);
+  try{sessionStorage.setItem('zpw',KEYS.zugati);sessionStorage.setItem('sesaPw',KEYS.sesa);sessionStorage.setItem('zaloPw',KEYS.zalo)}catch(e){}
+  $('gate').classList.add('hidden');$('app').classList.remove('hidden');
+  hubs();agents(pw);show(location.hash==='#agents'?'agents':'hubs');
+ }catch(e){console.error(e);try{localStorage.removeItem('eliHome')}catch(x){}$('err').classList.remove('hidden');const g=$('pw');g.classList.remove('shake');void g.offsetWidth;g.classList.add('shake')}
+}
+function logout(){['eliHome','zugatiRemember','sesaRemember','zaloRemember'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});try{sessionStorage.clear()}catch(e){}location.hash='';location.reload()}
+function show(v){['hubs','agents'].forEach(x=>{$('v-'+x).classList.toggle('hidden',x!==v);$('tb-'+x).classList.toggle('on',x===v)});history.replaceState(null,'',v==='agents'?'#agents':'#');window.scrollTo(0,0)}
+
+function ago(t){if(!t)return '';const m=Math.round((Date.now()-new Date(t))/6e4);if(m<1)return 'just now';if(m<60)return m+'m ago';const h=Math.round(m/60);if(h<24)return h+'h ago';const d=Math.round(h/24);return d+(d===1?' day ago':' days ago')}
+function when(t){if(!t)return '';const d=new Date(t),n=new Date();const tm=d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/London'});const day=(x)=>x.toLocaleDateString('en-GB',{timeZone:'Europe/London'});const tmr=new Date(n.getTime()+864e5);
+ if(day(d)===day(n))return 'today '+tm;if(day(d)===day(tmr))return 'tomorrow '+tm;return d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',timeZone:'Europe/London'})+' '+tm}
+const gbp=n=>'£'+Math.round(n).toLocaleString('en-GB');
+
+async function hubs(){
+ const h=new Date().toLocaleString('en-GB',{hour:'numeric',hour12:false,timeZone:'Europe/London'});
+ const hi=h<12?'Good morning':h<18?'Good afternoon':'Good evening';
+ $('v-hubs').innerHTML=`<h1>${hi}, Eli</h1><p class="sub">Tap a hub - you're already logged in to all three.</p>
+ <div class="tiles">
+  <a class="tile t-zug" href="../"><div class="k">Amazon</div><div class="n"><b></b>Zugati</div><div class="h" id="h-zug">Loading...</div><div class="st" id="s-zug"></div><div class="go">${svg('M5 12h14M13 6l6 6-6 6')}</div></a>
+  <a class="tile t-sesa" href="../sesa/"><div class="k">Property</div><div class="n"><b></b>Sesa Estates</div><div class="h" id="h-sesa">Loading...</div><div class="st" id="s-sesa"></div><div class="go">${svg('M5 12h14M13 6l6 6-6 6')}</div></a>
+  <a class="tile t-zalo" href="../zalo/"><div class="k">Property</div><div class="n"><b></b>Zalo Estates</div><div class="h" id="h-zalo">Loading...</div><div class="st" id="s-zalo"></div><div class="go">${svg('M5 12h14M13 6l6 6-6 6')}</div></a>
+ </div>
+ <div class="sec">More</div>
+ <div class="mini">
+  <a class="mtile" href="#agents" onclick="show('agents');return false"><div class="ic" style="background:#7b4fd022;color:#7b4fd0">${svg('M12 2a4 4 0 0 1 4 4v2H8V6a4 4 0 0 1 4-4zM4 10h16v10H4zM9 15h.01M15 15h.01')}</div><b>Agents</b><small id="m-ag">Your live agents</small></a>
+  <a class="mtile" href="https://www.zugati.co.uk/admin" target="_blank" rel="noopener"><div class="ic" style="background:#e06c9f22;color:#e06c9f">${svg('M4 5h16v11H4zM8 20h8M12 16v4')}</div><b>Zugati shop</b><small>Website back end</small></a>
+  <a class="mtile" href="https://www.zugati.co.uk/" target="_blank" rel="noopener"><div class="ic" style="background:#ff990022;color:#c47a00">${svg('M3 6h18l-2 12H5L3 6zm5 0a4 4 0 0 1 8 0')}</div><b>zugati.co.uk</b><small>Live shop</small></a>
+  <a class="mtile" href="../hub/"><div class="ic" style="background:#2fae6e22;color:#2fae6e">${svg('M16 11a4 4 0 1 0-8 0M3 21a9 9 0 0 1 18 0')}</div><b>Partner logins</b><small>Eli Hub (Samuel, Eli S)</small></a>
+ </div>`;
+ // live peeks - each one is optional
+ (async()=>{try{const d=JSON.parse(await openBox(await getJ('../data.enc.json'),KEYS.zugati));const y=d.accounts.UK.periods.find(p=>p.key==='yesterday')||d.accounts.UK.periods[1];
+  $('h-zug').textContent=(d.team&&d.team.update&&d.team.update.text||'').split('\n')[0]||'Amazon dashboard';
+  $('s-zug').innerHTML=`<span>Yesterday ${gbp(y.sales)}</span><span>Profit ${gbp(y.net_profit)}</span>`}catch(e){$('h-zug').textContent='Sales, stock, payments and the order basket'}})();
+ (async()=>{try{let k=KEYS.sesa_data;if(!k){const j=await getJ('../sesa/keys.json');for(const w of j.wraps){try{k=await openBox(w,KEYS.sesa);break}catch(e){}}}
+  const d=JSON.parse(await openBox(await getJ('../sesa/data.enc.json'),k));fillProp('sesa',d,'sesaDone')}catch(e){$('h-sesa').textContent='Jobs, tenants and rent'}})();
+ (async()=>{try{const d=JSON.parse(await openBox(await getJ('../zalo/data.enc.json'),KEYS.zalo));fillProp('zalo',d,'zaloDone')}catch(e){$('h-zalo').textContent='Jobs, bookings and rent'}})();
+}
+function fillProp(id,d,doneKey){let done={};try{done=JSON.parse(localStorage.getItem(doneKey)||'{}')||{}}catch(e){}
+ const props=d.properties||[];let open=0,urgent=0;props.forEach(p=>(p.tasks||[]).forEach(t=>{const isDone=Array.isArray(done)?done.includes(t.id):!!done[t.id];if(!isDone){open++;if(t.level==='urgent')urgent++}}));
+ $('h-'+id).textContent=d.headline||'';
+ $('s-'+id).innerHTML=`<span>${props.length} ${props.length===1?'property':'properties'}</span><span>${open} jobs</span>`+(urgent?`<span style="background:rgba(255,120,120,.25)">${urgent} urgent</span>`:'')}
+
+async function agents(pw){
+ try{AG=JSON.parse(await openBox(await getJ('agents.enc.json'),pw))}catch(e){$('v-agents').innerHTML='<p class="sub">Could not load the agents list.</p>';return}
+ const live=AG.agents.filter(a=>a.status!=='paused');$('m-ag').textContent=live.length+' working for you';
+ $('foot').textContent='Agents list updated '+ago(AG.updated_at)+'. Refreshed 3 times a day.';
+ drawAgents();
+}
+function setF(f){FILTER=f;drawAgents()}
+function drawAgents(){
+ const A=AG.agents,now=Date.now();
+ const live=A.filter(a=>a.status==='live'),one=A.filter(a=>a.status==='oneoff'),off=A.filter(a=>a.status==='paused');
+ const today=new Date().toLocaleDateString('en-GB',{timeZone:'Europe/London'});
+ const ranToday=A.filter(a=>a.last&&new Date(a.last).toLocaleDateString('en-GB',{timeZone:'Europe/London'})===today).length;
+ const failed=A.filter(a=>a.status!=='paused'&&a.last_ok===false);
+ const next=A.filter(a=>a.next&&a.status!=='paused'&&new Date(a.next)>now).sort((a,b)=>new Date(a.next)-new Date(b.next));
+ const running=A.filter(a=>a.status!=='paused'&&a.last&&now-new Date(a.last)<10*6e4);
+ const n0=next[0];
+ let h=`<h1>Your agents</h1><p class="sub">Everything working in the background, by business.</p>
+ <div class="stats"><div class="stat g"><div class="v">${live.length+one.length}</div><div class="l">live now</div></div><div class="stat"><div class="v">${ranToday}</div><div class="l">ran today</div></div><div class="stat"><div class="v" style="color:var(--off)">${off.length}</div><div class="l">paused</div></div></div>`;
+ if(failed.length)h+=`<div class="now" style="background:linear-gradient(120deg,#5a1f1f,#3a1414)"><span class="dot" style="background:#ff8a8a"></span><div><b>${failed.length} agent${failed.length>1?'s':''} had a problem last run</b><small>${failed.map(a=>esc(a.name)).join(', ')}</small></div></div>`;
+ if(n0)h+=`<div class="now"><span class="dot ${running.length?'run':'live'}"></span><div><b>${running.length?esc(running[0].name)+' is working now':'Next up: '+esc(n0.name)}</b><small>${running.length?'Started '+ago(running[0].last):when(n0.next)+' - '+esc(BIZ[n0.biz].n)}</small></div></div>`;
+ // next 6 runs timeline
+ h+=`<div class="sec">Coming up</div><div class="timeline">`+next.slice(0,6).map(a=>{const d=new Date(a.next);const t=d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/London'});const isT=d.toLocaleDateString('en-GB',{timeZone:'Europe/London'})===today;return `<div class="tl" style="--c:${BIZ[a.biz].c}"><time>${t}</time><i></i><span>${esc(a.name)}</span><small style="color:var(--muted)">${isT?'today':d.toLocaleDateString('en-GB',{weekday:'short',timeZone:'Europe/London'})}</small></div>`}).join('')+`</div>`;
+ h+=`<div class="sec">By business</div><div class="chips"><button class="chip ${FILTER==='all'?'on':''}" onclick="setF('all')">All</button>`+ORDER.filter(b=>A.some(a=>a.biz===b)).map(b=>`<button class="chip ${FILTER===b?'on':''}" style="--c:${BIZ[b].c}" onclick="setF('${b}')"><i></i>${BIZ[b].n}</button>`).join('')+`<button class="chip ${FILTER==='paused'?'on':''}" style="--c:var(--off)" onclick="setF('paused')"><i></i>Paused</button></div>`;
+ ORDER.forEach(b=>{let list=A.filter(a=>a.biz===b);if(FILTER==='paused')list=list.filter(a=>a.status==='paused');else{list=list.filter(a=>a.status!=='paused');if(FILTER!=='all'&&FILTER!==b)list=[]}
+  if(!list.length)return;const B=BIZ[b];
+  h+=`<div class="grp" style="--c:${B.c}"><div class="gh"><div class="ic">${svg(B.ic,18,'#fff')}</div><b>${B.n}</b><small>${list.length} agent${list.length>1?'s':''}</small></div><div class="cards">`+list.map((a,i)=>card(a,i,B)).join('')+`</div></div>`});
+ $('v-agents').innerHTML=h;
+}
+function card(a,i,B){
+ const st=a.status==='paused'?'<span class="pill off">Paused</span>':a.status==='oneoff'?'<span class="pill one">One-off</span>':'';
+ const dc=a.status==='paused'?'off':a.status==='oneoff'?'one':'live';
+ const last=a.last?`<span class="pill ${a.last_ok===false?'bad':'ok'}">${a.last_ok===false?'Problem':'Ran'} ${ago(a.last)}</span>`:'';
+ const nx=a.next&&a.status!=='paused'?`<span class="pill">${svg('M12 7v5l3 2M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z',12)}Next ${when(a.next)}</span>`:'';
+ const tell=a.tells_you?`<span class="pill one">Messages you</span>`:'';
+ const ends=a.ends?`<span class="pill">Until ${esc(a.ends)}</span>`:'';
+ return `<div class="ag ${a.status}" style="--c:${B.c};animation-delay:${Math.min(i*40,300)}ms"><div class="r1"><span class="dot ${dc}"></span><span class="nm">${esc(a.name)}</span>${st}</div><div class="wh">${esc(a.what)}</div><div class="r2"><span class="pill">${esc(a.when)}</span>${last}${nx}${tell}${ends}</div></div>`}
+
+(()=>{let pw;try{pw=sessionStorage.getItem('eliHomePw')}catch(e){}if(!pw)pw=remPw('eliHome');if(pw){$('pw').value=pw;go()}else $('pw').focus()})();
+</script>
+</body>
+</html>

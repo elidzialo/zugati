@@ -1303,5 +1303,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet();const f
  const pk=USER&&remPw('sesaPartner');if(pk){try{skeleton(true);await load(pk);skeleton(false);showApp();return}catch(e){skeleton(false);KEY=null;USER=null;forgetPw('sesaPartner');try{localStorage.removeItem('sesaUser')}catch(e){};document.getElementById('app').classList.add('hidden');document.getElementById('gate').classList.remove('hidden');partnerForm(true)}return}
  let pw;try{pw=sessionStorage.getItem('sesaPw')}catch(e){}if(!pw)pw=remPw('sesaRemember');if(pw){document.getElementById('pw').value=pw;go()}})();
 </script>
+<!-- Eli HQ "All hubs" button (only shows for Eli, never partners). Keep this line. -->
+<script src="../home/back.js" defer></script>
 </body>
 </html>
