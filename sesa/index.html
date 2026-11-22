@@ -1258,7 +1258,8 @@ document.addEventListener('click',e=>{if(e.target.id==='shade')return closeSheet
  if(t.id==='morebtn'){WX=!WX;const w=document.getElementById('watch');if(w)w.innerHTML=watchBlock();return}
  if(t.dataset.tab)setTab(t.dataset.tab)});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet();const f=e.target.closest&&e.target.closest('[data-fold]');if(f&&e.target===f&&(e.key==='Enter'||e.key===' ')){e.preventDefault();fold(f)}});
-(async()=>{const pk=USER&&remPw('sesaPartner');if(pk){try{skeleton(true);await load(pk);skeleton(false);showApp();return}catch(e){skeleton(false);KEY=null;USER=null;forgetPw('sesaPartner');try{localStorage.removeItem('sesaUser')}catch(e){};document.getElementById('app').classList.add('hidden');document.getElementById('gate').classList.remove('hidden');partnerForm(true)}return}
+(async()=>{if(USER&&!SESS){const em=USER.email;USER=null;forgetPw('sesaPartner');try{localStorage.removeItem('sesaUser')}catch(e){}partnerForm(true);document.getElementById('pem').value=em||'';return}
+ const pk=USER&&remPw('sesaPartner');if(pk){try{skeleton(true);await load(pk);skeleton(false);showApp();return}catch(e){skeleton(false);KEY=null;USER=null;forgetPw('sesaPartner');try{localStorage.removeItem('sesaUser')}catch(e){};document.getElementById('app').classList.add('hidden');document.getElementById('gate').classList.remove('hidden');partnerForm(true)}return}
  let pw;try{pw=sessionStorage.getItem('sesaPw')}catch(e){}if(!pw)pw=remPw('sesaRemember');if(pw){document.getElementById('pw').value=pw;go()}})();
 </script>
 </body>
