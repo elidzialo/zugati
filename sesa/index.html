@@ -166,6 +166,7 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .pban .t{font-size:21px;font-weight:700;line-height:1.25;position:relative;z-index:1}.pban .a{font-size:13px;opacity:.88;position:relative;z-index:1}
 .pban .s{font-size:14px;margin-top:10px;position:relative;z-index:1;line-height:1.45}
 .pban .ev{display:inline-flex;align-items:center;gap:8px;background:rgba(0,0,0,.18);border-radius:14px;padding:8px 12px;font-size:13px;margin-top:12px;font-weight:600;position:relative;z-index:1}
+.pban .ev svg{flex-shrink:0}
 .pstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;position:relative;z-index:1}
 .pstats div{background:rgba(255,255,255,.2);border-radius:14px;padding:9px 10px}.pstats b{display:block;font-size:20px;line-height:1.2}.pstats span{font-size:12px;opacity:.9}
 .lvl{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;margin:16px 2px 8px}
@@ -360,6 +361,11 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .rpc .m{font-size:13px;opacity:.92;grid-column:1/-1}
 .rpc .tr{grid-column:1/-1;height:8px;border-radius:6px;background:rgba(255,255,255,.3);overflow:hidden}.rpc .tr i{display:block;height:100%;background:#fff;border-radius:6px;transition:width .9s cubic-bezier(.2,.8,.2,1)}
 .rpc.zero{background:var(--card)!important;color:var(--ink);border:2px dashed var(--red)}.rpc.zero .v{color:var(--red)}.rpc.zero .tr{background:var(--redbg)}
+.rstrip{background:rgba(255,255,255,.16);border-radius:14px;padding:9px 12px 8px;margin-top:10px;max-width:440px}.rsh{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;flex-wrap:wrap}.rsh b{font-size:15px}.rsh span{opacity:.85;font-weight:500}
+.rsb{display:flex;align-items:flex-end;gap:8px;height:84px;margin-top:6px}.rsc{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
+.rsc i{display:block;width:100%;max-width:46px;height:var(--h);background:#fff;border-radius:7px 7px 3px 3px;transform-origin:bottom;animation:rsg .6s cubic-bezier(.2,.8,.3,1.25) both}.rsc.zero i{background:rgba(255,255,255,.35)}.rsc.now i{background:repeating-linear-gradient(135deg,#fff 0 5px,rgba(255,255,255,.6) 5px 10px)}
+.rsc em{font-style:normal;font-size:11px;font-weight:700;margin-bottom:3px;white-space:nowrap}.rsc span{font-size:11px;font-weight:600;opacity:.9;margin-top:3px}@keyframes rsg{from{transform:scaleY(0)}}
+@media (prefers-reduced-motion:reduce){.rsc i{animation:none}}
 .rentchip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.22);border-radius:12px;padding:5px 10px;font-size:13px;font-weight:600;margin-top:8px}
 
 /* D 18 Nov: weekly streak + points */
@@ -1085,6 +1091,13 @@ function alertCard(x){const tp=x.tp,lab=HEAT.find(z=>z[0]===x.k)[1];
  return `<div class="alert hz ${x.k==='h'?'':x.k}"><div class="ic tico ${tp.c}">${ic(tp.i,19,2.1)}${x.k==='h'?'<em class="hot">!</em>':''}</div><div><div class="hrow"><span class="hpill">${lab}</span><i class="tlab ${tp.c}">${tp.l}</i>${dchip(x)}</div>${txt}</div></div>`}
 function rentOf(p){const m=DATA.money;if(!m||!m.payments)return{sum:0,n:0,last:null};const k=short(p.name).toLowerCase();const ps=m.payments.filter(x=>String(x.property||'').toLowerCase().includes(k));
  return{sum:ps.reduce((a,x)=>a+(+x.amount||0),0),n:ps.length,last:ps.map(x=>x.date).sort().pop()||null}}
+/* A2 23 Nov: rent by month for one property - mini bars in the property banner */
+function rentStrip(p){const x=rentOf(p),m=DATA.money,k=short(p.name).toLowerCase(),t0=new Date(),M=[];
+ for(let d=new Date(2026,8,1);d<=t0;d=new Date(d.getFullYear(),d.getMonth()+1,1))M.push({y:d.getFullYear(),mo:d.getMonth(),v:0});
+ (m.payments||[]).filter(q=>String(q.property||'').toLowerCase().includes(k)).forEach(q=>{const d=new Date(q.date),b=M.find(z=>z.y===d.getFullYear()&&z.mo===d.getMonth());if(b)b.v+=(+q.amount||0)});
+ const mx=Math.max(...M.map(z=>z.v),1),last=M.length-1;
+ if(!x.sum)return `<div class="rentchip">${ic('pound',14,2.4)} No rent in yet</div>`;
+ return `<div class="rstrip"><div class="rsh">${ic('pound',14,2.4)} <b>${gbp(x.sum)}</b> rent in since Sep${x.last?` <span>· last ${esc(dShort(x.last))}</span>`:''}</div><div class="rsb">${M.map((z,i)=>`<div class="rsc${i===last?' now':''}${z.v?'':' zero'}" title="${esc(MON[z.mo])}: ${gbp(z.v)}"><em>${z.v?gbp(z.v):'-'}</em><i style="--h:${z.v?Math.max(10,Math.round(z.v/mx*100)):4}%;animation-delay:${i*90}ms"></i><span>${esc(new Date(z.y,z.mo,1).toLocaleDateString('en-GB',{month:'short'}))}</span></div>`).join('')}</div></div>`}
 function dShort(d){return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
 function nextRentDate(n,t0){const re=/\b(\d{1,2})(?:st|nd|rd|th)?\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b/gi;let m;
  while((m=re.exec(n))){const pre=n.slice(Math.max(0,m.index-16),m.index).toLowerCase();if(!/(next|about|due|expect|around|by)\W*\s*$/.test(pre)&&!/next (one|rent|payout)/.test(pre))continue;
@@ -1185,7 +1198,7 @@ function wxIcon(k,z){const sun=(cx,cy,r)=>`<g class="wsun"><circle cx="${cx}" cy
 function wxCard(p){const w=wxOf(p);return `<div class="wx k-${w.k}" id="wx"><div class="wxi">${wxIcon(w.k,76)}</div><div class="wxb"><div class="wxl">Property weather</div><div class="wxt">${w.l}<span>${w.s}</span></div><div class="wxm" role="img" aria-label="Health ${w.sc} out of 100"><i style="width:${w.sc}%"></i></div><div class="wxs">${w.sc}/100</div></div>
  <div class="wxw">${w.why.map(x=>`<span class="wxr ${x.c}">${x.c==='ok'?ic('check',14,3):'<b>!</b>'}${esc(x.t)}</span>`).join('')}</div></div>`}
 function prop(p,i){let h='';const t=p.tasks.length,o=open_(p),att=p.units.filter(u=>u.tag!=='ok').length;
- h+=`<div class="pban ${GR[i%4]}"><div class="t">${esc(p.name)}</div><div class="a">${esc(p.area||'')}</div>${p.status?`<div class="s">${esc(p.status)}</div>`:''}${p.event?`<div class="ev">${ic('cal',16)} ${esc(String(p.event).replace(/^([A-Z])([A-Z]{3,})\b/,(m,a,b)=>a+b.toLowerCase()))}</div>`:''}${DATA.money?(()=>{const x=rentOf(p);return `<div class="rentchip">${ic('pound',14,2.4)} ${x.sum?`${gbp(x.sum)} rent in since Sep`:'No rent in yet'}</div>`})():''}
+ h+=`<div class="pban ${GR[i%4]}"><div class="t">${esc(p.name)}</div><div class="a">${esc(p.area||'')}</div>${p.status?`<div class="s">${esc(p.status)}</div>`:''}${p.event?`<div class="ev">${ic('cal',16)} ${esc(String(p.event).replace(/^([A-Z])([A-Z]{3,})\b/,(m,a,b)=>a+b.toLowerCase()))}</div>`:''}${DATA.money?rentStrip(p):''}
  <div class="pstats"><div><b id="po">${o}</b><span>Jobs left</span></div><div><b>${p.units.length}</b><span>Units</span></div><div><b>${att}</b><span>Need a look</span></div></div></div>`;
  h+=wxCard(p);
  h+=`<h2>Jobs <span class="cnt" id="pc">${t-o}/${t} done</span></h2>`;{const nd=Object.values(DEL).filter(v=>v.prop===p.id).length;h+=`<div class="jbar"><button class="own none addt" data-addtask="${esc(p.id)}">+ Add task</button>${nd?`<button class="own none undel" data-undel="1">${nd} deleted - bring back</button>`:''}</div>`}if(t)h+=jobMix(p);if(t)h+=topicMix(p.tasks.filter(x=>!DONE[x.id]).length?p.tasks.filter(x=>!DONE[x.id]):p.tasks);
