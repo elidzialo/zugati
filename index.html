@@ -284,7 +284,7 @@ svg text{font-family:inherit}
 .rec.now{background:var(--redbg);color:#7a0721}.rec.soon{background:var(--amberbg);color:#7a3500}.rec.ok{background:var(--greenbg);color:#044d3c}.rec.stop,.rec.slow{background:var(--greybg);color:#333}
 .msec{padding:16px 22px}
 .msec h4{margin:0 0 8px;font-size:16px}
-.yoy .ystory{background:var(--greybg);border-radius:12px;padding:10px 12px;margin:10px 0 2px;font-size:15px;line-height:1.45}
+.yoy .ystory.peak{font-size:17px;background:#fff4f6;border:1px solid #f6c9d4}.yoy .ystory{background:var(--greybg);border-radius:12px;padding:10px 12px;margin:10px 0 2px;font-size:15px;line-height:1.45}
 .yline{stroke-dasharray:1400;stroke-dashoffset:1400;animation:ydraw 1.1s ease-out forwards}
 .yline[stroke-dasharray="5 4"]{animation:none;stroke-dashoffset:0}
 @keyframes ydraw{to{stroke-dashoffset:0}}
@@ -620,15 +620,15 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
 .fivek .fkt{font-size:19px;font-weight:800;line-height:1.2}.fivek .fks{font-size:14px;color:var(--muted);margin-top:3px;line-height:1.35}
 .fivek .fkbar{display:flex;height:26px;border-radius:13px;overflow:hidden;background:var(--greybg);margin:14px 0 6px;position:relative}
 .fivek .fkbar i{display:flex;align-items:center;justify-content:center;font-style:normal;font-size:12px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;border-right:2px solid #fff;transition:background .4s;animation:fkgrow .8s ease both}
-.fivek .fkbar i.s1{background:var(--orange2)}.fivek .fkbar i.s2{background:var(--teal)}.fivek .fkbar i.s3{background:var(--blue)}.fivek .fkbar i.ok{background:var(--green)}
+.fivek .fkbar i.s1{background:var(--orange2)}.fivek .fkbar i.s2{background:var(--teal)}.fivek .fkbar i.s3{background:var(--blue)}.fivek .fkbar i.s4{background:#8c4bff}.fivek .fkbar i.s5{background:#c45500}.fivek .fkbar i.ok{background:var(--green)}
 .fivek .fkbar i.left{background:repeating-linear-gradient(45deg,#e3e6e6 0 6px,#f0f2f2 6px 12px);color:var(--muted);border-right:0}
 @keyframes fkgrow{from{max-width:0}to{max-width:100%}}
 .fivek .fkl{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);font-weight:700}
-.fivek .fkp{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.fivek .fkp{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:12px}
 .fivek .fki{display:flex;gap:9px;align-items:center;border-radius:10px;padding:9px 10px;background:var(--greybg);border-left:5px solid var(--grey);position:relative;transition:background .4s}
 .fivek .fki .n{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:var(--nav);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
 .fivek .fki .w{font-weight:800;font-size:14px;line-height:1.2}.fivek .fki .a{font-size:13px;color:var(--muted)}
-.fivek .fki.c1{border-left-color:var(--orange2)}.fivek .fki.c2{border-left-color:var(--teal)}.fivek .fki.c3{border-left-color:var(--blue)}
+.fivek .fki.c1{border-left-color:var(--orange2)}.fivek .fki.c2{border-left-color:var(--teal)}.fivek .fki.c3{border-left-color:var(--blue)}.fivek .fki.c4{border-left-color:#8c4bff}.fivek .fki.c5{border-left-color:#c45500}
 .fivek .fki.ok{background:var(--greenbg);border-left-color:var(--green)}.fivek .fki.ok .n{background:var(--green)}.fivek .fki.ok .w{text-decoration:line-through;text-decoration-color:rgba(6,125,98,.5)}
 .fivek .fki .bk{margin-left:auto;flex:0 0 auto;font-size:12px;font-weight:800;border-radius:16px;padding:5px 9px;background:#fff;color:var(--green);border:1px solid var(--green);cursor:pointer}
 .fivek .fkn{margin-top:10px;font-size:13px;color:var(--muted)}
@@ -1318,6 +1318,33 @@ function yoySvg(p,mode){const SS=seasons(p,mode);if(!SS.length)return '';const s
   const l1=labs.find(l=>l.i===1);labs.forEach(l=>{let y=l.y-9;if(l.i!==1&&l1&&Math.abs(l.x-l1.x)<60&&Math.abs(l.y-l1.y)<18)y=Math.max(l.y,l1.y)+20;
     g+='<text x="'+l.x+'" y="'+y+'" text-anchor="middle" font-size="12" font-weight="800" fill="'+l.c+'" paint-order="stroke" stroke="#fff" stroke-width="3">'+l.t+'</text>'});
   return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" class="msvg">'+g+'</svg>'}
+/* ---------- simple bars: this season vs last season, month by month ---------- */
+function ybCol(mo){return mo===12?'#cc0c39':mo===2?'#e8436a':mo===1?'#f08aa3':mo===11?'#e0707f':'#232f3e'}
+function yoyBars(p,mode){const SS=seasons(p,mode);if(!SS.length)return '';const a=SS[0],b=SS[1]||{v:Array(12).fill(null)};
+  const sm=window.innerWidth<600,W=sm?400:860,H=sm?270:270,pl=4,pr=4,pt=40,pb=40;
+  const all=a.v.concat(b.v).filter(v=>v!=null),mx=Math.max(...all,1),mn=Math.min(0,...all),rng=mx-mn||1,slot=(W-pl-pr)/12,bw=Math.min(slot*0.36,26),Y=v=>pt+(mx-v)/rng*(H-pt-pb);let g='';
+  // Christmas + Valentine's bands
+  [[3,4,'rgba(204,12,57,.06)','🎄'],[5,6,'rgba(232,67,106,.08)','❤️']].forEach(([i0,i1,c,e])=>{g+='<rect x="'+(pl+i0*slot)+'" y="'+(pt-30)+'" width="'+(slot*(i1-i0))+'" height="'+(H-pb-pt+30)+'" rx="6" fill="'+c+'"/><text x="'+(pl+(i0+.5)*slot)+'" y="'+(pt-14)+'" text-anchor="middle" font-size="14">'+e+'</text>'});
+  g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="#d5d9d9"/>';
+  // biggest bar of each season gets its number (few numbers)
+  const pk=s=>{let j=-1;s.v.forEach((v,k)=>{if(v!=null&&(j<0||v>s.v[j]))j=k});return j};const pa=pk(a),pb2=pk(b);
+  SEAS_M.forEach((mo,i)=>{const cx=pl+i*slot+slot/2,col=ybCol(mo),y0=Y(0);
+    [[b.v[i],cx-bw-1,true,i===pb2],[a.v[i],cx+1,false,i===pa]].forEach(([v,x,old,top])=>{if(v==null)return;const y=Y(v),part=!old&&a.part===i,neg=mode==='profit'&&v<0,c=neg?'#cc0c39':col;
+      g+='<rect class="mbar" style="animation-delay:'+(i*35+(old?0:15))+'ms" x="'+x+'" y="'+Math.min(y,y0)+'" width="'+bw+'" height="'+Math.max(Math.abs(y0-y),1.5)+'" rx="3" fill="'+c+'" fill-opacity="'+(old?.34:part?.5:1)+'"'+(part?' stroke="'+c+'" stroke-dasharray="3 2"':'')+'><title>'+new Date(2000,mo-1,1).toLocaleDateString('en-GB',{month:'long'})+' '+(old?'last year':'this year')+(part?' (so far)':'')+': '+mFmt(p,mode,v)+'</title></rect>';
+      if(top&&v>0)g+='<text x="'+(x+bw/2)+'" y="'+(y-6)+'" text-anchor="'+(old?'end':'start')+'" font-size="'+(sm?11:13)+'" font-weight="800" fill="'+(old?'#6f7373':c)+'" paint-order="stroke" stroke="#fff" stroke-width="3">'+mFmt(p,mode,v)+'</text>'});
+    g+='<text x="'+cx+'" y="'+(H-pb+17)+'" text-anchor="middle" font-size="'+(sm?11:12)+'" font-weight="'+(mo===12||mo===2?'800':'400')+'" fill="'+(mo===12||mo===2?col:'#666')+'">'+(sm?'JFMAMJJASOND'[mo-1]:new Date(2000,mo-1,1).toLocaleDateString('en-GB',{month:'short'}))+'</text>'});
+  return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" class="msvg">'+g+'</svg>'}
+function ybLegend(p){const SS=seasons(p,'units');const a=SS[0];if(!a)return '';
+  return '<div class="legend" style="margin-top:8px"><span><i style="background:#232f3e"></i>This year</span><span><i style="background:#232f3e;opacity:.28"></i>Last year</span><span><i style="background:#cc0c39"></i>December</span><span><i style="background:#e8436a"></i>February</span></div>'}
+function peakLine(p){const M=p.monthly,V=M.sales||M.units,N=V.length,end=M.partial_last?N-1:N;let first=V.findIndex(v=>v>0);if(first<0)return '';
+  const avg=f=>{const a=[];for(let i=first;i<end;i++)if(f(+M.months[i].slice(5)))a.push(V[i]);return a.length?a.reduce((s,v)=>s+v,0)/a.length:0};
+  const norm=avg(m=>m>=3&&m<=10),feb=avg(m=>m===2),dec=avg(m=>m===12),x=v=>v>=2?Math.round(v)+'x':v.toFixed(1).replace(/\.0$/,'')+'x';
+  if(!(norm>0))return feb>0||dec>0?'Almost all of its sales come at Christmas and Valentine\'s.':'';
+  const F=feb/norm,D=dec/norm,f='<b style="color:#e8436a">❤️ February sells '+x(F)+'</b>',d='<b style="color:#cc0c39">🎄 December sells '+x(D)+'</b>';
+  if(F>=1.4&&D>=1.4)return f+' a normal month. '+d+'.';
+  if(F>=1.4)return f+' a normal month.';
+  if(D>=1.4)return d+' a normal month.';
+  return 'Sells about the same all year - no big Christmas or Valentine\'s jump.'}
 function SS_leg(SS){return '<div class="legend" style="margin-top:8px">'+SS.map((s,i)=>'<span><i style="background:'+SEAS_COL[i]+'"></i>'+sName(s.y,i)+'<span class="ydt"> Sep '+String(s.y).slice(2)+' - Aug '+String(s.y+1).slice(2)+'</span></span>').join('')+'</div>'}
 function peakTiles(p,mode){const ALL=seasons(p,mode),SS=ALL.filter(s=>s.v[4]!=null&&s.v[5]!=null).slice(0,3);if(!SS.length)return '';
   const tot=SS.map(s=>(s.v[4]||0)+(s.v[5]||0)),mx=Math.max(...tot,1);
@@ -1329,11 +1356,11 @@ function yoyStory(p){const SS=seasons(p,'sales'),U=seasons(p,'units');const v=s=
   if(b&&v(b)>0){const ch=(v(a)/v(b)-1)*100;t+=Math.abs(ch)<8?', about the same as '+(b.y+1)+'.':ch>0?', <span class="up">up '+ch.toFixed(0)+'%</span> on '+(b.y+1)+'.':', <span class="down">down '+(-ch).toFixed(0)+'%</span> on '+(b.y+1)+'.'}else t+='.';
   const cur=SS[0],last=SS[1];if(cur&&last&&cur!==a){let c=0,l=0;cur.v.forEach((x,j)=>{if(x!=null&&j!==cur.part){c+=x;l+=last.v[j]||0}});if(l>0){const ch=(c/l-1)*100;t+=' This season so far is '+(Math.abs(ch)<8?'about level with':ch>0?'<span class="up">'+ch.toFixed(0)+'% ahead of</span>':'<span class="down">'+(-ch).toFixed(0)+'% behind</span>')+' last season.'}}
   return t}
-function yoySection(p){const hasS=!!p.monthly.sales,m0=hasS?'sales':'units';if(seasons(p,'units').length<2)return '';
-  return '<div class="msec yoy"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h4 style="margin:0">This year vs last year</h4><div class="mtog" data-t="y">'+(hasS?'<button class="on" data-m="sales">Sales</button>':'')+'<button'+(hasS?'':' class="on"')+' data-m="units">Units</button><button data-m="profit">Profit</button></div></div>'+
-   '<div class="ystory">'+yoyStory(p)+'</div>'+SS_leg(seasons(p,'units'))+'<div id="ychart">'+yoySvg(p,m0)+'</div><div id="ypk">'+peakTiles(p,m0)+'</div><div class="note">Each line is one gift season, September to August, so Christmas and Valentine\'s line up. Hollow dot = this month so far.</div></div>'}
+function yoySection(p){const hasS=!!p.monthly.sales,m0=hasS?'sales':'units';if(seasons(p,'units').length<2)return '';const pl=peakLine(p);
+  return '<div class="msec yoy"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h4 style="margin:0">Each month - this year vs last year</h4><div class="mtog" data-t="y">'+(hasS?'<button class="on" data-m="sales">£ Sales</button>':'')+'<button'+(hasS?'':' class="on"')+' data-m="units">Units</button><button data-m="profit">Profit</button></div></div>'+
+   (pl?'<div class="ystory peak">'+pl+'</div>':'')+ybLegend(p)+'<div id="ychart">'+yoyBars(p,m0)+'</div><div class="ystory" style="margin-top:6px">'+yoyStory(p)+'</div><div id="ypk">'+peakTiles(p,m0)+'</div><div class="note">Pale bar = same month last year, dark bar = this year. Starts in September so Christmas and Valentine\'s sit next to each other. Dotted bar = this month so far.</div></div>'}
 function wireMonthly(p){$('md').querySelectorAll('.mtog').forEach(t=>t.querySelectorAll('button').forEach(b=>b.onclick=()=>{t.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
-  if(t.dataset.t==='y'){$('ychart').innerHTML=yoySvg(p,b.dataset.m);$('ypk').innerHTML=peakTiles(p,b.dataset.m)}else{$('mchart').innerHTML=monthlySvg(p,b.dataset.m);$('msm').innerHTML=sameMonth(p,b.dataset.m)}}))}
+  if(t.dataset.t==='y'){$('ychart').innerHTML=yoyBars(p,b.dataset.m);$('ypk').innerHTML=peakTiles(p,b.dataset.m)}else{$('mchart').innerHTML=monthlySvg(p,b.dataset.m);$('msm').innerHTML=sameMonth(p,b.dataset.m)}}))}
 
 
 /* ---------- today strip ---------- */
@@ -1346,11 +1373,11 @@ function renderFiveK(){const el=$('fivek');if(!el)return;const F=DATA.fivek;if(!
   const L=F.unlocks.map((u,i)=>{const x=P(u.id);const g=u.gbp!=null?u.gbp:(x?payGbp(x):0);return {u,x,g,i,ok:isPaid(u.id)}});
   const used=L.reduce((a,r)=>a+r.g,0),left=Math.max(0,tot-used),done=L.filter(r=>r.ok).length,allDone=done===L.length;
   const nxt=L.find(r=>!r.ok);
-  const title=!landed?'Waiting on the '+money(tot,'GBP'):allDone?'All 3 paid - well done':'The '+money(tot,'GBP')+' is in - pay these in order';
-  const sub=!landed?'Once it lands it unlocks these 3 payments, in this order. Nothing can be paid until then.':allDone?money(left,'GBP')+' of it is left over as a cushion.':'Next: <b>'+esc(nxt.u.label)+'</b> (about '+money(nxt.g,'GBP')+'). '+done+' of '+L.length+' paid.';
+  const title=!landed?'Waiting on the '+money(tot,'GBP'):allDone?'All '+L.length+' paid - well done':'The '+money(tot,'GBP')+' is in - pay these in order';
+  const sub=!landed?'Once it lands it unlocks these '+L.length+' payments, in this order. Nothing can be paid until then.':allDone?money(left,'GBP')+' of it is left over as a cushion.':'Next: <b>'+esc(nxt.u.label)+'</b> (about '+money(nxt.g,'GBP')+'). '+done+' of '+L.length+' paid.';
   el.className='fivek'+(landed?' in':'');
   el.innerHTML='<div class="fkh"><div class="fkd">'+(landed?'<b>'+(allDone?'✓':'£')+'</b><small>'+(allDone?'done':'in')+'</small>':'<small>day</small><b>'+day+'</b>')+'</div><div style="min-width:0"><div class="fkt">'+(landed?'✅ ':'⏳ ')+title+'</div><div class="fks">'+sub+'</div></div></div>'+
-   '<div class="fkbar" role="img" aria-label="'+money(used,'GBP')+' of '+money(tot,'GBP')+' already planned">'+L.map(r=>'<i class="'+(r.ok?'ok':'s'+(r.i+1))+'" style="width:'+(r.g/tot*100)+'%;animation-delay:'+(r.i*.15)+'s">'+(r.ok?'✓ ':'')+esc(r.u.icon||'')+' '+money(r.g,'GBP')+'</i>').join('')+(left>0?'<i class="left" style="width:'+(left/tot*100)+'%">spare</i>':'')+'</div>'+
+   '<div class="fkbar" role="img" aria-label="'+money(used,'GBP')+' of '+money(tot,'GBP')+' already planned">'+L.map(r=>'<i class="'+(r.ok?'ok':'s'+(r.i+1))+'" style="width:'+(r.g/tot*100)+'%;animation-delay:'+(r.i*.15)+'s" title="'+esc(r.u.label)+' - '+money(r.g,'GBP')+'">'+(r.g/tot>=.13?(r.ok?'✓ ':'')+esc(r.u.icon||'')+' '+money(r.g,'GBP'):r.g/tot>=.05?(r.ok?'✓':esc(r.u.icon||'')):'')+'</i>').join('')+(left>0?'<i class="left" style="width:'+(left/tot*100)+'%">'+(left/tot>=.12?'spare':'')+'</i>':'')+'</div>'+
    '<div class="fkl"><span>'+money(used,'GBP')+' of '+money(tot,'GBP')+' already spoken for</span><span>'+money(left,'GBP')+' spare</span></div>'+
    '<div class="fkp">'+L.map(r=>'<div class="fki c'+(r.i+1)+(r.ok?' ok':'')+'"><span class="n">'+(r.ok?'✓':r.i+1)+'</span><div style="min-width:0"><div class="w">'+esc(r.u.icon||'')+' '+esc(r.u.label)+'</div><div class="a">'+(r.ok?'Paid':'About '+money(r.g,'GBP'))+'</div></div>'+(!r.ok&&landed&&r===nxt&&r.x?'<span class="bk" data-dis="p:'+esc(r.u.id)+'" data-st="paid" data-t="'+esc(r.x.what||r.u.label)+'">✓ Paid</span>':'')+'</div>').join('')+'</div>'+
    (F.note?'<div class="fkn">'+esc(F.note)+'</div>':'')+'<button class="fkco" id="fkco">🛒 What\'s left to spend? Open checkout</button>';
