@@ -57,6 +57,8 @@ h2{font-size:21px;margin:30px 0 4px;font-weight:700}
 .acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
 .act{border-left:5px solid var(--amber);display:flex;flex-direction:column;gap:6px}
 .act.urgent{border-color:var(--red)}.act.normal{border-color:var(--blue)}
+.drbadge{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#e6f4f1;border:1px solid #b7e0d8;color:#00594f;border-radius:10px;padding:6px 10px;font-size:14px;align-self:flex-start}.drbadge span{font-size:17px}.drbadge em{font-style:normal;font-size:12.5px;color:#007185;font-weight:600}
+.drbadge.old{background:#fff4e0;border-color:#ffd28a;color:#8a4b00;animation:drpulse 2.4s ease-in-out 3}.drbadge.old em{color:#b45f06}@keyframes drpulse{50%{box-shadow:0 0 0 5px rgba(255,153,0,.18)}}
 .act .tt{font-weight:700;font-size:16px}
 .act .meta{font-size:12px;color:var(--muted)}
 .act p{margin:0;font-size:14px}
@@ -471,6 +473,10 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
 /* A1: December dip + quotes */
 .dip h4{margin:0;font-size:18px}.dhd{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .dlg{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;flex-wrap:wrap}.dlg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-left:6px}
+.dcall{display:flex;align-items:center;gap:12px;border-radius:14px;padding:12px 14px;margin:10px 0 6px;color:#fff;background:linear-gradient(135deg,#cc0c39,#e0435f);box-shadow:0 6px 18px rgba(204,12,57,.22)}.dcall.ok{background:linear-gradient(135deg,#1d8f5f,#2fb37a);box-shadow:0 6px 18px rgba(29,143,95,.2)}
+.dcall .dci{font-size:26px}.dcall small{display:block;font-size:12px;font-weight:600;opacity:.9;text-transform:uppercase;letter-spacing:.04em}.dcall b{font-size:19px}.dcall .dcv{margin-left:auto;text-align:right;font-size:28px;font-weight:900;line-height:1}.dcall .dcv small{text-transform:none;letter-spacing:0;font-size:13px}
+.dwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}.dbar{cursor:pointer;animation:dgrow .55s cubic-bezier(.2,.8,.3,1.2) both}@keyframes dgrow{from{transform:scaleY(0)}}.dbar.sel rect:nth-child(2){stroke:#0f1111;stroke-width:2.5}.dbar:hover rect:nth-child(2){fill-opacity:1}
+.dcap{background:#f7fafa;border:1px solid #e3e6e6;border-left:4px solid #007185;border-radius:10px;padding:9px 12px;margin:4px 0 6px;font-size:14.5px;line-height:1.4;min-height:44px}.dcap .dneg,.dcap .dpos{font-weight:800;margin-left:4px}.dpos{color:var(--green)}
 .dsay{font-size:16px;line-height:1.45;margin:8px 0 4px}.dneg{color:var(--red)}.dok{display:block;margin-top:6px;color:var(--green);font-weight:700}.dhint{display:block;margin-top:6px;color:var(--teal);font-weight:600}
 .dbar{transform-box:fill-box;transform-origin:bottom;animation:dgrow .5s ease-out both}@keyframes dgrow{from{opacity:0;transform:scaleY(.2)}}
 .darea{animation:dfade .8s ease both}@keyframes dfade{from{opacity:0}}.dline{stroke-dasharray:2400;stroke-dashoffset:2400;animation:ddraw 1.3s ease forwards}@keyframes ddraw{to{stroke-dashoffset:0}}.ddot{animation:dfade .4s ease both}
@@ -909,12 +915,17 @@ const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+Stri
 function isHid(v){return !!v&&!(v.st==='snooze'&&(v.until||'')<=ymd(today()))}
 /* A2 22 Nov: a task about a supplier draft opens THAT supplier's drafts in Gmail, not the whole drafts folder */
 function supDraftUrl(s){const e=((DATA.suppliers||{})[s]||{}).email;if(!e)return null;return 'https://mail.google.com/mail/?authuser=eli@zelr.co.uk#search/in%3Adrafts+to%3A'+encodeURIComponent(e)}
-function taskDraft(x){if(!/draft/i.test([x.title,x.detail,x.link,x.link_label].join(' ')))return null;const u=supDraftUrl(x.who);return u?{u,w:sFirst(x.who)}:null}
+function taskDraft(x){if(!draftAge(x)&&!/draft/i.test([x.link,x.link_label].join(' ')))return null;/* A2: 'bin the old drafts' is not a draft to send */const u=supDraftUrl(x.who);return u?{u,w:sFirst(x.who)}:null}
+/* A2 23 Nov: 'Draft ready - waiting N days' badge so Eli sees a draft costs nothing to send */
+function draftAge(x){const tx=[x.title,x.detail].join(' ');if(!/\bdraft\s*(\(|ready|is ready|still)|new draft|draft ready/i.test(tx))return null;
+  const M={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11},m=tx.match(/draft\s*\((\d{1,2})\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\)/i);
+  if(!m)return {days:null};const t=today();let d=new Date(t.getFullYear(),M[m[2].toLowerCase()],+m[1]);if(d>t)d=new Date(t.getFullYear()-1,d.getMonth(),d.getDate());return {days:Math.round((t-d)/DAY)}}
+function draftBadge(x){const a=draftAge(x);if(!a)return '';const n=a.days;return '<div class="drbadge'+(n>=3?' old':'')+'"><span>✉️</span><b>Draft ready'+(n?' - waiting '+n+' day'+(n>1?'s':''):'')+'</b><em>Costs nothing to send</em></div>'}
 function renderActs(){
   const t=(DATA.tasks||[]).slice().sort((a,b)=>({urgent:0,high:1,normal:2}[a.level]-{urgent:0,high:1,normal:2}[b.level]));
   let DIS={};try{DIS=JSON.parse(localStorage.getItem('zdis')||'{}')}catch(e){}
   const all=t.filter(x=>!isHid(DIS['t:'+x.id]));const hid=t.length-all.length;window._actsAll=window._actsAll||false;const shown=window._actsAll?all:all.slice(0,3);
-  $('acts').innerHTML=shown.map(x=>'<div class="card act '+esc(x.level)+'"><div class="meta">'+esc(x.who)+(x.due?' · by '+fmtD(new Date(x.due+'T00:00:00')):'')+'</div><div class="tt">'+esc(x.title)+'</div><p>'+esc(x.detail)+'</p><div class="btns">'+(()=>{const dr=taskDraft(x),gen=x.link&&/#drafts$/.test(x.link);return (dr?'<a class="btn drb2" target="_blank" rel="noopener" href="'+esc(dr.u)+'">✉ Open the '+esc(dr.w)+' draft</a>':'')+(x.link&&!(dr&&gen)?'<a class="btn'+(dr?' ghost':'')+'" target="_blank" rel="noopener" href="'+esc(x.link)+'">'+esc(x.link_label||'Open')+'</a>':'')})()+(x.email?'<a class="btn ghost" target="_blank" rel="noopener" href="'+esc(x.email)+'">Open email</a>':'')+'</div><div class="tact"><span class="tb ok" data-dis="t:'+esc(x.id)+'" data-st="done" data-t="'+esc(x.title)+'">✓ Done</span><span class="tb no" data-dis="t:'+esc(x.id)+'" data-st="not relevant" data-t="'+esc(x.title)+'">✕ Not relevant</span><span class="tb zz" data-dis="t:'+esc(x.id)+'" data-st="snooze" data-t="'+esc(x.title)+'">💤 Tomorrow</span></div></div>').join('')+(hid?'<div><span class="hidtog" id="unhide">'+(()=>{const z=t.filter(x=>{const v=DIS['t:'+x.id];return isHid(v)&&v.st==='snooze'}).length;return (hid-z?(hid-z)+' hidden':'')+(hid-z&&z?' · ':'')+(z?z+' back tomorrow':'')})()+' - show again</span></div>':'')+(all.length>3?'<div class="more"><span class="btn ghost" id="actmore">'+(window._actsAll?'Show less':'Show all '+all.length+' jobs')+'</span></div>':'');
+  $('acts').innerHTML=shown.map(x=>'<div class="card act '+esc(x.level)+'"><div class="meta">'+esc(x.who)+(x.due?' · by '+fmtD(new Date(x.due+'T00:00:00')):'')+'</div>'+draftBadge(x)+'<div class="tt">'+esc(x.title)+'</div><p>'+esc(x.detail)+'</p><div class="btns">'+(()=>{const dr=taskDraft(x),gen=x.link&&/#drafts$/.test(x.link);return (dr?'<a class="btn drb2" target="_blank" rel="noopener" href="'+esc(dr.u)+'">✉ Open the '+esc(dr.w)+' draft</a>':'')+(x.link&&!(dr&&(gen||/draft/i.test(x.link_label||'')))?'<a class="btn'+(dr?' ghost':'')+'" target="_blank" rel="noopener" href="'+esc(x.link)+'">'+esc(x.link_label||'Open')+'</a>':'')})()+(x.email?'<a class="btn ghost" target="_blank" rel="noopener" href="'+esc(x.email)+'">Open email</a>':'')+'</div><div class="tact"><span class="tb ok" data-dis="t:'+esc(x.id)+'" data-st="done" data-t="'+esc(x.title)+'">✓ Done</span><span class="tb no" data-dis="t:'+esc(x.id)+'" data-st="not relevant" data-t="'+esc(x.title)+'">✕ Not relevant</span><span class="tb zz" data-dis="t:'+esc(x.id)+'" data-st="snooze" data-t="'+esc(x.title)+'">💤 Tomorrow</span></div></div>').join('')+(hid?'<div><span class="hidtog" id="unhide">'+(()=>{const z=t.filter(x=>{const v=DIS['t:'+x.id];return isHid(v)&&v.st==='snooze'}).length;return (hid-z?(hid-z)+' hidden':'')+(hid-z&&z?' · ':'')+(z?z+' back tomorrow':'')})()+' - show again</span></div>':'')+(all.length>3?'<div class="more"><span class="btn ghost" id="actmore">'+(window._actsAll?'Show less':'Show all '+all.length+' jobs')+'</span></div>':'');
   const am=$('actmore');if(am)am.onclick=()=>{window._actsAll=!window._actsAll;renderActs()};wireDis($('acts'));const uh=$('unhide');if(uh)uh.onclick=()=>{Object.keys(DIS).filter(k=>k.startsWith('t:')&&isHid(DIS[k])).forEach(k=>delete DIS[k]);try{localStorage.setItem('zdis',JSON.stringify(DIS))}catch(e){}renderActs()};
 }
 function list(){return DATA.products.filter(p=>p.account===ACC).map(p=>({p,f:forecast(p)}))}
@@ -1536,7 +1547,14 @@ let _cfT;window.addEventListener('resize',()=>{clearTimeout(_cfT);_cfT=setTimeou
 /* ---------- CFO ---------- */
 function payoutFor(d){const h=DATA.history;if(!h)return 0;const L=h.months.length,ratio=h.payout[L-14]?h.payout[L-2]/h.payout[L-14]:1;const key=(d.getFullYear()-1)+'-'+String(d.getMonth()+1).padStart(2,'0');const i=h.months.indexOf(key);if(i<0)return 0;return h.payout[i]*ratio/new Date(d.getFullYear(),d.getMonth()+1,0).getDate()}
 function cashWeeks(){
-  const c0=DATA.cfo;if(c0.weekly&&c0.weekly.length){let bal=c0.cash.reduce((s,x)=>s+x.gbp,0);try{const o=JSON.parse(localStorage.getItem('zcash')||'null');if(o&&o.at>(c0.as_of||''))bal=o.v}catch(e){}const start=bal;const W=[{w:0,d:today(),b:bal,in:0,out:0}];const t0=today();c0.weekly.forEach((x,i)=>{const d=new Date(x.w+'T00:00:00'),cur=x.bal!=null&&d<=t0&&addD(d,7)>t0;/* current week: the bank balance already includes it */if(!cur)bal+=x.in-x.out;W.push({w:i+1,d,b:bal,in:cur?0:x.in,out:cur?0:x.out,pay:x.pay})});return {W,start,low:Math.min(...W.map(x=>x.b))}}
+  const c0=DATA.cfo;if(c0.weekly&&c0.weekly.length){let bal=c0.cash.reduce((s,x)=>s+x.gbp,0);try{const o=JSON.parse(localStorage.getItem('zcash')||'null');if(o&&o.at>(c0.as_of||''))bal=o.v}catch(e){}const start=bal;const W=[{w:0,d:today(),b:bal,in:0,out:0}];const t0=today();
+    /* A2 23 Nov: weeks that have ended are already in the bank balance - skip them (they were being added again, e.g. the £5,000 that never came).
+       Current week: if A3 marked it 'Actual' it is in the bank; otherwise trust A3's planned end-of-week balance (bal) so money landing mid-week is not counted twice. */
+    c0.weekly.forEach((x,i)=>{const d=new Date(x.w+'T00:00:00');if(addD(d,7)<=t0)return;const cur=d<=t0,act=/^\s*actual/i.test(x.pay||'');
+      if(cur&&act)return;
+      if(cur&&x.bal!=null&&W.length===1){W[0].b=x.bal-x.in+x.out;bal=x.bal}else bal+=x.in-x.out;
+      W.push({w:i+1,d,b:bal,in:x.in,out:x.out,pay:x.pay})});
+    return {W,start,low:Math.min(...W.map(x=>x.b))}}
   return cashWeeksOld();}
 function cashWeeksOld(){
   const c=DATA.cfo,t0=today();let bal=c.cash.reduce((s,x)=>s+x.gbp,0);try{const o=JSON.parse(localStorage.getItem('zcash')||'null');if(o&&o.at>(c.as_of||''))bal=o.v}catch(e){}const start=bal;
@@ -1728,35 +1746,23 @@ function renderDip(){const el=$('dip');if(!el)return;const c=DATA.cfo;if(!c||!c.
   const rest=B.slice(1),low=rest.reduce((m,x)=>x.b<m.b?x:m,rest[0]),neg=rest.filter(x=>x.b<0).length;
   const restA=A.slice(1),lowA=restA.reduce((m,x)=>x.b<m.b?x:m,restA[0]);
   const k=v=>(v<0?'-':'')+'£'+(Math.abs(v)/1000).toFixed(1).replace(/\.0$/,'')+'k';
-  // chart
-  const sm=window.innerWidth<640,Wd=sm?400:900,H=sm?290:260,pl=sm?34:46,pr=8,pt=60,pb=30,N=n-1;
-  const all=B.concat(A).slice(1).map(x=>x.b);const mx=Math.max(...all,c.floor||0,1000)*1.08,mn=Math.min(...all,0)*1.25-200;
-  const slot=(Wd-pl-pr)/N,X=i=>pl+slot*(i-0.5),Y=v=>pt+(mx-v)/(mx-mn)*(H-pt-pb),bw=Math.min(slot*0.7,34);let g='';
+  // chart - A2 23 Nov: week bars (green above £0, red below), tap a bar to read that week's payment
+  const sm=window.innerWidth<640,N=n-1,Wd=sm?400:Math.max(640,N*56),H=sm?250:250,pl=sm?36:46,pr=6,pt=24,pb=44;
+  const all=B.concat(A).slice(1).map(x=>x.b);const mx=Math.max(...all,1000)*1.12,mn=Math.min(...all,0)*1.18-200;
+  const slot=(Wd-pl-pr)/N,X=i=>pl+slot*(i-0.5),Y=v=>pt+(mx-v)/(mx-mn)*(H-pt-pb),bw=Math.min(slot*0.66,38);let g='';
   const step=mx-mn>12000?4000:2000;for(let v=Math.ceil(mn/step)*step;v<=mx;v+=step)if(v)g+='<line x1="'+pl+'" x2="'+(Wd-pr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#eef0f0"/><text x="'+(pl-5)+'" y="'+(Y(v)+4)+'" font-size="11" fill="#888" text-anchor="end">'+k(v)+'</text>';
-  // christmas band
-  const xi=B.map((x,i)=>i&&x.d.getMonth()===11?i:-1).filter(i=>i>0);if(xi.length){const a=X(xi[0])-slot/2,b=X(xi[xi.length-1])+slot/2;g+='<rect x="'+a+'" y="'+(pt-30)+'" width="'+(b-a)+'" height="'+(H-pb-pt+30)+'" rx="8" fill="rgba(29,143,95,.07)"/><text x="'+(a+8)+'" y="'+(pt-16)+'" font-size="11.5" font-weight="800" fill="#1d8f5f">🎄 December</text>'}
-  const col=v=>v<0?'#cc0c39':v<(c.floor||0)?'#ff9900':'#1d8f5f';
-  const y0=Y(0),PA=[],PB=[];for(let i=1;i<n;i++){PA.push([X(i),Y(A[i].b)]);PB.push([X(i),Y(B[i].b)])}
-  const ln=P=>P.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),ar=P=>'M'+P[0][0].toFixed(1)+','+y0+' L'+ln(P).split(' ').join(' L')+' L'+P[P.length-1][0].toFixed(1)+','+y0+' Z';
-  g+='<defs><clipPath id="dcA"><rect x="0" y="0" width="'+Wd+'" height="'+y0+'"/></clipPath><clipPath id="dcB"><rect x="0" y="'+y0+'" width="'+Wd+'" height="'+(H-y0)+'"/></clipPath>'+
-    '<linearGradient id="dgA" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#1d8f5f" stop-opacity=".38"/><stop offset="1" stop-color="#1d8f5f" stop-opacity=".06"/></linearGradient>'+
-    '<linearGradient id="dgB" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#cc0c39" stop-opacity=".18"/><stop offset="1" stop-color="#cc0c39" stop-opacity=".55"/></linearGradient></defs>';
-  if(picks.length)g+='<path d="'+ar(PB)+'" fill="rgba(204,12,57,.10)" clip-path="url(#dcB)"/><polyline points="'+ln(PB)+'" fill="none" stroke="#9aa0a0" stroke-width="2" stroke-dasharray="5 4"/>';
-  g+='<path class="darea" d="'+ar(PA)+'" fill="url(#dgA)" clip-path="url(#dcA)"/><path class="darea" d="'+ar(PA)+'" fill="url(#dgB)" clip-path="url(#dcB)"/>';
-  g+='<polyline class="dline" points="'+ln(PA)+'" fill="none" stroke="#1d8f5f" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" clip-path="url(#dcA)"/><polyline class="dline" points="'+ln(PA)+'" fill="none" stroke="#cc0c39" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" clip-path="url(#dcB)"/>';
-  const negI=[];for(let i=1;i<n;i++)if(A[i].b<0)negI.push(i);
-  if(negI.length>1){const mid=negI[Math.floor(negI.length/2)];if(Y(A[mid].b)-y0>44)g+='<text x="'+X(mid)+'" y="'+(y0+20)+'" text-anchor="middle" font-size="'+(sm?12:14)+'" font-weight="800" fill="#fff" style="paint-order:stroke" stroke="#cc0c39" stroke-width="3">Below zero</text>'}
-  for(let i=1;i<n;i++){const v=A[i].b,cx=X(i);
-    g+='<circle class="ddot" style="animation-delay:'+(300+i*45)+'ms" cx="'+cx+'" cy="'+Y(v)+'" r="'+(v<0?4.5:3.5)+'" fill="#fff" stroke="'+col(v)+'" stroke-width="2.5"><title>Week of '+fmtD(A[i].d)+': £'+n0(v)+' left in the bank'+(A[i].pay?' - '+esc(A[i].pay):'')+'</title></circle>';
-    if(sm?(i%3===1):(i%2===1))g+='<text x="'+cx+'" y="'+(H-pb+17)+'" font-size="11" fill="#666" text-anchor="middle">'+fmtD(A[i].d)+'</text>'}
-  g+='<line x1="'+pl+'" x2="'+(Wd-pr)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="#0f1111" stroke-width="1.5"/><text x="'+(pl-5)+'" y="'+(Y(0)+4)+'" font-size="11" font-weight="700" fill="#0f1111" text-anchor="end">£0</text>';
-  const dips=dipLows(A);let lastX=-999,row=0;
-  (dips.length?dips:[A.indexOf(lowA)]).forEach(li=>{const v=A[li].b,txt=v<0?(sm?fmtD(A[li].d)+' -'+k(-v).slice(0):fmtD(A[li].d)+': '+k(-v)+' short'):'Low '+k(v),w=txt.length*6.6+18;
-    const lx=Math.min(Math.max(X(li),pl+w/2),Wd-pr-w/2);row=Math.abs(lx-lastX)<w+6?row+1:0;lastX=lx;
-    const ly=(v<0?Y(0)-12:Y(v)-14)-row*24;
-    if(v<0)g+='<line x1="'+X(li)+'" x2="'+X(li)+'" y1="'+(ly+6)+'" y2="'+(Y(0)-1)+'" stroke="'+col(v)+'" stroke-width="1.5"/>';
-    g+='<g class="dlow"><rect x="'+(lx-w/2)+'" y="'+(ly-14)+'" width="'+w+'" height="20" rx="10" fill="'+col(v)+'"/><text x="'+lx+'" y="'+(ly+1)+'" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">'+txt+'</text></g>'});
-  const svg='<svg viewBox="0 0 '+Wd+' '+H+'" width="100%" role="img" aria-label="Cash left at the end of each week">'+g+'</svg>';
+  const xi=B.map((x,i)=>i&&x.d.getMonth()===11?i:-1).filter(i=>i>0);if(xi.length){const a=X(xi[0])-slot/2,b=X(xi[xi.length-1])+slot/2;g+='<rect x="'+a+'" y="2" width="'+(b-a)+'" height="'+(H-pb-2)+'" rx="8" fill="rgba(29,143,95,.07)"/><text x="'+(a+6)+'" y="15" font-size="11.5" font-weight="800" fill="#1d8f5f">🎄 December</text>'}
+  const fi=B.map((x,i)=>i&&x.d.getMonth()===1?i:-1).filter(i=>i>0);if(fi.length){const a=X(fi[0])-slot/2,b=X(fi[fi.length-1])+slot/2;g+='<rect x="'+a+'" y="2" width="'+(b-a)+'" height="'+(H-pb-2)+'" rx="8" fill="rgba(240,98,146,.08)"/><text x="'+(a+6)+'" y="15" font-size="11.5" font-weight="800" fill="#d6336c">❤️ Feb</text>'}
+  const col=v=>v<0?'#cc0c39':'#1d8f5f',y0=Y(0),liA=A.indexOf(lowA);
+  for(let i=1;i<n;i++){const v=A[i].b,cx=X(i),top=Math.min(Y(v),y0),h=Math.max(Math.abs(Y(v)-y0),2);
+    if(picks.length&&Math.abs(B[i].b-v)>1){const vb=B[i].b,tb=Math.min(Y(vb),y0),hb=Math.max(Math.abs(Y(vb)-y0),2);g+='<rect x="'+(cx-bw/2)+'" y="'+tb+'" width="'+bw+'" height="'+hb+'" rx="5" fill="none" stroke="#9aa0a0" stroke-width="1.5" stroke-dasharray="4 3"/>'}
+    g+='<g class="dbar'+(i===liA?' dlowb':'')+'" data-wk="'+i+'" style="animation-delay:'+(120+i*40)+'ms;transform-origin:'+cx+'px '+y0+'px"><rect x="'+(cx-slot/2)+'" y="0" width="'+slot+'" height="'+H+'" fill="transparent"/><rect x="'+(cx-bw/2)+'" y="'+top+'" width="'+bw+'" height="'+h+'" rx="5" fill="'+col(v)+'"'+(i===liA?'':' fill-opacity="'+(v<0?.82:.78)+'"')+'/>'+
+      (A[i].pay?'<text x="'+cx+'" y="'+(H-pb+32)+'" font-size="'+(sm?10:12)+'" text-anchor="middle">💸</text>':'')+'<title>Week of '+fmtD(A[i].d)+': '+(v<0?k(-v)+' short':k(v)+' left')+(A[i].pay?' - '+esc(A[i].pay):'')+'</title></g>';
+    if(i===liA||(Math.abs(i-liA)>1&&(sm?i%3===1:i%2===1)))g+='<text x="'+cx+'" y="'+(H-pb+15)+'" font-size="'+(sm?10.5:11)+'" fill="'+(i===liA?'#cc0c39':'#666')+'" font-weight="'+(i===liA?800:400)+'" text-anchor="middle">'+fmtD(A[i].d)+'</text>'}
+  g+='<line x1="'+pl+'" x2="'+(Wd-pr)+'" y1="'+y0+'" y2="'+y0+'" stroke="#0f1111" stroke-width="1.5"/><text x="'+(pl-5)+'" y="'+(y0+4)+'" font-size="11" font-weight="700" fill="#0f1111" text-anchor="end">£0</text>';
+  {const v=lowA.b,cx=X(liA),txt=v<0?k(-v)+' short':'Low '+k(v),w=txt.length*7+16,lx=Math.min(Math.max(cx,pl+w/2),Wd-pr-w/2),ly=v<0?y0-12:Y(v)-8;g+='<g class="dlow"><rect x="'+(lx-w/2)+'" y="'+(ly-14)+'" width="'+w+'" height="20" rx="10" fill="'+col(v)+'" stroke="#fff" stroke-width="2"/><text x="'+lx+'" y="'+(ly+1)+'" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">'+txt+'</text></g>'}
+  const svg='<div class="dcall '+(lowA.b<0?'neg':'ok')+'"><span class="dci">'+(lowA.b<0?'⚠️':'✅')+'</span><span><small>Lowest point</small><b>w/c '+fmtD(lowA.d)+'</b></span><span class="dcv">'+(lowA.b<0?k(-lowA.b)+'<small>short</small>':k(lowA.b)+'<small>left</small>')+'</span></div>'+
+    '<div class="dwrap"><svg viewBox="0 0 '+Wd+' '+H+'" width="100%" role="img" aria-label="Cash left at the end of each week">'+g+'</svg></div><div class="dcap" id="dcap"></div>';
   // sentence
   let say;if(low.b>=0)say='Good news - your cash stays <b>above zero</b> every week. Lowest point is about <b>'+k(low.b)+'</b> in the week of '+fmtD(low.d)+'.';
   else{const bl=dipLows(B);let li0=B.indexOf(low);while(li0+1<B.length&&B[li0+1].b<0)li0++;const lastNeg=B[li0];
@@ -1772,8 +1778,10 @@ function renderDip(){const el=$('dip');if(!el)return;const c=DATA.cfo;if(!c||!c.
     return '<button class="dopt'+(on?' on':'')+(isB?' best':'')+'" data-dip="'+o.k+'" aria-pressed="'+on+'"><span class="dic">'+o.ic+'</span><span class="dtx">'+(isB?'<i class="dbest">⭐ Best fix</i>':'')+'<b>'+esc(o.t)+'</b>'+(o.d?'<span>'+esc(o.d)+'</span>':'')+(eff?'<em>'+eff+'</em>':'')+'</span><span class="dck">'+(on?'✓':'+')+'</span></button>'};
   const rest2=OS.filter(o=>!best.includes(o.k)),openR=rest2.some(o=>DIPP[o.k]);
   const cards=(best.length?best.map(k=>card(O.find(o=>o.k===k))).join(''):'')+(rest2.length?(best.length?'<details class="dmore"'+(openR?' open':'')+'><summary>'+rest2.length+' more idea'+(rest2.length>1?'s':'')+' ▾</summary><div class="dopts">'+rest2.map(card).join('')+'</div></details>':rest2.map(card).join('')):'');
-  el.innerHTML='<div class="dhd"><h4>The December dip</h4><span class="dlg"><i style="background:#1d8f5f"></i>Safe <i style="background:#ff9900"></i>Under £'+n0(c.floor||0)+' <i style="background:#cc0c39"></i>Below zero</span></div><div class="dsay">'+say+'</div>'+svg+'<div class="note" style="margin:2px 0 10px">The line is the cash left at the end of each week. Red = you would be short.'+(picks.length?' Grey dashed line = before your fixes.':'')+'</div>'+
+  el.innerHTML='<div class="dhd"><h4>The December dip</h4><span class="dlg"><i style="background:#1d8f5f"></i>Money left <i style="background:#cc0c39"></i>Short</span></div><div class="dsay">'+say+'</div>'+svg+'<div class="note" style="margin:2px 0 10px">Each bar is the cash left at the end of a week. Red = you would be short. 💸 = a big payment - tap any bar to read it.'+(picks.length?' Dashed outline = before your fixes.':'')+'</div>'+
     (O.length?'<div class="dh2">'+(best.length?'The '+(best.length>1?'2 best fixes':'best fix')+' - tap to see the gap close':'Ways to close the gap - pick one or two')+'</div><div class="dopts">'+cards+'</div>'+(picks.length?'<div class="dfoot"><a class="btn ghost" id="diptell" href="#">Tell the team what I picked</a><span class="lnk" id="dipclr">Clear</span></div>':''):'');
+  const capW=i=>{const x=A[i],v=x.b;$('dcap').innerHTML='<b>Week of '+fmtD(x.d)+'</b> <span class="'+(v<0?'dneg':'dpos')+'">'+(v<0?k(-v)+' short':k(v)+' left')+'</span><div>'+(x.pay?'💸 '+esc(x.pay):'<span class="note">No big payment - cash builds up.</span>')+'</div>';el.querySelectorAll('.dbar').forEach(b=>b.classList.toggle('sel',+b.dataset.wk===i))};
+  el.querySelectorAll('.dbar').forEach(b=>b.onclick=()=>capW(+b.dataset.wk));capW(A.indexOf(lowA));
   el.querySelectorAll('[data-dip]').forEach(b=>b.onclick=()=>{const kk=b.dataset.dip;if(DIPP[kk])delete DIPP[kk];else DIPP[kk]=1;try{localStorage.setItem('zdip',JSON.stringify(DIPP))}catch(e){}try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}renderDip()});
   const cl=$('dipclr');if(cl)cl.onclick=()=>{DIPP={};try{localStorage.setItem('zdip','{}')}catch(e){}renderDip()};
   const tl=$('diptell');if(tl)tl.onclick=e=>{e.preventDefault();window.open(gmailUrl('Zugati portal feedback - December gap','To close the December gap I want to:\n'+picks.map(o=>'- '+o.t+(o.d?' ('+o.d+')':'')).join('\n')+'\n\n(Sent from the Zugati portal)'),'_blank','noopener')};
