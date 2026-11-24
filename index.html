@@ -313,6 +313,30 @@ svg text{font-family:inherit}
 .pli b{display:block;font-size:15px;margin-bottom:3px}.pli span{font-size:14px;color:#333}
 .more{margin-top:10px}
 .addb{display:block;width:100%;margin-top:6px;border:1px solid #c7811b;background:var(--orange);border-radius:20px;padding:7px;font-weight:700;font-size:14px;cursor:pointer}
+
+/* A1 24 Nov: red payouts alert, Reorder now, check badge */
+#ralert:empty{display:none}
+.ralert{position:relative;background:linear-gradient(135deg,#b3001b,#e0102f);color:#fff;border-radius:18px;padding:20px 22px;margin:6px 0 18px;box-shadow:0 10px 28px rgba(204,12,57,.35);overflow:hidden;animation:raIn .5s ease}
+.ralert:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 90% 10%,rgba(255,255,255,.18),transparent 55%);pointer-events:none}
+.ralert .rah{display:flex;align-items:center;gap:12px}
+.ralert .rai{font-size:34px;line-height:1;animation:raPulse 1.6s ease-in-out infinite}
+.ralert .rat{font-size:22px;font-weight:900;line-height:1.2}
+.ralert .ral{font-size:17px;margin:10px 0 14px;opacity:.95;font-weight:600}
+.ralert .rab{position:relative;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.ralert .rago{display:inline-flex;align-items:center;gap:8px;background:#fff;color:#b3001b;font-weight:900;font-size:18px;padding:14px 22px;border-radius:30px;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.ralert .rago:active{transform:scale(.97)}
+.ralert .rae{color:#fff;font-weight:700;text-decoration:underline;font-size:14px}
+.ralert .rad{margin-left:auto;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.6);color:#fff;border-radius:20px;padding:8px 14px;font-weight:800;cursor:pointer;font-size:14px}
+.ralert.gone{opacity:0;transform:scale(.97);transition:.33s}
+@keyframes raPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes raIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+@media(max-width:600px){.ralert{padding:16px}.ralert .rat{font-size:19px}.ralert .rago{width:100%;justify-content:center;font-size:17px}.ralert .rad{margin-left:0}}
+.rnow{display:flex;flex-direction:column;align-items:center;width:100%;margin-top:8px;border:0;background:linear-gradient(135deg,#ff9900,#f08804);color:#111;border-radius:14px;padding:10px 12px;font-weight:900;font-size:16px;cursor:pointer;box-shadow:0 3px 10px rgba(255,153,0,.4)}
+.rnow small{font-weight:600;font-size:12px;margin-top:2px;opacity:.85}
+.rnow.in{background:var(--greenbg);color:var(--green);box-shadow:none;border:1px solid var(--green)}
+.rnow:active{transform:scale(.98)}
+.qbadge{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--amber);color:#fff;font-weight:900;font-size:13px;margin-right:6px;vertical-align:middle;animation:raPulse 1.8s ease-in-out infinite}
+.prow.chk{background:#fffaf0}
 .addb.in{background:var(--greenbg);border-color:var(--green);color:var(--green)}
 .bbar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:40;background:var(--nav2);color:#fff;border-radius:30px;padding:10px 12px 10px 20px;display:flex;gap:14px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.35);max-width:94vw}
 .bbar b{color:var(--orange)}
@@ -674,6 +698,7 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
 
   <div class="wrap">
     <section id="today">
+      <div id="ralert"></div>
       <div class="hello"><h1 id="greet">Hello Eli</h1><div class="note" id="todaydate"></div></div>
       <div class="fivek" id="fivek"></div>
       <div class="tstrip" id="tstrip"></div>
@@ -921,10 +946,19 @@ function draftAge(x){const tx=[x.title,x.detail].join(' ');if(!/\bdraft\s*(\(|re
   const M={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11},m=tx.match(/draft\s*\((\d{1,2})\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\)/i);
   if(!m)return {days:null};const t=today();let d=new Date(t.getFullYear(),M[m[2].toLowerCase()],+m[1]);if(d>t)d=new Date(t.getFullYear()-1,d.getMonth(),d.getDate());return {days:Math.round((t-d)/DAY)}}
 function draftBadge(x){const a=draftAge(x);if(!a)return '';const n=a.days;return '<div class="drbadge'+(n>=3?' old':'')+'"><span>✉️</span><b>Draft ready'+(n?' - waiting '+n+' day'+(n>1?'s':''):'')+'</b><em>Costs nothing to send</em></div>'}
+/* A1 24 Nov: big red alert at the very top when tasks[0] is the urgent payouts-on-hold task (t27). Hides once Done. */
+function renderAlert(){const el=$('ralert');if(!el)return;const x=(DATA.tasks||[])[0];let DIS={};try{DIS=JSON.parse(localStorage.getItem('zdis')||'{}')}catch(e){}
+  if(!x||x.level!=='urgent'||x.id!=='t27'||isHid(DIS['t:'+x.id])){el.innerHTML='';return}
+  el.innerHTML='<div class="ralert" role="alert"><div class="rah"><span class="rai">🚨</span><div class="rat">'+esc(x.title)+'</div></div><div class="ral">No payouts until this is fixed.</div><div class="rab">'+(x.link?'<a class="rago" target="_blank" rel="noopener" href="'+esc(x.link)+'">💳 Fix the card in Seller Central ↗</a>':'')+(x.email?'<a class="rae" target="_blank" rel="noopener" href="'+esc(x.email)+'">Open Amazon\'s email</a>':'')+'<button class="rad" data-dis="t:'+esc(x.id)+'" data-st="done" data-t="'+esc(x.title)+'">✓ Done - fixed it</button></div></div>';
+  wireDis(el);const b=el.querySelector('[data-dis]'),h=b.onclick;b.onclick=e=>{e.stopPropagation();el.firstChild.classList.add('gone');setTimeout(()=>h.call(b,e),330)}}
+/* A1 24 Nov: 'Reorder now' - one tap fills the basket with the suggested qty for this supplier and opens it, ready to hand to Claude */
+function canRe(p,f){return f.st==='now'&&!p.valentine&&supOf(p)!==NOSUP}
+function reBtn(p,f){const inb=BASKET[p.id],q=recFor(p).sug||f.qty||100;return '<button class="rnow'+(inb?' in':'')+'" data-rnow="'+esc(p.id)+'" data-q="'+q+'">'+(inb?'✓ In your order ('+n0(inb)+') - open basket':'🔁 Reorder now')+'<small>'+(inb?'Then one tap to hand it to Claude':n0(q)+' units from '+esc(sFirst(supOf(p)))+' - one tap to Claude')+'</small></button>'}
+function wireRe(root){root.querySelectorAll('[data-rnow]').forEach(b=>b.onclick=e=>{e.stopPropagation();const id=b.dataset.rnow;if(!BASKET[id])BASKET[id]=+b.dataset.q||100;saveB();renderBar();renderGrid();if(!$('ov').classList.contains('hidden'))closeP();openB()})}
 function renderActs(){
   const t=(DATA.tasks||[]).slice().sort((a,b)=>({urgent:0,high:1,normal:2}[a.level]-{urgent:0,high:1,normal:2}[b.level]));
   let DIS={};try{DIS=JSON.parse(localStorage.getItem('zdis')||'{}')}catch(e){}
-  const all=t.filter(x=>!isHid(DIS['t:'+x.id]));const hid=t.length-all.length;window._actsAll=window._actsAll||false;const shown=window._actsAll?all:all.slice(0,3);
+  renderAlert();const all=t.filter(x=>!isHid(DIS['t:'+x.id])&&!(x.id==='t27'&&x===(DATA.tasks||[])[0]&&x.level==='urgent'));const hid=t.length-all.length;window._actsAll=window._actsAll||false;const shown=window._actsAll?all:all.slice(0,3);
   $('acts').innerHTML=shown.map(x=>'<div class="card act '+esc(x.level)+'"><div class="meta">'+esc(x.who)+(x.due?' · by '+fmtD(new Date(x.due+'T00:00:00')):'')+'</div>'+draftBadge(x)+'<div class="tt">'+esc(x.title)+'</div><p>'+esc(x.detail)+'</p><div class="btns">'+(()=>{const dr=taskDraft(x),gen=x.link&&/#drafts$/.test(x.link);return (dr?'<a class="btn drb2" target="_blank" rel="noopener" href="'+esc(dr.u)+'">✉ Open the '+esc(dr.w)+' draft</a>':'')+(x.link&&!(dr&&(gen||/draft/i.test(x.link_label||'')))?'<a class="btn'+(dr?' ghost':'')+'" target="_blank" rel="noopener" href="'+esc(x.link)+'">'+esc(x.link_label||'Open')+'</a>':'')})()+(x.email?'<a class="btn ghost" target="_blank" rel="noopener" href="'+esc(x.email)+'">Open email</a>':'')+'</div><div class="tact"><span class="tb ok" data-dis="t:'+esc(x.id)+'" data-st="done" data-t="'+esc(x.title)+'">✓ Done</span><span class="tb no" data-dis="t:'+esc(x.id)+'" data-st="not relevant" data-t="'+esc(x.title)+'">✕ Not relevant</span><span class="tb zz" data-dis="t:'+esc(x.id)+'" data-st="snooze" data-t="'+esc(x.title)+'">💤 Tomorrow</span></div></div>').join('')+(hid?'<div><span class="hidtog" id="unhide">'+(()=>{const z=t.filter(x=>{const v=DIS['t:'+x.id];return isHid(v)&&v.st==='snooze'}).length;return (hid-z?(hid-z)+' hidden':'')+(hid-z&&z?' · ':'')+(z?z+' back tomorrow':'')})()+' - show again</span></div>':'')+(all.length>3?'<div class="more"><span class="btn ghost" id="actmore">'+(window._actsAll?'Show less':'Show all '+all.length+' jobs')+'</span></div>':'');
   const am=$('actmore');if(am)am.onclick=()=>{window._actsAll=!window._actsAll;renderActs()};wireDis($('acts'));const uh=$('unhide');if(uh)uh.onclick=()=>{Object.keys(DIS).filter(k=>k.startsWith('t:')&&isHid(DIS[k])).forEach(k=>delete DIS[k]);try{localStorage.setItem('zdis',JSON.stringify(DIS))}catch(e){}renderActs()};
 }
@@ -958,11 +992,11 @@ function renderGrid(){
     '<div class="big"><span class="num">'+n0(p.stock)+'</span><span class="u">in stock</span>'+inbPill(p)+'</div>'+
     '<div class="run"><i style="width:'+pct+'%;background:'+col+'"></i></div><div class="runl"><span class="ro '+RI.c+'">'+(top?'':esc(RI.t))+'</span><span>'+(p.per_day?(p.per_day<1?p.per_day.toFixed(1):Math.round(p.per_day))+' sold / day':'')+'</span></div>'+(RI.s&&!top?'<div class="rosub '+RI.c+'">'+esc(RI.s)+'</div>':'')+
     '<div class="facts"><div class="fact">'+(p.valentine&&p.val_units?'<div class="k">Need until 14 Feb</div><div class="x">'+n0(f.needVal)+'</div>':'<div class="k">Next 60 days need</div><div class="x">'+n0(f.need60)+'</div>')+'</div><div class="fact"><div class="k">Profit 30 days</div><div class="x" style="color:'+((p.profit30||0)<0?'var(--red)':'var(--green)')+'">'+(p.profit30==null?'-':money(p.profit30,p.cur))+'</div></div></div>'+
-    (p.valentine?quoteHtml(p,true):'')+(supOf(p)===NOSUP&&['now','soon'].includes(f.st)?'<button class="asksup sm" data-asksup="'+esc(p.id)+'">❓ Ask Eli who supplies this <span>Tap to answer</span></button>':'')+'<div class="order '+f.st+'">'+esc(orderLine(p,f))+'</div>'+draftBtn(p)+(['now','soon','ok'].includes(f.st)?addBtn(p,f):'')+'</div></div>';
+    (p.valentine?quoteHtml(p,true):'')+(supOf(p)===NOSUP&&['now','soon'].includes(f.st)?'<button class="asksup sm" data-asksup="'+esc(p.id)+'">❓ Ask Eli who supplies this <span>Tap to answer</span></button>':'')+'<div class="order '+f.st+'">'+esc(orderLine(p,f))+'</div>'+draftBtn(p)+(canRe(p,f)?reBtn(p,f):['now','soon','ok'].includes(f.st)?addBtn(p,f):'')+'</div></div>';
   }).join('')||(PQ?'<div class="card empty"><div class="ei">🔎</div><b>No product matches "'+esc(PQ)+'"</b><span class="note">Try fewer letters, or <a href="#" id="psclr">clear the search</a>'+(FILTER!=='all'?' and tap <b>All</b>':'')+'.</span></div>':'<div class="card empty"><div class="ei">'+(FILTER==='soon'?'🎉':FILTER==='now'?'✅':'📭')+'</div><b>'+(FILTER==='soon'||FILTER==='now'?'Nothing to order here - all good':'Nothing here')+'</b><span class="note">Tap <b>All</b> to see every product.</span></div>');
   const pc=$('psclr');if(pc)pc.onclick=e=>{e.preventDefault();$('psx').click()};
   const gk=L.map(x=>x.p.id).join(',')+'|'+PQ;if(gk!==window._gk){window._gk=gk;$('grid').classList.remove('gfade');void $('grid').offsetWidth;$('grid').classList.add('gfade')}
-  $('grid').querySelectorAll('.pc').forEach(x=>x.onclick=e=>{if(e.target.closest('a'))return;openP(x.dataset.id)});wireAdd($('grid'));wireQ($('grid'));
+  $('grid').querySelectorAll('.pc').forEach(x=>x.onclick=e=>{if(e.target.closest('a'))return;openP(x.dataset.id)});wireAdd($('grid'));wireQ($('grid'));wireRe($('grid'));
 }
 
 /* ---------- product popup ---------- */
@@ -1005,13 +1039,13 @@ function openP(id){
    '<h3>'+esc(p.name)+'</h3><div class="note">ASIN '+esc(p.asin)+' · SKU '+esc(p.sku)+(supOf(p)!==NOSUP?' · Supplier: '+esc(supOf(p)):'')+'</div>'+(supOf(p)===NOSUP?'<button class="asksup" data-asksup="'+esc(p.id)+'">❓ Ask Eli who supplies this <span>Tap to answer</span></button>':'')+
    '<div class="bubbles"><div class="bub"><div class="x">'+n0(p.stock)+'</div><div class="k">In stock</div></div><div class="bub"><div class="x">'+n0((p.inbound||0)+(p.on_order||0))+'</div><div class="k">On the way</div></div><div class="bub"><div class="x">'+(p.per_day?(p.per_day<1?p.per_day.toFixed(1):Math.round(p.per_day)):'0')+'</div><div class="k">Sold / day</div></div><div class="bub"><div class="x" style="color:'+((p.profit30||0)<0?'var(--red)':'var(--green)')+'">'+(p.profit30==null?'-':money(p.profit30,p.cur))+'</div><div class="k">Profit 30d</div></div></div>'+
    '<div class="btns" style="margin-top:12px"><a class="btn ghost" target="_blank" rel="noopener" href="https://www.amazon.'+(p.account==='USA'?'com':p.market.indexOf('DE')===0?'de':p.market==='FR'?'fr':'co.uk')+'/dp/'+esc(p.asin)+'">View on Amazon</a></div></div></div>'+
-   '<div class="rec '+f.st+'">'+rec+(['now','soon','ok'].includes(f.st)?'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><div style="min-width:220px">'+addBtn(p,f)+'</div><button class="claude" style="width:auto;padding:7px 16px;font-size:14px" data-ask1="'+esc(p.id)+'">Ask Claude to order this ↗</button></div>':'')+'</div>'+quoteHtml(p,false)+
+   '<div class="rec '+f.st+'">'+rec+(['now','soon','ok'].includes(f.st)?'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><div style="min-width:220px">'+(canRe(p,f)?reBtn(p,f):addBtn(p,f))+'</div><button class="claude" style="width:auto;padding:7px 16px;font-size:14px" data-ask1="'+esc(p.id)+'">Ask Claude to order this ↗</button></div>':'')+'</div>'+quoteHtml(p,false)+
    '<div class="msec"><h4>Stock forecast - next 5 months</h4><div class="legend"><span><i style="background:#ff9900"></i>Units left</span><span><i style="background:#146eb4"></i>Last day to order</span><span><i style="background:#cc0c39"></i>Runs out</span></div>'+runwaySvg(p,f)+'<div class="note">Includes stock on the way and last year\'s seasonal peaks.</div></div>'+
    yoyOnly(p)+'<details class="hist"><summary><span>📊 Show the full history</span><span class="note">every month, every year, units then and now</span></summary>'+monthlyRest(p)+'<div class="msec"><h4>Money made each year</h4>'+yearsSvg(p)+'</div>'+'<div class="msec"><h4>Units sold - then and now</h4><div style="max-width:460px">'+barsSvg(bars)+'</div></div></details>'+'<div class="msec"><div><h4>Money</h4>'+
    '<div class="facts"><div class="fact"><div class="k">Sales 30 days</div><div class="x">'+(p.sales30==null?'-':money(p.sales30,p.cur))+'</div></div><div class="fact"><div class="k">Margin</div><div class="x">'+(p.margin==null?'-':p.margin.toFixed(0)+'%')+'</div></div><div class="fact"><div class="k">Missed sales (out of stock)</div><div class="x" style="color:'+(p.lost_sales?'var(--red)':'inherit')+'">'+money(p.lost_sales||0,p.cur)+'</div></div><div class="fact"><div class="k">Suggested order</div><div class="x">'+(f.qty?n0(f.qty)+' units':'none')+'</div></div></div>'+
    '</div></div>';
   $('ov').classList.remove('hidden');document.body.style.overflow='hidden';
-  $('md').querySelector('.mx').onclick=closeP;wireAdd($('md'));wireQ($('md'));wireMonthly(p);$('md').querySelectorAll('[data-ask1]').forEach(b=>b.onclick=()=>{const id=b.dataset.ask1,pp=DATA.products.find(x=>x.id===id),ff=forecast(pp);const q=BASKET[id]||ff.qty||Math.max(100,Math.round((ff.need60||0)/50)*50);sendOrder({[id]:q})});
+  $('md').querySelector('.mx').onclick=closeP;wireAdd($('md'));wireRe($('md'));wireQ($('md'));wireMonthly(p);$('md').querySelectorAll('[data-ask1]').forEach(b=>b.onclick=()=>{const id=b.dataset.ask1,pp=DATA.products.find(x=>x.id===id),ff=forecast(pp);const q=BASKET[id]||ff.qty||Math.max(100,Math.round((ff.need60||0)/50)*50);sendOrder({[id]:q})});
 }
 function closeP(){$('ov').classList.add('hidden');document.body.style.overflow=''}
 $('ov').onclick=e=>{if(e.target.id==='ov')closeP()};
@@ -1023,15 +1057,15 @@ function renderPay(){
   const P=(DATA.payments||[]).filter(x=>!DISP['p:'+x.id]).slice().sort((a,b)=>a.due<b.due?-1:1);
   const lab={unpaid:'Not paid',overdue:'Overdue',check:'Check if paid',planned:'Planned',later:'Later',forecast:'Not ordered yet',paid:'✓ Paid'};
   const rowH=x=>{const d=new Date(x.due+'T00:00:00'),late=d<today()&&x.status!=='forecast';
-   const pd=x.status==='paid';return '<div class="prow'+(pd?' paid':'')+'"><div class="pdate'+(late&&!pd?' late':'')+'"><div class="dd">'+d.getDate()+'</div><div class="mm">'+d.toLocaleDateString('en-GB',{month:'short'})+'</div></div>'+
-   '<div><span class="pill p-'+esc(x.status)+'">'+(lab[x.status]||esc(x.status))+'</span><div class="pw">'+esc(x.what)+'</div><div class="pto">'+esc(x.to)+'</div><div class="pwhy">'+esc(x.why)+'</div></div>'+
-   '<div class="pamt"><div class="a">'+(x.amount!=null?money(x.amount,x.cur):'?')+'</div><div class="an">'+esc(x.amount_note||'')+'</div>'+(pd?'':'<div class="btns" style="justify-content:flex-end">'+(x.link?'<a class="btn" target="_blank" rel="noopener" href="'+esc(x.link)+'">Pay</a>':'')+(x.email?'<a class="btn ghost" target="_blank" rel="noopener" href="'+esc(x.email)+'">Email</a>':'')+'</div><div class="tact" style="justify-content:flex-end"><span class="tb ok" data-dis="p:'+esc(x.id)+'" data-st="paid" data-t="'+esc(x.what)+'">✓ Paid</span><span class="tb no" data-dis="p:'+esc(x.id)+'" data-st="not relevant" data-t="'+esc(x.what)+'">✕ Not relevant</span></div>')+'</div></div>'};
+   const pd=x.status==='paid',ck=x.status==='check';return '<div class="prow'+(pd?' paid':'')+(ck?' chk':'')+'"><div class="pdate'+(late&&!pd?' late':'')+'"><div class="dd">'+d.getDate()+'</div><div class="mm">'+d.toLocaleDateString('en-GB',{month:'short'})+'</div></div>'+
+   '<div>'+(ck?'<span class="qbadge" title="We need you to tell us">?</span>':'')+'<span class="pill p-'+esc(x.status)+'">'+(ck&&x.paid?'Already sent - what was it?':(lab[x.status]||esc(x.status)))+'</span><div class="pw">'+esc(x.what)+'</div><div class="pto">'+esc(x.to)+'</div><div class="pwhy">'+esc(x.why)+'</div></div>'+
+   '<div class="pamt"><div class="a">'+(x.amount!=null?money(x.amount,x.cur):'?')+'</div><div class="an">'+esc(x.amount_note||'')+'</div>'+(pd?'':'<div class="btns" style="justify-content:flex-end">'+(x.link?'<a class="btn" target="_blank" rel="noopener" href="'+esc(x.link)+'">Pay</a>':'')+(x.email?'<a class="btn'+(ck?'':' ghost')+'" target="_blank" rel="noopener" href="'+esc(x.email)+'">'+(ck?'✉ Open email':'Email')+'</a>':'')+'</div><div class="tact" style="justify-content:flex-end"><span class="tb ok" data-dis="p:'+esc(x.id)+'" data-st="paid" data-t="'+esc(x.what)+'">✓ Paid</span><span class="tb no" data-dis="p:'+esc(x.id)+'" data-st="not relevant" data-t="'+esc(x.what)+'">✕ Not relevant</span></div>')+'</div></div>'};
   /* A2 21 Nov: three coloured stacks with a £ total each - Pay now / Waiting for money / Later */
   const isIn=x=>/money in\b|coming in|top-up/i.test((x.what||'')+' '+(x.amount_note||''));
   const G={now:[],wait:[],later:[],paid:[],inc:[]};
   P.forEach(x=>{if(isIn(x)){if(x.status!=='paid')G.inc.push(x)}else if(x.status==='paid')G.paid.push(x);else if(['unpaid','overdue','check'].includes(x.status))G.now.push(x);else if(x.status==='planned')G.wait.push(x);else G.later.push(x)});
   G.now.sort((a,b)=>(a.status==='check')-(b.status==='check')||(a.due<b.due?-1:1));
-  const tot=L=>{let t=0,u=0;L.forEach(x=>{const g=payGbp(x);if(g>0)t+=g;else u++});return {t:Math.round(t),u}};
+  const tot=L=>{let t=0,u=0;L.forEach(x=>{if(x.status==='check'&&x.paid)return;const g=payGbp(x);if(g>0)t+=g;else u++});return {t:Math.round(t),u}};
   const DEF=[['now','🔴','Pay now','Not paid yet, or check if you already paid','#cc0c39','#fde8ec'],['wait','🟠','Waiting for money','Planned - pay when the cash lands','#c45500','#fff1dc'],['later','🔵','Later','Next month and beyond','#0b6fb3','#e6f1fa']];
   const T={};DEF.forEach(d=>T[d[0]]=tot(G[d[0]]));const all=DEF.reduce((s,d)=>s+T[d[0]].t,0)||1;
   const unk=u=>u?'<small class="psu">+ '+u+' with no amount yet</small>':'';
