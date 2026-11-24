@@ -330,7 +330,7 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .nb.on{background:#fff;color:#1d1d1f}
 .nb .n{position:absolute;top:4px;right:calc(50% - 22px);background:var(--pink);color:#fff;border-radius:10px;font-size:12px;line-height:17px;padding:0 5px;min-width:17px;font-weight:700}
 /* toast, confetti */
-.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,16px);background:#fff;color:#1d1d1f;border-radius:24px;padding:11px 18px;font:600 14px Poppins,sans-serif;opacity:0;transition:all .25s ease;pointer-events:none;z-index:20;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,16px);background:#fff;color:#1d1d1f;border-radius:24px;padding:11px 18px;font:600 14px Poppins,sans-serif;opacity:0;transition:all .25s ease;pointer-events:none;z-index:20;white-space:normal;max-width:calc(100vw - 32px);width:max-content;text-align:center;line-height:1.35;box-sizing:border-box;box-shadow:0 8px 24px rgba(0,0,0,.2)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 .cf{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;z-index:30;pointer-events:none;animation:fall 1.6s cubic-bezier(.25,.6,.4,1) forwards}
 @keyframes fall{to{transform:translate(var(--x),105vh) rotate(var(--r));opacity:.9}}
@@ -653,6 +653,22 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .chip.wxc{gap:4px;padding-left:4px}.chip.wxc svg{flex:none}
 @media(min-width:760px){.wx{grid-template-columns:auto minmax(0,260px) 1fr}.wxw{grid-column:auto;margin-top:0}}
 @media (prefers-reduced-motion:reduce){.wsun,.wcl,.wrn,.wbt,.wxm i,.wxpop{animation:none}.wbt{opacity:1}}
+.runw{color:var(--ink);background:var(--card);border-radius:22px;padding:16px 16px 12px;margin:14px 0;box-shadow:0 2px 10px rgba(0,0,0,.05);border:2px solid transparent}
+.runw.bad{border-color:#f5b5c2;background:linear-gradient(180deg,#fff1f3,var(--card) 120px)}.runw.good{border-color:#bfe6cf;background:linear-gradient(180deg,#eefaf3,var(--card) 120px)}
+.rwh{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}.rwi{font-size:28px;line-height:1;animation:rwpop .5s cubic-bezier(.3,1.6,.6,1)}
+.rwk{font:700 12px Poppins,sans-serif;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}.rws{font-size:16px;line-height:1.35;margin-top:2px}.runw.bad .rws b{color:#d23c53}.runw.good .rws b{color:#2f9a63}
+.rwlist{position:relative;display:grid;gap:8px}.rwlist:before{content:"";position:absolute;left:62px;top:14px;bottom:14px;width:2px;background:repeating-linear-gradient(var(--line) 0 4px,transparent 4px 8px)}
+.rw{display:grid;grid-template-columns:44px 24px 1fr auto;gap:8px;align-items:center;background:var(--soft);border-radius:14px;padding:8px 10px;position:relative;animation:rwin .4s ease both}
+.rw:nth-child(2){animation-delay:.06s}.rw:nth-child(3){animation-delay:.12s}.rw:nth-child(4){animation-delay:.18s}.rw:nth-child(5){animation-delay:.24s}
+.rwd{text-align:center;line-height:1.05;font-size:10.5px;color:var(--muted);font-weight:600}.rwd b{display:block;font-size:19px;color:var(--ink)}
+.rwdot{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:700 13px Poppins,sans-serif;font-style:normal;color:#fff;z-index:1}
+.rw.in .rwdot{background:#2f9a63}.rw.out .rwdot{background:var(--pink)}.rw.now .rwdot{background:var(--dark)}
+.rwt{min-width:0}.rwt b{display:block;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rwt span{font-size:12px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rwv{text-align:right;white-space:nowrap}.rwv b{display:block;font-size:15px}.rw.in .rwv b{color:#2f9a63}.rw.out .rwv b{color:#d23c53}.rwv em{font-style:normal;font-size:12px;color:var(--muted)}
+.rw.neg{background:#fde8eb}.rw.neg .rwv em{color:#d23c53;font-weight:700}
+.rwf{font-size:12px;color:var(--muted);margin-top:8px}
+@keyframes rwin{from{opacity:0;transform:translateX(-8px)}}@keyframes rwpop{from{transform:scale(.4)}}
+@media (prefers-color-scheme:dark){.runw.bad{background:linear-gradient(180deg,#3a1e23,var(--card) 120px)}.runw.good{background:linear-gradient(180deg,#16301f,var(--card) 120px)}.rw.neg{background:#3a1e23}.rw.now .rwdot{background:#4a4a4e}}
 </style>
 </head>
 <body>
@@ -737,7 +753,7 @@ const avatar=(p,cls='av')=>`<span class="${cls}" style="background:${pcol(p.id)}
 const first=n=>String(n||'').split(/\s+/)[0];
 const nick=p=>{const f=first(p.name),w=String(p.name||'').split(/\s+/);return people().some(o=>o.id!==p.id&&first(o.name)===f)&&w[1]?f+' '+w[1][0]:f};
 /* A2 20 Nov: the bank figure is the last bank-feed sync; when the note gives a newer estimate, show that (with a small 'est.' chip) so Eli isn't misled */
-function realCash(m){if(!m)return null;const t=String(m.note||'')+' '+(m.cash_note||'');const v=t.match(/(?:real cash is|cash should be|cash is) (?:about |around |roughly )?£(\d{1,3}(?:,\d{3})*(?:\.\d+)?)/i);const sy=t.match(/(?:not synced since|last synced?|feed[^.]*?since) (\d{1,2} [A-Z][a-z]{2})/);return {v:v?+v[1].replace(/,/g,''):null,sync:sy?sy[1]:null}}
+function realCash(m){if(!m)return null;const t=String(m.note||'')+' '+(m.cash_note||'');const v=t.match(/(?:real cash is|cash should be|cash is|real balance is|balance is) (?:about |around |roughly )?£(\d{1,3}(?:,\d{3})*(?:\.\d+)?)/i);const sy=t.match(/(?:not synced since|last synced?|feed[^.]*?since) (\d{1,2} [A-Z][a-z]{2})/);return {v:v?+v[1].replace(/,/g,''):null,sync:sy?sy[1]:null}}
 let DONE={};try{DONE=JSON.parse(localStorage.getItem('sesaDone')||'{}')}catch(e){}
 function saveDone(){try{localStorage.setItem('sesaDone',JSON.stringify(DONE))}catch(e){}}
 /* Deleted tasks (22 Nov): hidden on this device, by task id, so a refresh does not bring them back */
@@ -1113,6 +1129,25 @@ function rentClock(e){const p=clockProp(e);
  const pts=[r.last?`<div class="rp1 pa"><i></i><b>Last rent</b><span>${esc(dShort(r.last))}</span></div>`:`<div class="rp1 no"><i></i><b>Last rent</b><span>None yet</span></div>`,`<div class="rp1 td"><i></i><b>Today</b><span>${esc(dShort(t0))}</span></div>`,nx?`<div class="rp1 fu"><i></i><b>Next</b><span>${esc(dShort(nx))}</span></div>`:''].join('');
  return `<div class="rc k-${st.c}"><div class="rch"${p?` data-tab="${esc(p.id)}" role="button" aria-label="Open ${esc(short(p.name))}"`:''}>${dial}<div class="rci"><div class="rcn">${esc(e.property)}</div><span class="rcs ${st.c}">${st.l}</span><div class="rcsub">${days===null?st.s:`<b style="color:var(--ink)">${gbp(r.sum)}</b> in since Sep`}</div>${inN!==null?`<span class="nx">${ic('cal',14,2.4)} ${inN===1?'Next rent tomorrow':`Next in about ${inN} days`}</span>`:''}</div></div>
  <div class="rtr${nx?' three':''}">${pts}</div><details class="rcd2"><summary><span class="cl">${esc(e.note)}</span></summary></details></div>`}
+/* A2 24 Nov: 'Next 3 weeks' money runway - real cash today, then each dated bill and rent we know about, with the balance after each step (read from the notes, nothing stored) */
+function runEvents(d){const m=d.money||{},MO='JanFebMarAprMayJunJulAugSepOctNovDec',now=new Date(),t0=new Date(now.getFullYear(),now.getMonth(),now.getDate()),ev=[],seen={};
+  const src=[].concat((d.watch||[]).map(t=>({t})),[{t:m.note||''}],(m.expected||[]).map(e=>({t:e.note||'',p:e.property})));
+  const dt=c=>{const r=c.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\b/);if(!r)return null;let x=new Date(t0.getFullYear(),MO.indexOf(r[2])/3,+r[1]);if(x<new Date(t0-60*864e5))x.setFullYear(x.getFullYear()+1);const n=Math.round((x-t0)/864e5);return n>=0&&n<=21?{x,n}:null};
+  src.forEach(s=>String(s.t).split(/(?<=[.!?])\s+|\s+-\s+|;\s*/).forEach(c=>{const D=dt(c);if(!D)return;const am=c.match(/£(\d{1,3}(?:,\d{3})*(?:\.\d+)?)/),a=am?+am[1].replace(/,/g,''):null;
+    const isIn=/standing order|\brent\b|payout|pay out/i.test(c)&&!/interest|direct debit/i.test(c)&&!/\bno\b|n't\b|\bnot\b|\bstill\b|checked/i.test(c),isOut=!isIn&&a&&/direct debit|goes out|\btakes\b|\bdue\b|\bbill/i.test(c);if(!isIn&&!isOut)return;
+    let who=(isIn?(c.match(/\b([A-Z][a-z]+)(?:'s|\s+\()/)||[])[1]||String(s.p||'').split(' ')[0]:(c.slice(0,am.index).replace(/\b(takes|by|the|his|her|bridging)\b/gi,' ').trim().split(/\s+/).slice(0,2).join(' ')))||'Payment';
+    const k=(isIn?'i':'o')+D.n+'|'+(a||who);if(seen[k])return;seen[k]=1;ev.push({n:D.n,x:D.x,a,dir:isIn?1:-1,who,c:c.trim().replace(/\.$/,'')})}));
+  return ev.sort((a,b)=>a.n-b.n||b.dir-a.dir)}
+function runway(d){const m=d.money;if(!m)return '';const ev=runEvents(d);if(!ev.length)return '';const rc=realCash(m),start=rc&&rc.v!=null?rc.v:+m.bank_balance||0;
+  let bal=start,low=null,lowE=null;const rows=ev.map(e=>{if(e.a!=null)bal+=e.dir*e.a;const b=bal;if(e.a!=null&&e.dir<0&&(low==null||b<low)){low=b;lowE=e}
+    const day=e.n===0?'Today':e.n===1?'Tomorrow':e.x.toLocaleDateString('en-GB',{weekday:'short'});
+    return `<div class="rw ${e.dir>0?'in':'out'}${b<0&&e.a!=null?' neg':''}" title="${esc(e.c)}"><div class="rwd"><span>${day}</span><b>${e.x.getDate()}</b><span>${e.x.toLocaleDateString('en-GB',{month:'short'})}</span></div><i class="rwdot">${e.dir>0?'↓':'↑'}</i><div class="rwt"><b>${esc(e.who)}</b><span>${esc(e.dir>0?'Rent expected':'Goes out')}${e.n>1?' · in '+e.n+' days':''}</span></div><div class="rwv"><b>${e.a!=null?(e.dir>0?'+':'-')+gbp(e.a):'+?'}</b>${e.a!=null?`<em>${b<0?'-':''}${gbp(Math.abs(b))} left</em>`:'<em>not known yet</em>'}</div></div>`}).join('');
+  const short=low!=null&&low<0,hasIn=ev.some(e=>e.dir>0&&e.a==null&&lowE&&e.n<=lowE.n);
+  const say=short?`<b>${gbp(-low)} short</b> on ${lowE.x.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})}${hasIn?' - unless the rent lands first':''}. Top up Wise before then.`:`You're covered for the next 3 weeks${low!=null?` - lowest point about ${gbp(low)}`:''}.`;
+  return `<div class="runw ${short?'bad':'good'}"><div class="rwh"><span class="rwi">${short?'⚠️':'✅'}</span><div><div class="rwk">Next 3 weeks</div><div class="rws">${say}</div></div></div>
+  <div class="rwlist"><div class="rw now"><div class="rwd"><span>Now</span><b>${t0d()}</b><span>${new Date().toLocaleDateString('en-GB',{month:'short'})}</span></div><i class="rwdot">£</i><div class="rwt"><b>In the bank</b><span>${rc&&rc.v!=null?'Roughly, after recent spending':'Last bank sync'}</span></div><div class="rwv"><b>${gbp(start)}</b></div></div>${rows}</div>
+  <div class="rwf">From the notes in your emails. Bills without a date aren't shown.</div></div>`}
+function t0d(){return new Date().getDate()}
 function money(m){let h='';const max=Math.max(...m.months.map(x=>Math.max(x.rent||0,x.costs||0)),1);
  h+=`<div class="mhero"><div class="l">Rent received since Sep</div><div class="big" data-count="${Number(m.rent_total)||0}">${gbp(m.rent_total)}</div>
  ${(()=>{/* A2 22 Nov: one-glance 'is rent paying for it yet?' meter */const r=+m.rent_total||0,c=+m.costs_total||0;if(!c)return '';const pc=Math.min(100,Math.round(r/c*100)),gap=c-r;
@@ -1120,6 +1155,7 @@ function money(m){let h='';const max=Math.max(...m.months.map(x=>Math.max(x.rent
  ${m.months.length?`<div class="bars">${m.months.map(x=>`<div class="bar"><b>${gbp(x.rent)}</b><div class="bpair"><i class="r" data-h="${Math.round((x.rent||0)/max*100)}"></i><i class="c" data-h="${Math.round((x.costs||0)/max*100)}"></i></div><span>${esc(x.m)}${x.partial?' so far':''}</span>${(()=>{const n=(+x.rent||0)-(+x.costs||0);return `<em class="net ${n<0?'neg':'pos'}" title="Rent ${gbp(x.rent)} - costs ${gbp(x.costs)}">${n<0?'-':'+'}${gbp(Math.abs(n))}</em>`})()}</div>`).join('')}</div><div class="netkey">Pill = what was left after costs that month</div>
  <div class="legend"><span><i style="background:#fff"></i>Rent in</span><span><i style="background:rgba(255,255,255,.3)"></i>Costs out</span></div>`:''}</div>
  <div class="tiles">${(()=>{const rc=realCash(m);return rc&&rc.v!=null?`<div class="tile tb"><div class="ic">${ic('bank',18)}</div><b>~${gbp(rc.v)}</b><span>Real cash, roughly</span><em class="stale">Feed: ${gbp(m.bank_balance)}${rc.sync?' on '+esc(rc.sync):''}</em></div>`:`<div class="tile tb"><div class="ic">${ic('bank',18)}</div><b>${gbp(m.bank_balance,2)}</b><span>In the bank (last sync)</span></div>`})()}<div class="tile tp"><div class="ic">${ic('out',18)}</div><b>${gbp(m.costs_total)}</b><span>Costs since Sep</span></div></div>`;
+ h+=runway(DATA);
  {const r=+m.rent_total||0,c=+m.costs_total||0,t=(r+c)||1,net=r-c;
  h+=`<div class="card io"><div class="ttl">Money in vs money out since Sep</div><div class="sbar"><i class="r" data-w="${Math.round(r/t*100)}" style="width:0"></i><i class="c" data-w="${Math.round(c/t*100)}" style="width:0"></i></div>
  <div class="lg"><span><b>${gbp(r)}</b> in</span><span><b>${gbp(c)}</b> out</span></div><div class="say">${net>=0?`You are <b style="color:var(--grn)">${gbp(net)} up</b> - rent covers the costs.`:`Costs are <b style="color:var(--red)">${gbp(-net)} more</b> than rent so far - mostly set-up and repairs, so this should turn round once all rents come in.`}</div></div>`;}

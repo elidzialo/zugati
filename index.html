@@ -481,7 +481,29 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
 .bfc .bfi b{color:var(--teal)}.bfc .bfi div{color:var(--muted);font-size:12.5px;margin-top:2px}
 .bfc .bff{grid-column:1/-1;font-size:12px;color:var(--muted);padding-top:8px;border-top:1px solid var(--line)}
 @media(max-width:700px){.bfc .bfg{grid-template-columns:1fr}.bfc .bfr:nth-child(2){border-top:1px solid var(--line)}.bfc .bfs{font-size:15px;min-width:0}.bfc .bfh{flex-wrap:nowrap;align-items:flex-start}.bfc .bfd b{font-size:22px}}
+.cashk .v{font-size:34px}.cashk.neg .v{color:var(--red)}
+.cksync{display:inline-block;margin:2px 0 8px;font-size:12.5px;font-weight:700;border-radius:999px;padding:4px 10px}
+.cksync.ok{background:#e6f4ef;color:#067d62}.cksync.old{background:#fff1dc;color:#b25e00;border:1px solid #ffcf8a;animation:ckp 2.4s ease-in-out infinite}
+@keyframes ckp{50%{box-shadow:0 0 0 4px rgba(255,153,0,.18)}}
+.pots{display:grid;gap:5px;margin:2px 0 8px}
+.pot{display:grid;grid-template-columns:10px 70px 1fr auto;gap:8px;align-items:center;font-size:13px}
+.pot .pnm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-weight:600}
+.pot .pbar{height:8px;background:#eaeded;border-radius:4px;overflow:hidden}.pot .pbar i{display:block;height:100%;background:var(--teal);border-radius:4px;transition:width .6s}
+.pot b{font-size:13.5px;min-width:44px;text-align:right}
+.pdot{width:9px;height:9px;border-radius:50%}.pdot.ok{background:#1d8f5f}.pdot.old{background:var(--orange)}
+.cknote{margin:0 0 8px;background:#fff8ec;border-left:3px solid var(--orange);border-radius:6px;padding:7px 10px;font-size:13px;line-height:1.4}
+.cknote summary{cursor:pointer;font-weight:600;color:#0f1111;list-style:none}.cknote summary::-webkit-details-marker{display:none}
+.cknote summary:after{content:' more ▾';color:var(--teal);font-weight:700}.cknote[open] summary:after{content:' less ▴'}.cknote p{margin:6px 0 0;color:var(--muted)}
+.pnx{font-size:17px!important;line-height:1.3;margin:6px 0!important;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .leaks{margin-top:14px;background:var(--card);border-radius:10px;padding:12px 16px;border-left:6px solid var(--teal)}
+.leaks .lkbtns,.leaks .lkans{grid-column:2/-1}.leaks .lkbtns{display:flex;gap:8px;margin-top:-2px}
+.leaks .lkbtns button{flex:1 1 0;min-width:0;white-space:nowrap;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 8px;font:700 12.5px inherit;font-family:inherit;color:#0f1111;cursor:pointer;transition:transform .12s,background .15s}
+.leaks .lkbtns button:first-child:hover,.leaks .lkbtns button:first-child:active{background:#e6f4ef;border-color:#9fd3bd}
+.leaks .lkbtns button:last-child:hover,.leaks .lkbtns button:last-child:active{background:#fde8ec;border-color:#f5b5c2}
+.leaks .lkbtns button:active{transform:scale(.96)}
+.leaks .lkans{margin-top:-4px;font-size:12.5px;color:var(--muted);animation:lkin .3s ease}.leaks .lkans b{color:#0f1111}
+.leaks .lkundo{border:0;background:none;color:var(--teal);font:600 12px inherit;font-family:inherit;text-decoration:underline;cursor:pointer;padding:0 4px}
+@keyframes lkin{from{opacity:0;transform:translateY(3px)}}
 .leaks .lkh{font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700}
 .leaks .lks{font-size:15.5px;font-weight:700;margin:3px 0 8px;line-height:1.35}
 .leaks .lkr{display:grid;grid-template-columns:52px 1fr auto;gap:10px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
@@ -1548,7 +1570,15 @@ function renderLeaks(){const el=$('leaks');if(!el)return;const L=((DATA.cfo||{})
   const tin=L.reduce((s,x)=>s+(+x.in||0),0),tout=L.reduce((s,x)=>s+(+x.out||0),0),mx=Math.max(...L.map(x=>Math.max(+x.in||0,+x.out||0)),1),net=tin-tout;
   const say=net<0?'More went out than came in this week - '+money(-net,'GBP')+' more out.':net>0?'More came in than went out this week - '+money(net,'GBP')+' ahead.':'What came in this week all went straight back out.';
   el.innerHTML='<div class="leaks"><div class="lkh">💸 Where the money went this week</div><div class="lks">'+say+'</div>'+L.map(x=>{const d=new Date(x.date+'T00:00:00'),i=+x.in||0,o=+x.out||0;
-    return '<div class="lkr"><div class="lkd">'+d.toLocaleDateString('en-GB',{weekday:'short'})+'<b>'+d.getDate()+'</b></div><div class="lkn">'+esc(x.note||'')+'<div class="lkb">'+(i?'<i style="width:'+(i/mx*100*.5).toFixed(1)+'%;background:var(--green)"></i>':'')+(o?'<i style="width:'+(o/mx*100*.5).toFixed(1)+'%;background:var(--red)"></i>':'')+'</div></div><div class="lkv">'+(i?'<div class="lin">+'+money(i,'GBP')+'</div>':'')+(o?'<div class="lout">-'+money(o,'GBP')+'</div>':'')+'</div></div>'}).join('')+'</div>'}
+    return '<div class="lkr"><div class="lkd">'+d.toLocaleDateString('en-GB',{weekday:'short'})+'<b>'+d.getDate()+'</b></div><div class="lkn">'+esc(x.note||'')+'<div class="lkb">'+(i?'<i style="width:'+(i/mx*100*.5).toFixed(1)+'%;background:var(--green)"></i>':'')+(o?'<i style="width:'+(o/mx*100*.5).toFixed(1)+'%;background:var(--red)"></i>':'')+'</div></div><div class="lkv">'+(i?'<div class="lin">+'+money(i,'GBP')+'</div>':'')+(o?'<div class="lout">-'+money(o,'GBP')+'</div>':'')+'</div>'+(o?leakBtns(x):'')+'</div>'}).join('')+'</div>';
+  el.querySelectorAll('[data-lk]').forEach(b=>b.onclick=()=>{const k=b.dataset.lk,v=b.dataset.v,x=L.find(r=>leakKey(r)===k);if(!x)return;const M=leakGet();M[k]=v;try{localStorage.setItem('zleak',JSON.stringify(M))}catch(e){}
+    window.open(gmailUrl('Zugati portal feedback - leak','Money out on '+x.date+': -£'+(+x.out||0).toLocaleString('en-GB')+(x.in?' (in +£'+(+x.in).toLocaleString('en-GB')+')':'')+'\nWhat it says: '+(x.note||'')+'\nMy answer: '+v+'\n\n(Sent from the Zugati portal - the Team Leader agent reads these every morning.)'),'_blank','noopener');renderLeaks()})}
+/* A2 24 Nov: leak rows - Eli taps 'Zugati cost' / 'Not Zugati'; opens a ready Gmail (Eli presses Send) and remembers the answer on this phone */
+function leakKey(x){return x.date+'|'+(+x.out||0)}
+function leakGet(){try{return JSON.parse(localStorage.getItem('zleak')||'{}')||{}}catch(e){return {}}}
+function leakBtns(x){const k=leakKey(x),a=leakGet()[k];
+  if(a)return '<div class="lkans">'+(a==='Zugati cost'?'✅':'🚫')+' You said: <b>'+esc(a)+'</b> <button class="lkundo" data-lk="'+esc(k)+'" data-v="'+(a==='Zugati cost'?'Not Zugati':'Zugati cost')+'">change</button></div>';
+  return '<div class="lkbtns"><button data-lk="'+esc(k)+'" data-v="Zugati cost">✅ Zugati cost</button><button data-lk="'+esc(k)+'" data-v="Not Zugati">🚫 Not Zugati</button></div>'}
 function renderOther(){const el=$('othercash');if(!el)return;const O=(DATA.cfo||{}).other_cash||[];if(!O.length){el.innerHTML='';return}
   el.innerHTML=O.map(a=>{const nm=String(a.name).split('(')[0].trim(),nt=(String(a.name).match(/\((.*)\)/)||[])[1]||'';const at=a.at?new Date(a.at):null;
     return '<div class="ocash'+(a.gbp<50?' low':'')+'"><div class="oci">🏢</div><div class="oct"><div class="ocl">Your other company - not in the cash above</div><div class="ocn">'+esc(nm)+'</div><div class="ocd">'+(nt?esc(nt.charAt(0).toUpperCase()+nt.slice(1))+' · ':'')+(at&&!isNaN(at)?'checked '+fmtD(at):'')+'</div></div><div class="ocv">'+money(a.gbp,'GBP',a.gbp<100?2:0)+'</div></div>'}).join('')}
@@ -1607,16 +1637,32 @@ function cashWeeksOld(){
     bal+=inn-out;W.push({w,d:addD(t0,w*7),b:bal,in:inn,out})}
   return {W,start,low:Math.min(...W.map(x=>x.b))};
 }
+/* A2 24 Nov: honest cash card - each bank pot with a freshness dot, 'Bank last synced X ago' (orange when >24h) and the team's note under the number */
+function syncAge(c){let t=(c.cash||[]).map(a=>a.at&&new Date(a.at)).filter(d=>d&&!isNaN(d)).sort((a,b)=>a-b)[0]||null;
+  const m=String(c.note||'').match(/last synced\s+(?:\w{3}\s+)?(\d{1,2})\s+([A-Z][a-z]{2})(?:\s+(\d{1,2}):(\d{2}))?/);
+  if(m){const MO='JanFebMarAprMayJunJulAugSepOctNovDec'.indexOf(m[2])/3;if(MO>=0&&MO%1===0){const n=new Date();let d=new Date(n.getFullYear(),MO,+m[1],+(m[3]||0),+(m[4]||0));if(d>n)d.setFullYear(d.getFullYear()-1);if(!t||d<t)t=d}}
+  return t}
+function agoTxt(d){const h=(Date.now()-d)/36e5;if(h<1)return 'just now';if(h<24)return Math.round(h)+' hour'+(Math.round(h)===1?'':'s')+' ago';const n=Math.round(h/24);return n+' day'+(n===1?'':'s')+' ago'}
+function cashCard(start){const c=DATA.cfo,P=(c.cash||[]).slice().sort((a,b)=>b.gbp-a.gbp),mx=Math.max(...P.map(a=>a.gbp),1),t=syncAge(c),old=t&&(Date.now()-t)>864e5;const stale=((String(c.note||'').match(/(\w+) last synced/)||[])[1]||'').toLowerCase();
+  let own=null;try{const o=JSON.parse(localStorage.getItem('zcash')||'null');if(o&&o.at>(c.as_of||''))own=o}catch(e){}
+  const pots=P.map(a=>{const at=a.at?new Date(a.at):null,nm=String(a.name).replace(/\s*\(.*\)/,'').replace(/\s+GBP\b/,'').replace(/\s+Main\b/,'').replace(/\s+EURO?\b/i,' €'),fr=at&&!isNaN(at)&&(Date.now()-at)<864e5&&!(old&&stale&&nm.split(' ')[0].toLowerCase()===stale);
+    return '<div class="pot"><span class="pdot '+(fr?'ok':'old')+'" title="'+(at?'checked '+esc(agoTxt(at)):'')+'"></span><span class="pnm">'+esc(nm)+'</span><span class="pbar"><i style="width:'+(a.gbp>0?Math.max(4,a.gbp/mx*100):0).toFixed(0)+'%"></i></span><b>'+money(a.gbp,'GBP')+'</b></div>'}).join('');
+  const n1=String(c.note||'').split(/(?<=[.!?])\s+/);
+  return '<div class="card kpi cashk'+(start<=0?' neg':'')+'"><div class="l">🏦 Cash in the bank now</div><div class="v">'+money(start,'GBP')+'</div>'+
+    (own?'<div class="cksync ok">✓ Your own figure, saved '+esc(agoTxt(new Date(own.at)))+'</div>':t?'<div class="cksync '+(old?'old':'ok')+'">'+(old?'⚠ ':'● ')+'Bank last synced '+esc(agoTxt(t))+(old?' - real figure may differ':'')+'</div>':'')+
+    (P.length?'<div class="pots">'+pots+'</div>':'')+
+    (c.note?'<details class="cknote"><summary>💬 '+esc(n1.find(x=>/likely|nearer|about|~/.test(x))||n1[0])+'</summary><p>'+esc(c.note)+'</p></details>':'')+
+    '<div class="d">Real bank balance · <a href="#cfo" id="updcash">Update</a></div></div>'}
 function renderCfo(){
   const c=DATA.cfo;if(!c){$('cfo').classList.add('hidden');return}
   const {W,start,low}=cashWeeks(),safe=safeSpend();
   const unknown=(DATA.payments||[]).filter(p=>p.amount==null&&!['paid','forecast'].includes(p.status)).length;
   const comingIn=W.slice(1,9).reduce((s,x)=>s+x.in,0);
   $('cfokpis').innerHTML=[
-   '<div class="card kpi"><div class="l">Cash in the bank now</div><div class="v" style="color:'+(start<=0?'var(--red)':'inherit')+'">'+money(start,'GBP')+'</div><div class="d">Real bank balance · <a href="#cfo" id="updcash">Update</a></div></div>',
+   cashCard(start),
    '<div class="card kpi"><div class="l">Coming in from Amazon · 8 weeks</div><div class="v" style="color:var(--green)">'+money(comingIn,'GBP')+'</div><div class="d">Christmas payouts land in December</div></div>',
    '<div class="card kpi"><div class="l">Left each month after costs</div><div class="v" style="color:var(--amber)">~'+money(c.amazon_profit_month-c.overheads_month,'GBP')+'</div><div class="d">Off-season: '+money(c.amazon_profit_month,'GBP')+' profit minus '+money(c.overheads_month,'GBP')+' costs</div></div>',
-   (()=>{const nx=W.slice(1,3).find(x=>x.pay);return '<div class="card kpi" style="border:2px solid var(--orange)"><div class="l">Pay next</div><div class="v" style="font-size:20px;line-height:1.25;margin:6px 0">'+(nx?esc(nx.pay):'Nothing - let cash build')+'</div><div class="d">'+(nx?'Week of '+fmtD(nx.d)+' · only once that week\'s Amazon money has landed':'Keep at least '+money(c.floor,'GBP')+' in the bank')+'</div></div>'})()
+   (()=>{const nx=W.slice(1,3).find(x=>x.pay);return '<div class="card kpi" style="border:2px solid var(--orange)"><div class="l">Pay next</div><div class="v pnx" title="'+(nx?esc(nx.pay):'')+'">'+(nx?esc(nx.pay):'Nothing - let cash build')+'</div><div class="d">'+(nx?'Week of '+fmtD(nx.d)+' · only once that week\'s Amazon money has landed':'Keep at least '+money(c.floor,'GBP')+' in the bank')+'</div></div>'})()
   ].join('');
   const uc=$('updcash');if(uc)uc.onclick=e=>{e.preventDefault();const v=prompt('How much is in the bank right now? (£)');if(v===null)return;const n=parseFloat(String(v).replace(/[£,\s]/g,''));if(isNaN(n))return;try{localStorage.setItem('zcash',JSON.stringify({v:n,at:new Date().toISOString()}))}catch(x){}renderCfo();fbSheet({head:'✓ Saved on this phone',sub:'Cash in the bank: £'+n,ask:'Tell the team so the agents use it?',chips:['🏦 NatWest + Wise together','🕐 Just checked'],subject:'Zugati portal feedback - bank balance',body:w=>'Cash in the bank today: £'+n+(w?'\nNote: '+w:'')+'\n(Sent from the Zugati portal)'})};
   renderCashFlow();try{renderDip()}catch(e){console.error(e)}try{renderOther()}catch(e){console.error(e)}try{renderLeaks()}catch(e){console.error(e)}
@@ -1628,7 +1674,7 @@ function renderCfo(){
   $('debts').innerHTML=(c.debts_detail||c.debts).map(([n,v])=>'<div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-size:14px"><span>'+esc(n)+'</span><b>'+money(v,'GBP')+'</b></div><div style="height:12px;border-radius:4px;background:#e66a7f;margin-top:3px;width:'+(v/dm*100)+'%"></div></div>').join('')+'<div class="note">'+(c.debts_detail?'Total on cards: '+money(c.debts.reduce((a,x)=>a+x[1],0),'GBP')+'. Amex last synced in September.':'Book figures - may be out of date.')+'</div>';
   const cm=Math.max(...c.overheads_top.map(x=>x[1]));
   $('costs').innerHTML=c.overheads_top.slice().sort((a,b)=>b[1]-a[1]).map(([n,v])=>'<div style="margin:6px 0"><div style="display:flex;justify-content:space-between;font-size:14px"><span>'+esc(n)+'</span><b>'+money(v,'GBP')+'/m</b></div><div style="height:10px;border-radius:4px;background:#ffb84d;margin-top:3px;width:'+(v/cm*100)+'%"></div></div>').join('');
-  $('cfonote').textContent=c.note;renderFlow();renderWk();
+  $('cfonote').textContent='';renderFlow();renderWk();
   $('cfomore').onclick=()=>{const d=$('cfodetail'),h=d.classList.toggle('hidden');$('cfomore').textContent=h?'Show more detail - cards & running costs ▾':'Hide detail ▴'};
 }
 
