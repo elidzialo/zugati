@@ -80,6 +80,7 @@ h2{font-size:21px;margin:30px 0 4px;font-weight:700}
 .rib{position:absolute;top:10px;left:0;padding:5px 12px 5px 10px;font-size:12px;font-weight:800;color:#fff;border-radius:0 14px 14px 0;text-transform:uppercase;letter-spacing:.4px}
 .mk{position:absolute;top:10px;right:10px;background:var(--nav);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px}
 .vtag{position:absolute;bottom:8px;right:10px;font-size:11px;font-weight:700;color:#b0123b;background:#fde8ec;padding:2px 8px;border-radius:10px}
+#totop{position:fixed;left:14px;bottom:calc(78px + env(safe-area-inset-bottom));width:44px;height:44px;border-radius:50%;border:0;background:#232f3e;color:#fff;font-size:22px;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:60;opacity:0;transform:translateY(20px) scale(.8);pointer-events:none;transition:opacity .25s,transform .25s;cursor:pointer;z-index:39}#totop.on{opacity:1;transform:none;pointer-events:auto}body:has(.ov:not(.hidden)) #totop,body:has(.sov) #totop,body:has(.bdr:not(.hidden)) #totop{display:none}#totop:active{transform:scale(.92)}
 .s-now{background:var(--red)}.s-soon{background:var(--amber)}.s-ok{background:var(--green)}.s-stop{background:var(--grey)}.s-slow{background:#8a8f8f}.s-clear{background:#6b4fa3}
 .pb{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;flex:1}
 .pn{font-weight:700;font-size:16px;line-height:1.25}
@@ -797,6 +798,7 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
 </div>
 
 <button class="fab" id="fab">✦ Ask Claude</button><div class="bbar hidden" id="bbar"></div><div class="bdr hidden" id="bdr"></div>
+<button id="totop" aria-label="Back to top" title="Back to top">↑</button>
 <div class="ov hidden" id="ov"><div class="md" id="md"></div></div>
 
 <script>
@@ -823,6 +825,10 @@ function inbPill(p){const w=waitTxt(p),inb=p.inbound||0,o=p.on_order||0;let h=''
   if(w&&o)h+='<span class="inb">+'+n0(o)+' ordered</span>';else if(!inb&&o)h+='<span class="inb">+'+n0(o)+' ordered</span>';return h}
 function lastsTxt(left,p){if(p&&!(p.stock>0)&&!(p.inbound>0))return 'Out of stock now';if(left!=null&&left<=1)return 'Runs out now';if(left==null)return 'No recent sales';if(left>365)return 'Lasts over a year';if(left>120)return 'Lasts ~'+Math.round(left/30)+' months';return 'Lasts ~'+left+' days'}
 
+/* A1 24 Nov: floating 'back to top' button - the phone page is long */
+(function(){const b=document.getElementById('totop');if(!b)return;let on=false;
+  addEventListener('scroll',()=>{const v=scrollY>1400&&!document.querySelector('.ov:not(.hidden)');if(v!==on){on=v;b.classList.toggle('on',v)}},{passive:true});
+  b.addEventListener('click',()=>scrollTo({top:0,behavior:'smooth'}))})();
 const DAY=864e5;
 const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
 const addD=(d,n)=>new Date(d.getTime()+n*DAY);
@@ -885,6 +891,8 @@ function forecast(p){
   const nx=run===null?null:AL.find(a=>a.i>run)||null,gap=run!==null&&nx?nx.i-run:null;
   return {clr,AL,nx,gap,line,run,needVal:Math.round(needVal),need60:Math.round(need60),need90:Math.round(need90),qty,reorderIn,st,left,have,vS,vE,xS};
 }
+/* A1 24 Nov: a 'Healthy' product that still runs dry before new stock lands gets an amber 'Short gap' badge, so the badge never fights the red 'Runs out' banner */
+const stBadge=f=>(f.st==='ok'&&f.nx&&f.gap>2)?['Short gap','s-soon']:ST[f.st];
 const ST={now:['Order now','s-now'],soon:['Order soon','s-soon'],ok:['Healthy','s-ok'],stop:["Don't reorder",'s-stop'],slow:['Slow seller','s-slow'],clear:['Clearing out','s-clear']};
 function orderLine(p,f){
   if(f.st==='stop')return 'Losing money - sell down, don\'t reorder';
@@ -985,7 +993,7 @@ function renderGrid(){
   const act=x=>x.f.st!=='now'?0:x.f.qty>0&&!x.f.nx?0:x.f.qty>0?1:2;const srt={urgent:(a,b)=>ord[a.f.st]-ord[b.f.st]||act(a)-act(b)||(a.f.left??1e9)-(b.f.left??1e9)||(b.p.profit30||0)-(a.p.profit30||0),profit:(a,b)=>(b.p.profit30||0)-(a.p.profit30||0),sold:(a,b)=>(b.p.per_day||0)-(a.p.per_day||0),az:(a,b)=>String(a.p.name).localeCompare(String(b.p.name))}[PSORT]||((a,b)=>0);
   const L=list().filter(x=>FILTER==='all'||(FILTER==='val'?x.p.valentine:FILTER==='stop'?['stop','clear'].includes(x.f.st):x.f.st===FILTER)).filter(x=>pMatch(x.p,PQ)).sort(srt);
   $('grid').innerHTML=L.map(({p,f})=>{
-    const [lab,cls]=ST[f.st];const left=f.left;const pct=left==null?0:Math.min(100,left/120*100);
+    const [lab,cls]=stBadge(f);const left=f.left;const pct=left==null?0:Math.min(100,left/120*100);
     const RI=runInfo(p,f),top=RI.c==='bad'&&f.run!=null;const col=f.st==='now'||RI.c==='bad'?'var(--red)':f.st==='soon'||RI.c==='mid'?'var(--amber)':'var(--green)';
     return '<div class="pc" data-id="'+esc(p.id)+'"><div class="pimg"><img loading="lazy" src="'+img(p.img,400)+'" alt=""><span class="rib '+cls+'">'+lab+'</span><span class="mk">'+esc(p.market)+'</span>'+(p.valentine?'<span class="vtag">♥ Valentine\'s</span>':'')+'</div>'+
     '<div class="pb">'+(top?'<div class="robig"><span class="rbi">📅</span><div><b>'+esc(RI.t)+'</b><small>'+(f.run<=1?'today':'in '+f.run+' day'+(f.run===1?'':'s'))+(RI.s?' · '+esc(RI.s.replace(/^⚠\s*/,'')):'')+'</small></div></div>':'')+'<div class="pn">'+esc(p.name)+'</div>'+leakB(p)+
@@ -1024,7 +1032,7 @@ function barsSvg(items,cur){
   return '<svg viewBox="0 0 '+W+' '+H+'" width="100%">'+g+'</svg>';
 }
 function openP(id){
-  const p=DATA.products.find(x=>x.id===id);if(!p)return;const f=forecast(p);const [lab,cls]=ST[f.st];
+  const p=DATA.products.find(x=>x.id===id);if(!p)return;const f=forecast(p);const [lab,cls]=stBadge(f);
   let rec;
   if(f.st==='clear')rec='<b>Clearing out - don\'t reorder.</b><br>'+esc(f.clr.deal||'')+' '+esc(f.clr.keep||'')+(p.stock>0?'':' Amazon may still be moving the last few into stock, so 0 here can be temporary.');
   else if(f.st==='stop')rec='<b>Don\'t reorder this one.</b><br>'+esc(p.note||'It is losing money on each sale right now.');
@@ -1032,6 +1040,7 @@ function openP(id){
   else if(f.st==='now'&&!f.qty&&p.on_order)rec='<b>'+n0(p.on_order)+' already ordered - make sure it ships now.</b><br>'+(f.run!=null?'At the current pace you could run out around '+fmtD(addD(today(),f.run))+', before it lands. ':'')+esc(p.note||'');
   else if(f.st==='now')rec='<b>Order '+n0(f.qty)+' units now.</b><br>'+(!(p.stock||0)&&!(p.inbound||0)?'You have none in stock right now. ':f.run!=null?'At the current pace you run out around '+fmtD(addD(today(),f.run))+', and new stock takes about '+(DATA.lead_days||45)+' days to arrive. ':'')+esc(p.note||'');
   else if(f.st==='soon')rec='<b>Order '+n0(f.qty)+' units by '+fmtD(addD(today(),f.reorderIn))+'.</b><br>'+esc(p.note||'');
+  else if(f.st==='ok'&&f.nx&&f.gap>2)rec='<b>Short gap coming - no new order needed.</b><br>You run out around '+fmtD(addD(today(),f.run))+' and the new stock lands around '+fmtD(addD(today(),f.nx.i))+', so about '+f.gap+' days with none. Ask for the delivery to be booked in as early as possible. '+esc(p.note||'');
   else rec='<b>You\'re fine for now.</b><br>'+(f.reorderIn!=null?'Next order due around '+fmtD(addD(today(),f.reorderIn))+'. ':'Stock covers the next 5 months. ')+esc(p.note||'');
   const bars=[{l:'Last Christmas',s:'Dec',v:p.xmas_units,c:'#1d8f5f'},{l:'Last Valentine\'s',s:'15 Jan-14 Feb',v:p.val_units,c:'#e8436a'},{l:'Last 30 days',s:'now',v:p.units30!=null?p.units30:Math.round((p.per_day||0)*30),c:'#ff9900'},{l:'Next 60 days',s:'forecast',v:f.need60,c:'#146eb4'}];
   $('md').innerHTML='<button class="mx" aria-label="Close">×</button>'+
@@ -1039,7 +1048,7 @@ function openP(id){
    '<h3>'+esc(p.name)+'</h3><div class="note">ASIN '+esc(p.asin)+' · SKU '+esc(p.sku)+(supOf(p)!==NOSUP?' · Supplier: '+esc(supOf(p)):'')+'</div>'+(supOf(p)===NOSUP?'<button class="asksup" data-asksup="'+esc(p.id)+'">❓ Ask Eli who supplies this <span>Tap to answer</span></button>':'')+
    '<div class="bubbles"><div class="bub"><div class="x">'+n0(p.stock)+'</div><div class="k">In stock</div></div><div class="bub"><div class="x">'+n0((p.inbound||0)+(p.on_order||0))+'</div><div class="k">On the way</div></div><div class="bub"><div class="x">'+(p.per_day?(p.per_day<1?p.per_day.toFixed(1):Math.round(p.per_day)):'0')+'</div><div class="k">Sold / day</div></div><div class="bub"><div class="x" style="color:'+((p.profit30||0)<0?'var(--red)':'var(--green)')+'">'+(p.profit30==null?'-':money(p.profit30,p.cur))+'</div><div class="k">Profit 30d</div></div></div>'+
    '<div class="btns" style="margin-top:12px"><a class="btn ghost" target="_blank" rel="noopener" href="https://www.amazon.'+(p.account==='USA'?'com':p.market.indexOf('DE')===0?'de':p.market==='FR'?'fr':'co.uk')+'/dp/'+esc(p.asin)+'">View on Amazon</a></div></div></div>'+
-   '<div class="rec '+f.st+'">'+rec+(['now','soon','ok'].includes(f.st)?'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><div style="min-width:220px">'+(canRe(p,f)?reBtn(p,f):addBtn(p,f))+'</div><button class="claude" style="width:auto;padding:7px 16px;font-size:14px" data-ask1="'+esc(p.id)+'">Ask Claude to order this ↗</button></div>':'')+'</div>'+quoteHtml(p,false)+
+   '<div class="rec '+(f.st==='ok'&&f.nx&&f.gap>2?'soon':f.st)+'">'+rec+(['now','soon','ok'].includes(f.st)?'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><div style="min-width:220px">'+(canRe(p,f)?reBtn(p,f):addBtn(p,f))+'</div><button class="claude" style="width:auto;padding:7px 16px;font-size:14px" data-ask1="'+esc(p.id)+'">Ask Claude to order this ↗</button></div>':'')+'</div>'+quoteHtml(p,false)+
    '<div class="msec"><h4>Stock forecast - next 5 months</h4><div class="legend"><span><i style="background:#ff9900"></i>Units left</span><span><i style="background:#146eb4"></i>Last day to order</span><span><i style="background:#cc0c39"></i>Runs out</span></div>'+runwaySvg(p,f)+'<div class="note">Includes stock on the way and last year\'s seasonal peaks.</div></div>'+
    yoyOnly(p)+'<details class="hist"><summary><span>📊 Show the full history</span><span class="note">every month, every year, units then and now</span></summary>'+monthlyRest(p)+'<div class="msec"><h4>Money made each year</h4>'+yearsSvg(p)+'</div>'+'<div class="msec"><h4>Units sold - then and now</h4><div style="max-width:460px">'+barsSvg(bars)+'</div></div></details>'+'<div class="msec"><div><h4>Money</h4>'+
    '<div class="facts"><div class="fact"><div class="k">Sales 30 days</div><div class="x">'+(p.sales30==null?'-':money(p.sales30,p.cur))+'</div></div><div class="fact"><div class="k">Margin</div><div class="x">'+(p.margin==null?'-':p.margin.toFixed(0)+'%')+'</div></div><div class="fact"><div class="k">Missed sales (out of stock)</div><div class="x" style="color:'+(p.lost_sales?'var(--red)':'inherit')+'">'+money(p.lost_sales||0,p.cur)+'</div></div><div class="fact"><div class="k">Suggested order</div><div class="x">'+(f.qty?n0(f.qty)+' units':'none')+'</div></div></div>'+
