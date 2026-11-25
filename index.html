@@ -323,6 +323,10 @@ svg text{font-family:inherit}
 .shipc .shh b{font-size:20px;color:var(--nav)}
 .shipc .shh span{font-size:26px}
 .shipc .shs{color:var(--muted);font-size:14px;margin-bottom:8px}
+.otw{position:absolute;bottom:8px;left:10px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.15);animation:raIn .5s ease both}
+.otw.go{color:#fff;background:var(--teal)}.otw.wt{color:#8a4b00;background:#ffe8c2}
+.shipc.pship{margin:0 22px 6px;box-shadow:none;border:1px solid var(--line);border-top:5px solid var(--teal);padding:14px 14px 4px}
+.shipc.pship .shh b{font-size:17px}.shipc.pship .shr img{width:52px;height:52px}
 .shr{display:flex;gap:14px;align-items:center;padding:14px 0;border-top:1px solid var(--line);animation:raIn .5s ease both}
 .shr img{width:58px;height:58px;object-fit:contain;border-radius:12px;background:#fff;border:1px solid var(--line);flex:none}
 .shr .shm{flex:1;min-width:0}
@@ -1033,14 +1037,20 @@ function shipRows(){const S=DATA.shipping||{},M=S.methods||{},t=today(),dt=s=>s?
 function shipMon(d){if(!d)return '';const n=d.getDate(),m=d.toLocaleString('en-GB',{month:'short'});return (n<=10?'early ':n<=20?'mid ':'late ')+m}
 function renderShips(){const el=$('ships');if(!el)return;let R=[];try{R=shipRows()}catch(e){console.error(e)}
   if(!R.length){el.innerHTML='';return}const t=today();
-  el.innerHTML='<div class="shipc"><div class="shh"><span>🌍</span><b>On the way to Amazon</b></div><div class="shs">Everything that is moving, or about to. Orange means we are waiting for something.</div>'+R.map((r,i)=>{const nm=esc(r.p.short||r.p.name);let pct=8,trk='wait',lab='',pills='';
+  el.innerHTML='<div class="shipc"><div class="shh"><span>🌍</span><b>On the way to Amazon</b></div><div class="shs">Everything that is moving, or about to. Orange means we are waiting for something.</div>'+R.map(shipRowHtml).join('')+'</div>'}
+/* A1 25 Nov eve: the same tracker row is reused on the product card (badge) and inside the product popup */
+function shipFor(id){try{return shipRows().filter(r=>r.p.id===id)}catch(e){return []}}
+function shipBadge(r){if(!r)return '';const t=today();
+  if(r.st==='go'){const ld=Math.round((r.land-t)/DAY);return '<span class="otw go">'+r.icon+' '+(ld<=0?'Landing now':'Lands ~'+shipMon(r.land))+'</span>'}
+  return '<span class="otw wt">'+r.icon+' '+(r.st==='pay'?'Waiting to fly':'On the way')+'</span>'}
+function shipRowHtml(r,i){const t=today();{const nm=esc(r.p.short||r.p.name);let pct=8,trk='wait',lab='',pills='';
     if(r.st==='go'){const tot=Math.max(1,r.land-r.from),done=Math.min(1,Math.max(0,(t-r.from)/tot));pct=Math.round(8+done*84);trk='go';const ld=Math.round((r.land-t)/DAY);
       lab='<div class="shl"><span>Left '+fmtD(r.from)+'</span><span>'+(ld<=0?'Should be there now':'Lands ~'+shipMon(r.land))+'</span></div>';
       pills='<span class="shp ok">'+r.icon+' Shipped by '+esc(r.how)+'</span>'+(r.tracking?(/^https?:/.test(r.tracking)?'<a class="shp tk" target="_blank" rel="noopener" href="'+esc(r.tracking)+'">📍 Track it ↗</a>':'<span class="shp tk">📍 '+esc(r.tracking)+'</span>'):'<span class="shp wt">Tracking: waiting</span>')}
     else if(r.st==='pay'){pct=6;lab='<div class="shl"><span>Made - not moving yet</span><span>Leaves once paid</span></div>';
       pills='<span class="shp wt">'+esc(r.payTxt)+'</span>'+(r.pay.link?'<a class="shp go" target="_blank" rel="noopener" href="'+esc(r.pay.link)+'">Open pay link ↗</a>':'')}
     else{pct=30;lab='<div class="shl"><span>Booked'+(r.where?' '+esc(r.where):'')+'</span><span>Date not known yet</span></div>';pills='<span class="shp wt">Tracking: waiting'+(r.who?' for '+esc(r.who):'')+'</span>'}
-    return '<div class="shr" style="animation-delay:'+(i*.08)+'s">'+(r.p.img?'<img loading="lazy" alt="" src="'+img(r.p.img,160)+'">':'')+'<div class="shm"><div class="shn">'+n0(r.qty)+' × '+nm+(r.where?' <em>'+esc(r.where)+'</em>':'')+'</div><div class="shtrk '+trk+'"><i style="width:'+pct+'%"></i><span class="pl" style="left:'+pct+'%">'+r.icon+'</span><span class="fl">🏁</span></div>'+lab+'<div class="shw">'+pills+'</div></div></div>'}).join('')+'</div>'}
+    return '<div class="shr" style="animation-delay:'+(i*.08)+'s">'+(r.p.img?'<img loading="lazy" alt="" src="'+img(r.p.img,160)+'">':'')+'<div class="shm"><div class="shn">'+n0(r.qty)+' × '+nm+(r.where?' <em>'+esc(r.where)+'</em>':'')+'</div><div class="shtrk '+trk+'"><i style="width:'+pct+'%"></i><span class="pl" style="left:'+pct+'%">'+r.icon+'</span><span class="fl">🏁</span></div>'+lab+'<div class="shw">'+pills+'</div></div></div>'}}
 function renderActs(){
   const t=(DATA.tasks||[]).slice().sort((a,b)=>({urgent:0,high:1,normal:2}[a.level]-{urgent:0,high:1,normal:2}[b.level]));
   let DIS={};try{DIS=JSON.parse(localStorage.getItem('zdis')||'{}')}catch(e){}
@@ -1070,10 +1080,11 @@ function renderGrid(){
   wireSearch();const ord={now:0,soon:1,ok:2,slow:3,clear:4,stop:5};
   const act=x=>x.f.st!=='now'?0:x.f.qty>0&&!x.f.nx?0:x.f.qty>0?1:2;const srt={urgent:(a,b)=>ord[a.f.st]-ord[b.f.st]||act(a)-act(b)||(a.f.left??1e9)-(b.f.left??1e9)||(b.p.profit30||0)-(a.p.profit30||0),profit:(a,b)=>(b.p.profit30||0)-(a.p.profit30||0),sold:(a,b)=>(b.p.per_day||0)-(a.p.per_day||0),az:(a,b)=>String(a.p.name).localeCompare(String(b.p.name))}[PSORT]||((a,b)=>0);
   const L=list().filter(x=>FILTER==='all'||(FILTER==='val'?x.p.valentine:FILTER==='stop'?['stop','clear'].includes(x.f.st):x.f.st===FILTER)).filter(x=>pMatch(x.p,PQ)).sort(srt);
+  const SHIPS={};try{shipRows().forEach(r=>{if(!SHIPS[r.p.id])SHIPS[r.p.id]=r})}catch(e){}
   $('grid').innerHTML=L.map(({p,f})=>{
     const [lab,cls]=stBadge(f);const left=f.left;const pct=left==null?0:Math.min(100,left/120*100);
     const RI=runInfo(p,f),top=RI.c==='bad'&&f.run!=null;const col=f.st==='now'||RI.c==='bad'?'var(--red)':f.st==='soon'||RI.c==='mid'?'var(--amber)':'var(--green)';
-    return '<div class="pc" data-id="'+esc(p.id)+'"><div class="pimg"><img loading="lazy" src="'+img(p.img,400)+'" alt=""><span class="rib '+cls+'">'+lab+'</span><span class="mk">'+esc(p.market)+'</span>'+(p.valentine?'<span class="vtag">♥ Valentine\'s</span>':'')+'</div>'+
+    return '<div class="pc" data-id="'+esc(p.id)+'"><div class="pimg"><img loading="lazy" src="'+img(p.img,400)+'" alt=""><span class="rib '+cls+'">'+lab+'</span><span class="mk">'+esc(p.market)+'</span>'+(p.valentine?'<span class="vtag">♥ Valentine\'s</span>':'')+shipBadge(SHIPS[p.id])+'</div>'+
     '<div class="pb">'+(top?'<div class="robig"><span class="rbi">📅</span><div><b>'+esc(RI.t)+'</b><small>'+(f.run<=1?'today':'in '+f.run+' day'+(f.run===1?'':'s'))+(RI.s?' · '+esc(RI.s.replace(/^⚠\s*/,'')):'')+'</small></div></div>':'')+'<div class="pn">'+esc(p.name)+'</div>'+leakB(p)+
     '<div class="big"><span class="num">'+n0(p.stock)+'</span><span class="u">in stock</span>'+inbPill(p)+'</div>'+
     '<div class="run"><i style="width:'+pct+'%;background:'+col+'"></i></div><div class="runl"><span class="ro '+RI.c+'">'+(top?'':esc(RI.t))+'</span><span>'+(p.per_day?(p.per_day<1?p.per_day.toFixed(1):Math.round(p.per_day))+' sold / day':'')+'</span></div>'+(RI.s&&!top?'<div class="rosub '+RI.c+'">'+esc(RI.s)+'</div>':'')+
@@ -1126,7 +1137,8 @@ function openP(id){
    '<h3>'+esc(p.name)+'</h3><div class="note">ASIN '+esc(p.asin)+' · SKU '+esc(p.sku)+(supOf(p)!==NOSUP?' · Supplier: '+esc(supOf(p)):'')+'</div>'+(supOf(p)===NOSUP?'<button class="asksup" data-asksup="'+esc(p.id)+'">❓ Ask Eli who supplies this <span>Tap to answer</span></button>':'')+
    '<div class="bubbles"><div class="bub"><div class="x">'+n0(p.stock)+'</div><div class="k">In stock</div></div><div class="bub"><div class="x">'+n0((p.inbound||0)+(p.on_order||0))+'</div><div class="k">On the way</div></div><div class="bub"><div class="x">'+(p.per_day?(p.per_day<1?p.per_day.toFixed(1):Math.round(p.per_day)):'0')+'</div><div class="k">Sold / day</div></div><div class="bub"><div class="x" style="color:'+((p.profit30||0)<0?'var(--red)':'var(--green)')+'">'+(p.profit30==null?'-':money(p.profit30,p.cur))+'</div><div class="k">Profit 30d</div></div></div>'+
    '<div class="btns" style="margin-top:12px"><a class="btn ghost" target="_blank" rel="noopener" href="https://www.amazon.'+(p.account==='USA'?'com':p.market.indexOf('DE')===0?'de':p.market==='FR'?'fr':'co.uk')+'/dp/'+esc(p.asin)+'">View on Amazon</a></div></div></div>'+
-   '<div class="rec '+(f.st==='ok'&&f.nx&&f.gap>2?'soon':f.st)+'">'+rec+(['now','soon','ok'].includes(f.st)?'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><div style="min-width:220px">'+(canRe(p,f)?reBtn(p,f):addBtn(p,f))+'</div><button class="claude" style="width:auto;padding:7px 16px;font-size:14px" data-ask1="'+esc(p.id)+'">Ask Claude to order this ↗</button></div>':'')+'</div>'+quoteHtml(p,false)+
+   (()=>{const R=shipFor(p.id);return R.length?'<div class="shipc pship"><div class="shh"><span>🌍</span><b>On the way to Amazon</b></div>'+R.map(shipRowHtml).join('')+'</div>':''})()+
+   '<div class="rec '+(f.st==='ok'&&f.nx&&f.gap>2?'soon':f.st)+'">'+rec+(['now','soon','ok'].includes(f.st)?'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><div style="min-width:220px">'+(canRe(p,f)?reBtn(p,f):addBtn(p,f))+'</div><button class="claude" style="width:auto;padding:7px 16px;font-size:14px" data-ask1="'+esc(p.id)+'">Ask Claude to order this ↗</button></div>':'')+'</div>'+(()=>{const q=quoteHtml(p,false);return q?'<div style="margin:0 22px">'+q+'</div>':''})()+
    '<div class="msec"><h4>Stock forecast - next 5 months</h4><div class="legend"><span><i style="background:#ff9900"></i>Units left</span><span><i style="background:#146eb4"></i>Last day to order</span><span><i style="background:#cc0c39"></i>Runs out</span></div>'+runwaySvg(p,f)+'<div class="note">Includes stock on the way and last year\'s seasonal peaks.</div></div>'+
    yoyOnly(p)+'<details class="hist"><summary><span>📊 Show the full history</span><span class="note">every month, every year, units then and now</span></summary>'+monthlyRest(p)+'<div class="msec"><h4>Money made each year</h4>'+yearsSvg(p)+'</div>'+'<div class="msec"><h4>Units sold - then and now</h4><div style="max-width:460px">'+barsSvg(bars)+'</div></div></details>'+'<div class="msec"><div><h4>Money</h4>'+
    '<div class="facts"><div class="fact"><div class="k">Sales 30 days</div><div class="x">'+(p.sales30==null?'-':money(p.sales30,p.cur))+'</div></div><div class="fact"><div class="k">Margin</div><div class="x">'+(p.margin==null?'-':p.margin.toFixed(0)+'%')+'</div></div><div class="fact"><div class="k">Missed sales (out of stock)</div><div class="x" style="color:'+(p.lost_sales?'var(--red)':'inherit')+'">'+money(p.lost_sales||0,p.cur)+'</div></div><div class="fact"><div class="k">Suggested order</div><div class="x">'+(f.qty?n0(f.qty)+' units':'none')+'</div></div></div>'+
