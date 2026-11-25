@@ -731,6 +731,34 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
 .hist[open]>summary span:first-child::after{content:' ▴'}
 .hist[open]>summary{border-bottom:1px solid #e3e6e6}
 .hist>.msec{padding-left:12px;padding-right:12px}
+
+/* A2 25 Nov: did-you-pay card, payouts on hold, before-stock-cost tags */
+.dpc{background:#fff;border-radius:16px;box-shadow:0 2px 10px rgba(15,17,17,.08);border-top:5px solid #ff9900;padding:16px;margin:14px 0;animation:dpin .45s ease-out}
+@keyframes dpin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.dph{display:flex;gap:12px;align-items:center;margin-bottom:6px}.dph b{font-size:20px;display:block;color:#232f3e}.dph small{color:#565959;font-size:14px}
+.dpq{width:42px;height:42px;border-radius:50%;background:#ff9900;color:#fff;font-weight:900;font-size:24px;display:grid;place-items:center;flex:none;animation:dpbob 2.4s ease-in-out infinite}
+@keyframes dpbob{50%{transform:scale(1.08)}}
+.dpr{display:grid;grid-template-columns:44px 1fr auto;gap:4px 12px;align-items:start;padding:14px 0;border-top:1px solid #eaeded}
+.dpr.done{opacity:.75}
+.dpa{width:44px;height:44px;border-radius:12px;background:#232f3e;color:#ff9900;font-weight:900;font-size:20px;display:grid;place-items:center}
+.dpw{font-weight:800;font-size:16px;color:#0f1111}.dpt{font-size:14px;color:#565959;margin-top:1px}
+.dphint{font-size:13.5px;color:#565959;margin-top:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dphint.y{color:#067d62;font-weight:700;background:#e7f6f1;border-radius:8px;padding:5px 8px;display:inline-block}
+.dpv{font-weight:900;font-size:18px;text-align:right;white-space:nowrap}.dpv small{display:block;font-size:12px;color:#565959;font-weight:600}
+.dpb{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.dpb button{font:inherit;font-weight:800;font-size:17px;border-radius:12px;padding:14px 8px;cursor:pointer;border:2px solid transparent;transition:transform .12s}
+.dpb button:active{transform:scale(.96)}
+.dpy{background:#067d62;color:#fff}.dpn{background:#fff;color:#cc0c39;border-color:#f3c3cd!important}
+.dpans{grid-column:1/-1;margin-top:6px;font-size:15px;background:#f3f5f5;border-radius:10px;padding:9px 12px}
+.dpans button{background:none;border:0;color:#007185;text-decoration:underline;font:inherit;cursor:pointer}
+.dplink{font-size:12.5px;color:#c45500;font-weight:700;white-space:nowrap}
+.pihold{display:flex;gap:12px;align-items:flex-start;background:#565f61;color:#fff;border-radius:14px;padding:14px;margin:10px 0 12px;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.07) 0 8px,transparent 8px 16px)}
+.pihold .pip{font-size:26px;line-height:1}.pihold b{display:block;font-size:17px}.pihold span{font-size:14px;opacity:.92;display:block;margin-top:2px}
+.pihold a{display:inline-block;margin-top:9px;background:#ff9900;color:#0f1111;font-weight:800;border-radius:20px;padding:7px 14px;text-decoration:none;font-size:14px}
+.pi.held .pihero,.pi.held .piweek,.pi.held .pireq{filter:grayscale(1);opacity:.5}
+.nct{font-size:11.5px;line-height:1.3;color:#c45500;font-weight:700;margin-top:3px}.nct b{color:#565959}
+.nct.big{font-size:11px;margin-top:4px}
+.ncs{color:#c45500;font-weight:900}
 </style>
 </head>
 <body>
@@ -759,6 +787,7 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
       <div class="hello"><h1 id="greet">Hello Eli</h1><div class="note" id="todaydate"></div></div>
       <div class="fivek" id="fivek"></div>
       <div class="tstrip" id="tstrip"></div>
+      <div id="didpay"></div>
       <div class="kpis" id="kpis"></div>
       <div class="season" id="seasonbar"></div>
       <div class="rof" id="rof"></div>
@@ -830,7 +859,7 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
       <h2>What's going well</h2>
       <p class="h2sub">Profit made by each product in the last 30 days.</p>
       <div class="two">
-        <div class="card"><div class="win" id="win"></div></div>
+        <div class="card"><div class="win" id="win"></div><div class="note" id="winnc" style="margin-top:8px">* before stock cost - Sellerboard has no buying price for these yet, so the real profit is lower.</div></div>
         <div class="card" id="insights"></div>
       </div>
     </section>
@@ -1002,6 +1031,12 @@ function renderKpis(){
 }
 /* A2 22 Nov: 'Tomorrow' snooze - a snoozed job comes back on its own the next morning */
 const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+/* A2 25 Nov (A3 priority): Sellerboard has no stock cost (Cost 0) for most products, so their profit is BEFORE stock cost.
+   Data can set products[].no_cost true/false; until then this list is from Sellerboard inventory 25 Nov (only the doll 4690 has a cost). */
+const NOCOST_IDS=['cocopoco1','cocopoco2','cups50','cups100','penguinheart','pinguin','puzzle','bottlekey','bottlebox','bottlehouse','bottlefr','penguinmama','oldpenguin','posipenguin','tulip'];
+function noCost(p){return p&&(p.no_cost!=null?!!p.no_cost:NOCOST_IDS.includes(p.id))}
+function afterCost(p){const b=p.buy;if(!noCost(p)||!b||!b.unit_usd||!p.units30||p.profit30==null)return null;const fr=b.sea_usd||b.truck_usd||b.air_usd||0,r=(DATA.shipping&&DATA.shipping.usd_gbp)||(DATA.cfo&&DATA.cfo.usd_gbp)||.79;return Math.round(p.profit30-p.units30*(b.unit_usd+fr)*r)}
+function ncTag(p,big){if(!noCost(p)||p.profit30==null)return '';const a=afterCost(p);return '<div class="nct'+(big?' big':'')+'" title="Sellerboard has no stock cost for this product">⚠ before stock cost'+(a!=null?'<br><b>~'+money(a,p.cur)+'</b> after (est.)':'')+'</div>'}
 function isHid(v){return !!v&&!(v.st==='snooze'&&(v.until||'')<=ymd(today()))}
 /* A2 22 Nov: a task about a supplier draft opens THAT supplier's drafts in Gmail, not the whole drafts folder */
 function supDraftUrl(s){const e=((DATA.suppliers||{})[s]||{}).email;if(!e)return null;return 'https://mail.google.com/mail/?authuser=eli@zelr.co.uk#search/in%3Adrafts+to%3A'+encodeURIComponent(e)}
@@ -1088,7 +1123,7 @@ function renderGrid(){
     '<div class="pb">'+(top?'<div class="robig"><span class="rbi">📅</span><div><b>'+esc(RI.t)+'</b><small>'+(f.run<=1?'today':'in '+f.run+' day'+(f.run===1?'':'s'))+(RI.s?' · '+esc(RI.s.replace(/^⚠\s*/,'')):'')+'</small></div></div>':'')+'<div class="pn">'+esc(p.name)+'</div>'+leakB(p)+
     '<div class="big"><span class="num">'+n0(p.stock)+'</span><span class="u">in stock</span>'+inbPill(p)+'</div>'+
     '<div class="run"><i style="width:'+pct+'%;background:'+col+'"></i></div><div class="runl"><span class="ro '+RI.c+'">'+(top?'':esc(RI.t))+'</span><span>'+(p.per_day?(p.per_day<1?p.per_day.toFixed(1):Math.round(p.per_day))+' sold / day':'')+'</span></div>'+(RI.s&&!top?'<div class="rosub '+RI.c+'">'+esc(RI.s)+'</div>':'')+
-    '<div class="facts"><div class="fact">'+(p.valentine&&p.val_units?'<div class="k">Need until 14 Feb</div><div class="x">'+n0(f.needVal)+'</div>':'<div class="k">Next 60 days need</div><div class="x">'+n0(f.need60)+'</div>')+'</div><div class="fact"><div class="k">Profit 30 days</div><div class="x" style="color:'+((p.profit30||0)<0?'var(--red)':'var(--green)')+'">'+(p.profit30==null?'-':money(p.profit30,p.cur))+'</div></div></div>'+
+    '<div class="facts"><div class="fact">'+(p.valentine&&p.val_units?'<div class="k">Need until 14 Feb</div><div class="x">'+n0(f.needVal)+'</div>':'<div class="k">Next 60 days need</div><div class="x">'+n0(f.need60)+'</div>')+'</div><div class="fact"><div class="k">Profit 30 days</div><div class="x" style="color:'+((p.profit30||0)<0?'var(--red)':'var(--green)')+'">'+(p.profit30==null?'-':money(p.profit30,p.cur))+'</div>'+ncTag(p)+'</div></div>'+
     (p.valentine?quoteHtml(p,true):'')+(supOf(p)===NOSUP&&['now','soon'].includes(f.st)?'<button class="asksup sm" data-asksup="'+esc(p.id)+'">❓ Ask Eli who supplies this <span>Tap to answer</span></button>':'')+'<div class="order '+f.st+'">'+esc(orderLine(p,f))+'</div>'+draftBtn(p)+(canRe(p,f)?reBtn(p,f):['now','soon','ok'].includes(f.st)?addBtn(p,f):'')+'</div></div>';
   }).join('')||(PQ?'<div class="card empty"><div class="ei">🔎</div><b>No product matches "'+esc(PQ)+'"</b><span class="note">Try fewer letters, or <a href="#" id="psclr">clear the search</a>'+(FILTER!=='all'?' and tap <b>All</b>':'')+'.</span></div>':'<div class="card empty"><div class="ei">'+(FILTER==='soon'?'🎉':FILTER==='now'?'✅':'📭')+'</div><b>'+(FILTER==='soon'||FILTER==='now'?'Nothing to order here - all good':'Nothing here')+'</b><span class="note">Tap <b>All</b> to see every product.</span></div>');
   const pc=$('psclr');if(pc)pc.onclick=e=>{e.preventDefault();$('psx').click()};
@@ -1135,7 +1170,7 @@ function openP(id){
   $('md').innerHTML='<button class="mx" aria-label="Close">×</button>'+
    '<div class="mh"><div class="im"><img src="'+img(p.img,600)+'" alt=""></div><div><span class="rib '+cls+'" style="position:static;display:inline-block;border-radius:12px">'+lab+'</span> <span class="mk" style="position:static">'+esc(p.market)+'</span>'+(p.valentine?' <span class="vtag" style="position:static">♥ Valentine\'s</span>':'')+
    '<h3>'+esc(p.name)+'</h3><div class="note">ASIN '+esc(p.asin)+' · SKU '+esc(p.sku)+(supOf(p)!==NOSUP?' · Supplier: '+esc(supOf(p)):'')+'</div>'+(supOf(p)===NOSUP?'<button class="asksup" data-asksup="'+esc(p.id)+'">❓ Ask Eli who supplies this <span>Tap to answer</span></button>':'')+
-   '<div class="bubbles"><div class="bub"><div class="x">'+n0(p.stock)+'</div><div class="k">In stock</div></div><div class="bub"><div class="x">'+n0((p.inbound||0)+(p.on_order||0))+'</div><div class="k">On the way</div></div><div class="bub"><div class="x">'+(p.per_day?(p.per_day<1?p.per_day.toFixed(1):Math.round(p.per_day)):'0')+'</div><div class="k">Sold / day</div></div><div class="bub"><div class="x" style="color:'+((p.profit30||0)<0?'var(--red)':'var(--green)')+'">'+(p.profit30==null?'-':money(p.profit30,p.cur))+'</div><div class="k">Profit 30d</div></div></div>'+
+   '<div class="bubbles"><div class="bub"><div class="x">'+n0(p.stock)+'</div><div class="k">In stock</div></div><div class="bub"><div class="x">'+n0((p.inbound||0)+(p.on_order||0))+'</div><div class="k">On the way</div></div><div class="bub"><div class="x">'+(p.per_day?(p.per_day<1?p.per_day.toFixed(1):Math.round(p.per_day)):'0')+'</div><div class="k">Sold / day</div></div><div class="bub"><div class="x" style="color:'+((p.profit30||0)<0?'var(--red)':'var(--green)')+'">'+(p.profit30==null?'-':money(p.profit30,p.cur))+'</div><div class="k">Profit 30d</div>'+ncTag(p,1)+'</div></div>'+
    '<div class="btns" style="margin-top:12px"><a class="btn ghost" target="_blank" rel="noopener" href="https://www.amazon.'+(p.account==='USA'?'com':p.market.indexOf('DE')===0?'de':p.market==='FR'?'fr':'co.uk')+'/dp/'+esc(p.asin)+'">View on Amazon</a></div></div></div>'+
    (()=>{const R=shipFor(p.id);return R.length?'<div class="shipc pship"><div class="shh"><span>🌍</span><b>On the way to Amazon</b></div>'+R.map(shipRowHtml).join('')+'</div>':''})()+
    '<div class="rec '+(f.st==='ok'&&f.nx&&f.gap>2?'soon':f.st)+'">'+rec+(['now','soon','ok'].includes(f.st)?'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><div style="min-width:220px">'+(canRe(p,f)?reBtn(p,f):addBtn(p,f))+'</div><button class="claude" style="width:auto;padding:7px 16px;font-size:14px" data-ask1="'+esc(p.id)+'">Ask Claude to order this ↗</button></div>':'')+'</div>'+(()=>{const q=quoteHtml(p,false);return q?'<div style="margin:0 22px">'+q+'</div>':''})()+
@@ -1148,23 +1183,23 @@ function openP(id){
 }
 function closeP(){$('ov').classList.add('hidden');document.body.style.overflow=''}
 $('ov').onclick=e=>{if(e.target.id==='ov')closeP()};
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeP()});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;closeP();const cb=$('closeb');if(cb&&cb.offsetParent)cb.click()});
 
 /* ---------- payments ---------- */
 function renderPay(){
-  let DISP={};try{DISP=JSON.parse(localStorage.getItem('zdis')||'{}')}catch(e){}
+  let DISP={},DP={};try{DISP=JSON.parse(localStorage.getItem('zdis')||'{}');DP=JSON.parse(localStorage.getItem('zdidpay')||'{}')}catch(e){}
   const P=(DATA.payments||[]).filter(x=>!DISP['p:'+x.id]).slice().sort((a,b)=>a.due<b.due?-1:1);
   const lab={unpaid:'Not paid',overdue:'Overdue',check:'Check if paid',planned:'Planned',later:'Later',forecast:'Not ordered yet',paid:'✓ Paid'};
   const rowH=x=>{const d=new Date(x.due+'T00:00:00'),late=d<today()&&x.status!=='forecast';
    const pd=x.status==='paid',ck=x.status==='check';return '<div class="prow'+(pd?' paid':'')+(ck?' chk':'')+'"><div class="pdate'+(late&&!pd?' late':'')+'"><div class="dd">'+d.getDate()+'</div><div class="mm">'+d.toLocaleDateString('en-GB',{month:'short'})+'</div></div>'+
-   '<div>'+(ck?'<span class="qbadge" title="We need you to tell us">?</span>':'')+'<span class="pill p-'+esc(x.status)+'">'+(ck&&x.paid?'Already sent - what was it?':(lab[x.status]||esc(x.status)))+'</span><div class="pw">'+esc(x.what)+'</div><div class="pto">'+esc(x.to)+'</div><div class="pwhy">'+esc(x.why)+'</div></div>'+
+   '<div>'+(ck?'<span class="qbadge" title="We need you to tell us">?</span>':'')+'<span class="pill p-'+esc(x.status)+'">'+(ck&&DP[x.id]?'You said: '+esc(DP[x.id]==='yes'?'paid':DP[x.id]==='no'?'not paid':DP[x.id]):ck&&x.paid?'Already sent - what was it?':(lab[x.status]||esc(x.status)))+'</span>'+(ck&&!DP[x.id]?' <a class="dplink" href="#didpay">Answer: did you pay? ↑</a>':'')+'<div class="pw">'+esc(x.what)+'</div><div class="pto">'+esc(x.to)+'</div><div class="pwhy">'+esc(x.why)+'</div></div>'+
    '<div class="pamt"><div class="a">'+(x.amount!=null?money(x.amount,x.cur):'?')+'</div><div class="an">'+esc(x.amount_note||'')+'</div>'+(pd?'':'<div class="btns" style="justify-content:flex-end">'+(x.link?'<a class="btn" target="_blank" rel="noopener" href="'+esc(x.link)+'">Pay</a>':'')+(x.email?'<a class="btn'+(ck?'':' ghost')+'" target="_blank" rel="noopener" href="'+esc(x.email)+'">'+(ck?'✉ Open email':'Email')+'</a>':'')+'</div><div class="tact" style="justify-content:flex-end"><span class="tb ok" data-dis="p:'+esc(x.id)+'" data-st="paid" data-t="'+esc(x.what)+'">✓ Paid</span><span class="tb no" data-dis="p:'+esc(x.id)+'" data-st="not relevant" data-t="'+esc(x.what)+'">✕ Not relevant</span></div>')+'</div></div>'};
   /* A2 21 Nov: three coloured stacks with a £ total each - Pay now / Waiting for money / Later */
   const isIn=x=>/money in\b|coming in|top-up/i.test((x.what||'')+' '+(x.amount_note||''));
   const G={now:[],wait:[],later:[],paid:[],inc:[]};
   P.forEach(x=>{if(isIn(x)){if(x.status!=='paid')G.inc.push(x)}else if(x.status==='paid')G.paid.push(x);else if(['unpaid','overdue','check'].includes(x.status))G.now.push(x);else if(x.status==='planned')G.wait.push(x);else G.later.push(x)});
   G.now.sort((a,b)=>(a.status==='check')-(b.status==='check')||(a.due<b.due?-1:1));
-  const tot=L=>{let t=0,u=0;L.forEach(x=>{if(x.status==='check'&&x.paid)return;const g=payGbp(x);if(g>0)t+=g;else u++});return {t:Math.round(t),u}};
+  const tot=L=>{let t=0,u=0;L.forEach(x=>{if(x.status==='check'&&(x.paid||DP[x.id]==='yes'))return;const g=payGbp(x);if(g>0)t+=g;else u++});return {t:Math.round(t),u}};
   const DEF=[['now','🔴','Pay now','Not paid yet, or check if you already paid','#cc0c39','#fde8ec'],['wait','🟠','Waiting for money','Planned - pay when the cash lands','#c45500','#fff1dc'],['later','🔵','Later','Next month and beyond','#0b6fb3','#e6f1fa']];
   const T={};DEF.forEach(d=>T[d[0]]=tot(G[d[0]]));const all=DEF.reduce((s,d)=>s+T[d[0]].t,0)||1;
   const unk=u=>u?'<small class="psu">+ '+u+' with no amount yet</small>':'';
@@ -1538,7 +1573,29 @@ function renderFiveK(){const el=$('fivek');if(!el)return;const F=DATA.fivek;if(!
    (F.note?'<div class="fkn">'+esc(F.note)+'</div>':'')+'<button class="fkco" id="fkco">🛒 What\'s left to spend? Open checkout</button>';
   wireDis(el);const fc=$('fkco');if(fc)fc.onclick=openB}
 function payGbp(x){const c=DATA.cfo||{};return x.gbp?x.gbp:(x.amount!=null?(x.cur==='USD'?x.amount*(c.usd_gbp||.79):x.cur==='EUR'?x.amount*.86:x.amount):0)}
-function renderToday(){try{renderFiveK()}catch(e){console.error(e)}const el=$('tstrip');if(!el)return;const c=DATA.cfo;if(!c){el.classList.add('hidden');return}
+/* A2 25 Nov: Amazon payouts on hold while the 'payouts stopped' task is open (and not ticked Done) */
+function payHold(){let D={};try{D=JSON.parse(localStorage.getItem('zdis')||'{}')}catch(e){}return (DATA.tasks||[]).find(t=>/payouts?\b.*(stopp|hold)|on hold/i.test(t.title||'')&&!isHid(D['t:'+t.id]))||null}
+/* A2 25 Nov (A3 priority): 'Did you pay this?' - one big Yes/No per payment we are not sure about */
+function dpHint(x){const o=(DATA.valentine_orders||[]).find(v=>(v.balance===x.id||v.deposit===x.id)&&v.shipped);
+  if(o)return {t:String(o.supplier||x.to).split(/[\s(]/)[0]+' shipped on '+fmtD(new Date(o.shipped+'T00:00:00'))+' - so probably yes',yes:1};
+  if(x.paid)return {t:'Money left the bank on '+fmtD(new Date(x.paid+'T00:00:00'))+' - so yes. Tell us what it was for.',yes:2};
+  return {t:String(x.why||'').split(/(?<=[.!?])\s/)[0],yes:0}}
+function renderDidPay(){const el=$('didpay');if(!el)return;let D={},A={};try{D=JSON.parse(localStorage.getItem('zdis')||'{}');A=JSON.parse(localStorage.getItem('zdidpay')||'{}')}catch(e){}
+  const L=(DATA.payments||[]).filter(x=>x.status==='check'&&!D['p:'+x.id]).map(x=>({x,h:dpHint(x)})).sort((a,b)=>((b.h.yes===1)-(a.h.yes===1))||((a.h.yes===2)-(b.h.yes===2))||(a.x.due<b.x.due?-1:1));
+  if(!L.length){el.innerHTML='';return}
+  const open=L.filter(r=>!A[r.x.id]).length;
+  el.innerHTML='<div class="dpc"><div class="dph"><span class="dpq">?</span><div><b>Did you pay this?</b><small>'+(open?open+' to answer - tap Yes or No, then press Send in Gmail':'All answered - thank you! The team will update the plan.')+'</small></div></div>'+
+   L.map(({x,h})=>{const a=A[x.id],ini=String(x.to||'?').trim()[0].toUpperCase(),amt=x.amount!=null?money(x.amount,x.cur):'Amount ?',g=x.cur&&x.cur!=='GBP'&&payGbp(x)?'<small>about '+money(payGbp(x),'GBP')+'</small>':'';
+    const yl=h.yes===2?'🥥 CocoPoco batch':'✅ Yes, paid',nl=h.yes===2?'🤷 Something else':'✕ No';
+    return '<div class="dpr'+(a?' done':'')+'"><div class="dpa">'+esc(ini)+'</div><div class="dpm"><div class="dpw">'+esc(String(x.to||'').replace(/ - Alibaba$/,''))+'</div><div class="dpt">'+esc(x.what)+'</div>'+(h.t?'<div class="dphint'+(h.yes?' y':'')+'">'+(h.yes?'💡 ':'')+esc(h.t)+'</div>':'')+'</div><div class="dpv">'+amt+g+'</div>'+
+     (a?'<div class="dpans">'+(a==='no'?'✕':'✅')+' You said: <b>'+esc(a==='yes'?'Yes, paid':a==='no'?'No, not paid':a)+'</b> <button data-dpundo="'+esc(x.id)+'">change</button></div>'
+       :'<div class="dpb"><button class="dpy" data-dp="'+esc(x.id)+'" data-v="'+(h.yes===2?'CocoPoco batch':'yes')+'">'+yl+'</button><button class="dpn" data-dp="'+esc(x.id)+'" data-v="'+(h.yes===2?'Something else':'no')+'">'+nl+'</button></div>')+'</div>'}).join('')+'</div>';
+  el.querySelectorAll('[data-dp]').forEach(b=>b.onclick=()=>{const x=(DATA.payments||[]).find(p=>p.id===b.dataset.dp);if(!x)return;const v=b.dataset.v;A[x.id]=v;try{localStorage.setItem('zdidpay',JSON.stringify(A))}catch(e){}
+    const amt=x.amount!=null?money(x.amount,x.cur):'amount not known';
+    window.open(gmailUrl('Zugati portal feedback - did you pay','Payment: '+x.id+' - '+x.to+'\nWhat: '+x.what+'\nAmount: '+amt+'\nDid I pay it? '+(v==='yes'?'YES, paid':v==='no'?'NO, not paid yet':v)+'\n\n(Sent from the Zugati portal - the Team Leader agent reads these every morning.)'),'_blank','noopener');
+    if(v==='yes')try{if(typeof confetti==='function')confetti()}catch(e){}renderDidPay();try{renderPay()}catch(e){}});
+  el.querySelectorAll('[data-dpundo]').forEach(b=>b.onclick=()=>{delete A[b.dataset.dpundo];try{localStorage.setItem('zdidpay',JSON.stringify(A))}catch(e){}renderDidPay();try{renderPay()}catch(e){}})}
+function renderToday(){try{renderDidPay()}catch(e){console.error(e)}try{renderFiveK()}catch(e){console.error(e)}const el=$('tstrip');if(!el)return;const c=DATA.cfo;if(!c){el.classList.add('hidden');return}
   let DIS={};try{DIS=JSON.parse(localStorage.getItem('zdis')||'{}')}catch(e){}
   const t0=today(),wk=addD(t0,7),{start}=cashWeeks(),safe=safeSpend();
   const due=(DATA.payments||[]).filter(x=>['unpaid','overdue'].includes(x.status)&&!DIS['p:'+x.id]&&new Date(x.due+'T00:00:00')<=wk).sort((a,b)=>a.due<b.due?-1:1);
@@ -1597,7 +1654,8 @@ function piLand(req){// UK rule learnt from your history: before cutoff -> N wor
  while(k){d.setDate(d.getDate()+1);const iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');if(d.getDay()%6&&!H.has(iso))k--}
  const [hh,mm]=(R.land_time||'04:15').split(':');d.setHours(+hh,+mm);return d}
 function piDay(d){return d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})}
-function piTime(d){return d.toLocaleTimeString('en-GB',{hour:'numeric',minute:'2-digit'}).replace(':00','').replace(' ','')}
+/* A2 25 Nov: was 'about 13' - now 1pm / 4:15am */
+function piTime(d){const h=d.getHours(),m=d.getMinutes();return (h%12||12)+(m?':'+String(m).padStart(2,'0'):'')+(h<12?'am':'pm')}
 function piLon(iso){const x=new Date(iso);return new Date(x.toLocaleString('en-US',{timeZone:'Europe/London'}))}
 function piCount(d){const ms=d-new Date(new Date().toLocaleString('en-US',{timeZone:'Europe/London'}));if(ms<=0)return 'any minute';const h=Math.round(ms/36e5);return h<24?h+' hours':Math.round(h/24)+(Math.round(h/24)===1?' day':' days')}
 function renderPayin(){const el=$('payin');if(!el)return;const P=window.PAYX||DATA.payouts;if(!P){el.innerHTML='';return}
@@ -1607,7 +1665,8 @@ function renderPayin(){const el=$('payin');if(!el)return;const P=window.PAYX||DA
  if(P.eu_gbp&&P.eu_gbp.next){let t=piLon(P.eu_gbp.next);while(t<nowL)t=new Date(t.getTime()+P.eu_gbp.every_days*864e5);exp.push({t,amt:P.eu_gbp.typical,cur:'GBP',k:'eu',lab:'Europe (in £)',sure:false});exp.push({t:new Date(t.getTime()+P.eu_gbp.every_days*864e5),amt:P.eu_gbp.typical,cur:'GBP',k:'eu',lab:'Europe (in £)',sure:false})}
  if(P.eu_eur&&P.eu_eur.next){let t=piLon(P.eu_eur.next);while(t<nowL)t=new Date(t.getTime()+7*864e5);exp.push({t,amt:P.eu_eur.typical,cur:'EUR',k:'eur',lab:'Europe (in €)',sure:false})}
  exp.sort((a,b)=>a.t-b.t);const nx=exp.find(x=>x.t>nowL);
- let h='<div class="pi"><h3>💰 Amazon money coming in</h3><div class="pis">When Amazon pays you, and when it actually lands in Wise.</div>';
+ let h='<div class="pi'+(payHold()?' held':'')+'"><h3>💰 Amazon money coming in</h3><div class="pis">When Amazon pays you, and when it actually lands in Wise.</div>';
+ const HOLD=payHold();if(HOLD)h+='<div class="pihold"><span class="pip">⏸</span><div><b>On hold - nothing is coming in right now</b><span>Amazon is holding your payouts until the card in Seller Central is fixed. The dates below start again once it is fixed.</span>'+(HOLD.link?'<a target="_blank" rel="noopener" href="'+esc(HOLD.link)+'">'+esc(HOLD.link_label||'Fix it now')+' ↗</a>':'')+'</div></div>';
  if(nx)h+='<div class="pihero"><div class="coin">'+(nx.cur==='EUR'?'€':'£')+'</div><div><div class="amt">'+(nx.sure?money(nx.amt,nx.cur,2):'~'+money(nx.amt,nx.cur))+'</div><div class="when">'+(nx.sure?'Lands ':'Likely ')+esc(piDay(nx.t))+', about '+piTime(nx.t)+'</div><div class="when" style="font-size:13px;opacity:.8">'+esc(nx.lab)+(nx.sure?' - Amazon has sent it':' - usual pattern, no email from Amazon')+'</div></div><div class="cd">in<b>'+piCount(nx.t)+'</b></div></div>';
  // 7-day strip
  h+='<div class="piweek">';for(let i=0;i<7;i++){const d=new Date(nowL.getFullYear(),nowL.getMonth(),nowL.getDate()+i);const its=exp.filter(x=>x.t.toDateString()===d.toDateString());
@@ -1668,8 +1727,16 @@ function renderCashFlow(){const el=$('cashline');if(!el)return;const c=DATA.cfo,
     if(x.in>0){const y=Y(x.in);g+='<rect class="cfbar up" style="animation-delay:'+(i*35)+'ms" x="'+(cx-bw/2)+'" y="'+y+'" width="'+bw+'" height="'+(y0-y)+'" rx="3" fill="'+(i===li?'#0b9e7c':'#5cc4a4')+'"><title>Week of '+fmtD(x.d)+' - money in £'+n0(x.in)+'</title></rect>'}
     if(x.out>0){const y=Y(-x.out);g+='<rect class="cfbar dn" style="animation-delay:'+(i*35)+'ms" x="'+(cx-bw/2)+'" y="'+y0+'" width="'+bw+'" height="'+(y-y0)+'" rx="3" fill="'+(i===ri?'#cc0c39':'#f08a9c')+'"><title>Week of '+fmtD(x.d)+' - money out £'+n0(x.out)+(x.pay?' ('+esc(x.pay)+')':'')+'</title></rect>'}
     if(sm?(i%3===1):(i%2===1))g+='<text x="'+cx+'" y="'+(H-pb+16)+'" font-size="11" fill="#666" text-anchor="middle">'+fmtD(x.d)+'</text>'});
+  /* A2 25 Nov (A3 priority): while payouts are on hold, this week's Amazon money is a grey striped 'held' bar */
+  const HOLD=payHold();let heldG=0;if(HOLD&&W.length>1){const P=window.PAYX||DATA.payouts||{},er=(P.eu_eur&&P.eu_eur.eur_gbp)||.87,c14=Date.now()-14*864e5;
+    heldG=Math.round((P.landed||[]).filter(x=>new Date(x.landed)>c14).reduce((s,x)=>s+(x.cur==='EUR'?x.amount*er:x.amount),0)/2);
+    if(heldG>0){const i=1,cx=X(i)+bw*0.62,y0=Y(0),y=Y(heldG),hw=Math.max(bw*0.8,9);
+      g='<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#c9cfd1"/><line x1="0" y1="0" x2="0" y2="6" stroke="#8d9699" stroke-width="2.4"/></pattern></defs>'+g;
+      g+='<rect class="cfbar up" x="'+(cx-hw/2)+'" y="'+y+'" width="'+hw+'" height="'+(y0-y)+'" rx="3" fill="url(#hatch)" stroke="#6b7476" stroke-width="1"><title>Held by Amazon - about £'+n0(heldG)+' of payouts this week, until the card is fixed</title></rect>';
+      const tw=sm?168:182,lc=Math.min(Math.max(X(1),pl+50),Wd-pr-50);let tx=Math.min(Math.max(cx,pl+tw/2),Wd-pr-tw/2),ty=Math.max(pt-2,y-14);if(li===1&&W[1].in>0){tx=Math.min(lc+58+tw/2,Wd-pr-tw/2);ty=Y(W[1].in)-12}
+      g+='<g><line x1="'+cx+'" x2="'+cx+'" y1="'+(ty+6)+'" y2="'+y+'" stroke="#6b7476" stroke-width="1" stroke-dasharray="2 2"/><rect x="'+(tx-tw/2)+'" y="'+(ty-14)+'" width="'+tw+'" height="20" rx="10" fill="#565f61"/><text x="'+tx+'" y="'+(ty+1)+'" text-anchor="middle" font-size="'+(sm?10:11.5)+'" font-weight="800" fill="#fff">⏸ Held by Amazon - fix the card</text></g>'}}
   // safety line
-  g+='<line x1="'+pl+'" x2="'+(Wd-pr)+'" y1="'+Y(c.floor)+'" y2="'+Y(c.floor)+'" stroke="#c45500" stroke-dasharray="6 4" stroke-width="1.3"/><text x="'+(Wd-pr-4)+'" y="'+(Y(c.floor)-5)+'" font-size="11" font-weight="700" fill="#c45500" text-anchor="end">safety line £'+n0(c.floor)+'</text>';
+  g+='<line x1="'+pl+'" x2="'+(Wd-pr)+'" y1="'+Y(c.floor)+'" y2="'+Y(c.floor)+'" stroke="#c45500" stroke-dasharray="6 4" stroke-width="1.3"/><text x="'+(pl+(Wd-pl-pr)*0.5)+'" y="'+(Y(c.floor)+14)+'" font-size="11" font-weight="700" fill="#c45500" text-anchor="middle">safety line £'+n0(c.floor)+'</text>';
   // balance line
   const pts=W.map((x,i)=>(i?X(i):pl+2)+','+Y(x.b)).join(' ');
   g+='<polyline class="cfline" points="'+pts+'" fill="none" stroke="#007185" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>';
@@ -1678,10 +1745,10 @@ function renderCashFlow(){const el=$('cashline');if(!el)return;const c=DATA.cfo,
   const flag=(i,y,txt,col,up)=>{const cx=Math.min(Math.max(X(i),pl+50),Wd-pr-50),fy=up?y-12:y+20;return '<g><rect x="'+(cx-52)+'" y="'+(fy-14)+'" width="104" height="20" rx="10" fill="'+col+'"/><text x="'+cx+'" y="'+(fy+1)+'" text-anchor="middle" font-size="11.5" font-weight="800" fill="#fff">'+txt+'</text></g>'};
   if(li>0){const lb=(loan.gbp>=1000?'£'+Math.round(loan.gbp/1000)+'k':'£'+n0(loan.gbp));g+=flag(li,Y(W[li].in),lb+' loan in','#067d62',true)}
   if(ri>0){g+=flag(ri,Y(-W[ri].out),'£5k paid back','#cc0c39',false)}
-  const pk=W.reduce((b,x,i)=>x.b>W[b].b?i:b,0);g+='<text x="'+Math.min(X(pk),Wd-pr-30)+'" y="'+(Y(W[pk].b)-12)+'" text-anchor="middle" font-size="13" font-weight="800" fill="#007185">£'+(W[pk].b/1000).toFixed(1)+'k</text>';
-  el.innerHTML='<svg viewBox="0 0 '+Wd+' '+H+'" width="100%" role="img" aria-label="Cash flow chart">'+g+'</svg><div class="cflg"><span><i style="background:#5cc4a4"></i>Money in</span><span><i style="background:#f08a9c"></i>Money out</span><span><i style="background:#007185;height:4px;vertical-align:3px"></i>Cash in the bank</span><span><i style="background:none;border-top:2px dashed #c45500;height:0;border-radius:0;vertical-align:3px"></i>Keep above this</span></div>';
+  const pk=W.reduce((b,x,i)=>x.b>W[b].b?i:b,0);g+='<text x="'+Math.min(X(pk),Wd-pr-30)+'" y="'+(Y(W[pk].b)-12<pt+4?Y(W[pk].b)+22:Y(W[pk].b)-12)+'" text-anchor="middle" font-size="13" font-weight="800" fill="#007185" paint-order="stroke" stroke="#fff" stroke-width="3">£'+(W[pk].b/1000).toFixed(1)+'k</text>';
+  el.innerHTML='<svg viewBox="0 0 '+Wd+' '+H+'" width="100%" role="img" aria-label="Cash flow chart">'+g+'</svg><div class="cflg"><span><i style="background:#5cc4a4"></i>Money in</span><span><i style="background:#f08a9c"></i>Money out</span>'+(heldG>0?'<span><i style="background:repeating-linear-gradient(45deg,#8d9699 0 2px,#c9cfd1 2px 5px)"></i>Held by Amazon (~£'+n0(heldG)+')</span>':'')+'<span><i style="background:#007185;height:4px;vertical-align:3px"></i>Cash in the bank</span><span><i style="background:none;border-top:2px dashed #c45500;height:0;border-radius:0;vertical-align:3px"></i>Keep above this</span></div>';
   // one sentence
-  const rest=W.slice(1),low=rest.reduce((b,x)=>x.b<b.b?x:b,rest[0]),pkw=W[pk],k=v=>'£'+(v/1000).toFixed(1).replace(/\.0$/,'')+'k';
+  const rest=W.slice(1),low=rest.reduce((b,x)=>x.b<b.b?x:b,rest[0]),pkw=W[pk],k=v=>(v<0?'-':'')+'£'+(Math.abs(v)/1000).toFixed(1).replace(/\.0$/,'')+'k';
   const mon=d=>d.toLocaleDateString('en-GB',{month:'long'});
   $('cfsay').innerHTML=(loan?'The <b>'+k(loan.gbp)+' loan</b> gets you started, ':'')+'cash stays tight until Christmas (lowest about <b>'+k(low.b)+'</b> in '+mon(low.d)+'), then <b>Valentine\'s money</b> lifts it to about <b>'+k(pkw.b)+'</b> in '+mon(pkw.d)+(ri>0?' - enough to pay the loan back.':'.')}
 let _cfT;window.addEventListener('resize',()=>{clearTimeout(_cfT);_cfT=setTimeout(()=>{try{renderCashFlow()}catch(e){}},250)});
@@ -1750,8 +1817,9 @@ function renderCfo(){
 function renderWin(){
   const L=DATA.products.filter(p=>p.account===ACC&&p.profit30!=null).sort((a,b)=>b.profit30-a.profit30);
   const mx=Math.max(...L.map(p=>Math.abs(p.profit30)),1);
-  $('win').innerHTML=L.slice(0,8).map(p=>'<div class="wr" data-id="'+esc(p.id)+'"><img src="'+img(p.img,100)+'" alt=""><div><div class="nm"><span>'+esc(p.name)+'</span><b style="color:'+(p.profit30<0?'var(--red)':'var(--green)')+'">'+money(p.profit30,p.cur)+'</b></div><div class="wb'+(p.profit30<0?' neg':'')+'" style="width:'+Math.max(2,Math.abs(p.profit30)/mx*100)+'%"></div></div></div>').join('');
+  $('win').innerHTML=L.slice(0,8).map(p=>'<div class="wr" data-id="'+esc(p.id)+'"><img src="'+img(p.img,100)+'" alt=""><div><div class="nm"><span>'+esc(p.name)+'</span><b style="color:'+(p.profit30<0?'var(--red)':'var(--green)')+'">'+money(p.profit30,p.cur)+(noCost(p)?'<sup class="ncs" title="before stock cost">*</sup>':'')+'</b></div><div class="wb'+(p.profit30<0?' neg':'')+'" style="width:'+Math.max(2,Math.abs(p.profit30)/mx*100)+'%"></div></div></div>').join('');
   $('win').querySelectorAll('.wr').forEach(x=>x.onclick=()=>openP(x.dataset.id));
+  {const wn=$('winnc');if(wn)wn.classList.toggle('hidden',!L.slice(0,8).some(noCost))}
   const best=L[0],lost=DATA.products.filter(p=>p.account===ACC).reduce((s,p)=>s+(p.lost_sales||0),0),neg=L.filter(p=>p.profit30<0);
   const hm=(DATA.history&&ACC==='UK')?DATA.history:null;
   let ins='<h4 style="margin:0 0 10px">Quick insights</h4><ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:10px">';
