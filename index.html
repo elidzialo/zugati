@@ -171,6 +171,7 @@ h2{font-size:21px;margin:30px 0 4px;font-weight:700}
 .pdate .dd{font-size:24px;font-weight:800;line-height:1}
 .pdate .mm{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--muted)}
 .pdate.late{background:var(--redbg)}.pdate.late .dd,.pdate.late .mm{color:var(--red)}
+.pdate.asap{background:var(--amberbg)}.pdate.asap .dd,.pdate.asap .mm{color:var(--amber)}.pdate .mm{line-height:1.15}.pdate .pin{margin:4px auto 0;font-size:11px;font-weight:800;color:#fff;background:var(--teal,#007185);border-radius:99px;padding:1px 6px;display:inline-block}
 .pw{font-weight:700}
 .pto{font-size:13px;color:var(--muted)}
 .pwhy{font-size:13px;margin-top:2px}
@@ -664,6 +665,12 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
 .psum{padding:14px}.psumh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}.psumh b{font-size:19px}.psumh span{font-size:15px;font-weight:700;color:var(--muted)}
 .psbar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--greybg);margin:10px 0 12px}.psbar i{display:block;height:100%;animation:psgrow .9s ease-out both;transform-origin:left}
 @keyframes psgrow{from{transform:scaleX(0)}}
+.dstrip{margin-top:12px;padding:12px;border-radius:12px;background:var(--greybg,#eaeded)}.dsh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}.dsh b{font-size:15px}.dsh span{font-size:12px;color:var(--muted);font-weight:700}
+.dsb{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;align-items:end}.dsc{text-align:center;min-width:0}.dsv{font-size:13px;font-weight:800;min-height:17px;white-space:nowrap}.dsc.now .dsv{color:#cc0c39}
+.dsbar{height:70px;display:flex;align-items:flex-end;justify-content:center;position:relative;border-bottom:2px solid #c8cccc}.dsbar i{display:block;width:72%;border-radius:6px 6px 0 0;transform-origin:bottom;animation:dsup .6s cubic-bezier(.2,.8,.2,1) both}.dsbar em{position:absolute;bottom:4px;left:0;right:0;font-style:normal;color:#067d62;font-weight:800}
+.dsl{font-size:11px;font-weight:800;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dsc.now .dsl{color:#cc0c39}.dsw{font-size:10px;color:var(--muted);line-height:1.2;min-height:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dsl2{font-size:12px;color:var(--muted);margin-top:8px;font-weight:700}
+@keyframes dsup{from{transform:scaleY(0)}to{transform:scaleY(1)}}@media(prefers-reduced-motion:reduce){.dsbar i{animation:none}}
+@media(max-width:600px){.dsb{gap:3px}.dsv{font-size:11px}.dsl{font-size:10px}.dsw{display:none}}
 .pstiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .pstile{font:inherit;text-align:left;border:0;border-top:5px solid var(--c);background:var(--bg);border-radius:10px;padding:10px;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-height:44px;color:#0f1111;transition:transform .15s}
 .pstile:active{transform:scale(.97)}.pstile .psi{font-size:18px}.pstile .psl{font-size:13px;font-weight:700;color:var(--c)}.pstile b{font-size:22px;line-height:1.1}.pstile small{font-size:12px;color:#565959}.pstile .psu{color:var(--c)}
@@ -1036,13 +1043,13 @@ function renderKpis(){
   const a=DATA.accounts[ACC],c=a.currency,p30=per('30d'),td=per('today'),lm=per('lastmonth');
   const hist=DATA.history||{},hp=(hist.profit||[]).slice(-12,-1),hs=(hist.sales||[]).slice(-12,-1);
   const prods=DATA.products.filter(p=>p.account===ACC).map(p=>[p,forecast(p)]);
-  const urgent=prods.filter(([,f])=>f.st==='now').length,soon=prods.filter(([,f])=>f.st==='soon').length;
+  /* A2 26 Nov: 'order now' counts only products that need a NEW order; ones already ordered and waiting are listed separately */const urgent=prods.filter(([,f])=>f.st==='now'&&f.qty>0).length,waitN=prods.filter(([,f])=>f.st==='now'&&!(f.qty>0)).length,soon=prods.filter(([,f])=>f.st==='soon').length;
   const ch=v=>v==null?'':'<span class="'+(v>=0?'up':'down')+'">'+(v>=0?'▲ ':'▼ ')+Math.abs(v).toFixed(0)+'%</span> ';
   $('kpis').innerHTML=[
     '<div class="card kpi"><div class="l">Profit · last 30 days</div><div class="v">'+money(p30.net_profit,c)+'</div><div class="d">'+ch(p30.profit_change)+'vs previous 30 days</div>'+(ACC==='UK'&&hp.length?spark(hp,90,34,'#067d62'):'')+'</div>',
     '<div class="card kpi"><div class="l">Sales · last 30 days</div><div class="v">'+money(p30.sales,c)+'</div><div class="d">'+n0(p30.units)+' items sold · '+ch(p30.sales_change)+'</div>'+(ACC==='UK'&&hs.length?spark(hs,90,34,'#ff9900'):'')+'</div>',
     '<div class="card kpi"><div class="l">Today so far</div><div class="v">'+money(td.sales,c)+'</div><div class="d">'+n0(td.units)+' items · profit '+money(td.net_profit,c)+'</div></div>',
-    '<div class="card kpi"><div class="l">Stock alerts</div><div class="v" style="color:'+(urgent?'var(--red)':'var(--green)')+'">'+urgent+' <span style="font-size:16px;color:var(--muted)">order now</span></div><div class="d">'+(soon?soon+' more to order soon · ':'')+'<a href="#products" data-f="now">see them</a></div></div>'
+    '<div class="card kpi"><div class="l">Stock alerts</div><div class="v" style="color:'+(urgent?'var(--red)':'var(--green)')+'">'+urgent+' <span style="font-size:16px;color:var(--muted)">order now</span></div><div class="d">'+(soon?soon+' more to order soon · ':'')+(waitN?waitN+' ordered, waiting · ':'')+'<a href="#products" data-f="now">see them</a></div></div>'
   ].join('');
   $('kpis').querySelectorAll('[data-f]').forEach(x=>x.onclick=()=>{FILTER=x.dataset.f;renderChips();renderGrid()});
   const s=DATA.season||{},sz=[];
@@ -1212,10 +1219,13 @@ function renderPay(){
   let DISP={},DP={};try{DISP=JSON.parse(localStorage.getItem('zdis')||'{}');DP=JSON.parse(localStorage.getItem('zdidpay')||'{}')}catch(e){}
   const P=(DATA.payments||[]).filter(x=>!DISP['p:'+x.id]).slice().sort((a,b)=>a.due<b.due?-1:1);
   const lab={unpaid:'Not paid',overdue:'Overdue',check:'Check if paid',planned:'Planned',later:'Later',forecast:'Not ordered yet',paid:'✓ Paid'};
-  const rowH=x=>{const d=new Date(x.due+'T00:00:00'),late=d<today()&&x.status!=='forecast';
-   const pd=x.status==='paid',ck=x.status==='check';return '<div class="prow'+(pd?' paid':'')+(ck?' chk':'')+'"><div class="pdate'+(late&&!pd?' late':'')+'"><div class="dd">'+d.getDate()+'</div><div class="mm">'+d.toLocaleDateString('en-GB',{month:'short'})+'</div></div>'+
+  /* A2 26 Nov: a payment that has a matching task with a ready Gmail draft (same email thread) gets that draft button, e.g. av1 Avask -> t29 'Open Avask draft' */
+  const drT=x=>x.email?(DATA.tasks||[]).find(t=>t.email===x.email&&t.link&&/compose|draft/i.test(t.link+' '+(t.link_label||''))):null;
+  const rowH=x=>{const d=new Date(x.due+'T00:00:00'),late=d<today()&&x.status!=='forecast',asap=d<today()&&x.status==='forecast';
+   const dt=drT(x),dn=Math.round((d-today())/DAY),soon=!late&&!asap&&x.status!=='paid'&&dn>=0&&dn<=21;
+   const pd=x.status==='paid',ck=x.status==='check';return '<div class="prow'+(pd?' paid':'')+(ck?' chk':'')+'"><div class="pdate'+(late&&!pd?' late':'')+(asap?' asap':'')+'">'+(asap?'<div class="dd">!</div><div class="mm">Ask now</div>':'<div class="dd">'+d.getDate()+'</div><div class="mm">'+d.toLocaleDateString('en-GB',{month:'short'})+'</div>'+(soon?'<div class="pin">'+(dn===0?'today':'in '+dn+'d')+'</div>':''))+'</div>'+
    '<div>'+(ck?'<span class="qbadge" title="We need you to tell us">?</span>':'')+'<span class="pill p-'+esc(x.status)+'">'+(ck&&DP[x.id]?'You said: '+esc(DP[x.id]==='yes'?'paid':DP[x.id]==='no'?'not paid':DP[x.id]):ck&&x.paid?'Already sent - what was it?':(lab[x.status]||esc(x.status)))+'</span>'+(ck&&!DP[x.id]?' <a class="dplink" href="#didpay">Answer: did you pay? ↑</a>':'')+'<div class="pw">'+esc(x.what)+'</div><div class="pto">'+esc(x.to)+'</div><div class="pwhy">'+esc(x.why)+'</div></div>'+
-   '<div class="pamt"><div class="a">'+(x.amount!=null?money(x.amount,x.cur):'?')+'</div><div class="an">'+esc(x.amount_note||'')+'</div>'+(pd?'':'<div class="btns" style="justify-content:flex-end">'+(x.link?'<a class="btn" target="_blank" rel="noopener" href="'+esc(x.link)+'">Pay</a>':'')+(x.email?'<a class="btn'+(ck?'':' ghost')+'" target="_blank" rel="noopener" href="'+esc(x.email)+'">'+(ck?'✉ Open email':'Email')+'</a>':'')+'</div><div class="tact" style="justify-content:flex-end"><span class="tb ok" data-dis="p:'+esc(x.id)+'" data-st="paid" data-t="'+esc(x.what)+'">✓ Paid</span><span class="tb no" data-dis="p:'+esc(x.id)+'" data-st="not relevant" data-t="'+esc(x.what)+'">✕ Not relevant</span></div>')+'</div></div>'};
+   '<div class="pamt"><div class="a">'+(x.amount!=null?money(x.amount,x.cur):'?')+'</div><div class="an">'+esc(x.amount_note||'')+'</div>'+(pd?'':'<div class="btns" style="justify-content:flex-end">'+(x.link?'<a class="btn" target="_blank" rel="noopener" href="'+esc(x.link)+'">Pay</a>':'')+(dt?'<a class="btn" target="_blank" rel="noopener" href="'+esc(dt.link)+'">✉ '+esc(dt.link_label||'Open draft')+'</a>':'')+(x.email?'<a class="btn'+(ck?'':' ghost')+'" target="_blank" rel="noopener" href="'+esc(x.email)+'">'+(ck?'✉ Open email':'Email')+'</a>':'')+'</div><div class="tact" style="justify-content:flex-end"><span class="tb ok" data-dis="p:'+esc(x.id)+'" data-st="paid" data-t="'+esc(x.what)+'">✓ Paid</span><span class="tb no" data-dis="p:'+esc(x.id)+'" data-st="not relevant" data-t="'+esc(x.what)+'">✕ Not relevant</span></div>')+'</div></div>'};
   /* A2 21 Nov: three coloured stacks with a £ total each - Pay now / Waiting for money / Later */
   const isIn=x=>/money in\b|coming in|top-up/i.test((x.what||'')+' '+(x.amount_note||''));
   const G={now:[],wait:[],later:[],paid:[],inc:[]};
@@ -1228,6 +1238,7 @@ function renderPay(){
   let ph='<div class="psum card"><div class="psumh"><b>What you owe</b><span>'+money(all,'GBP')+' in total</span></div>'+
    '<div class="psbar">'+DEF.map(d=>T[d[0]].t?'<i style="width:'+(T[d[0]].t/all*100).toFixed(1)+'%;background:'+d[4]+'"></i>':'').join('')+'</div>'+
    '<div class="pstiles">'+DEF.map(d=>'<button class="pstile" data-pgo="'+d[0]+'" style="--c:'+d[4]+';--bg:'+d[5]+'"><span class="psi">'+d[1]+'</span><span class="psl">'+d[2]+'</span><b>'+money(T[d[0]].t,'GBP')+'</b><small>'+G[d[0]].length+' item'+(G[d[0]].length===1?'':'s')+'</small>'+unk(T[d[0]].u)+'</button>').join('')+'</div>'+
+   dueStrip(P.filter(x=>!isIn(x)&&x.status!=='paid'&&!(x.status==='check'&&(x.paid||DP[x.id]==='yes'))))+
    G.inc.map(x=>'<div class="pinc">💚 <b>'+money(x.amount,x.cur)+' coming in</b> - '+esc(x.to)+'<span>'+esc(x.amount_note||x.why||'')+'</span></div>').join('')+'</div>';
   DEF.forEach(d=>{const L=G[d[0]];if(!L.length)return;const cap=d[0]==='now'?99:2;
    ph+='<div class="pstack" id="pst-'+d[0]+'" style="--c:'+d[4]+';--bg:'+d[5]+'"><div class="psth"><span class="psi">'+d[1]+'</span><div><b>'+d[2]+'</b><small>'+d[3]+'</small></div><span class="pstt">'+money(T[d[0]].t,'GBP')+'</span></div>'+
@@ -1594,6 +1605,14 @@ function renderFiveK(){const el=$('fivek');if(!el)return;const F=DATA.fivek;if(!
    '<div class="fkp">'+L.map(r=>'<div class="fki c'+(r.i+1)+(r.ok?' ok':'')+'"><span class="n">'+(r.ok?'✓':r.i+1)+'</span><div style="min-width:0"><div class="w">'+esc(r.u.icon||'')+' '+esc(r.u.label)+'</div><div class="a">'+(r.ok?'Paid':'About '+money(r.g,'GBP'))+'</div></div>'+(!r.ok&&landed&&r===nxt&&r.x?'<span class="bk" data-dis="p:'+esc(r.u.id)+'" data-st="paid" data-t="'+esc(r.x.what||r.u.label)+'">✓ Paid</span>':'')+'</div>').join('')+'</div>'+
    (F.note?'<div class="fkn">'+esc(F.note)+'</div>':'')+'<button class="fkco" id="fkco">🛒 What\'s left to spend? Open checkout</button>';
   wireDis(el);const fc=$('fkco');if(fc)fc.onclick=openB}
+/* A2 26 Nov design: 'When it's due' - one bar per week for the next 6 weeks so Eli sees at a glance which week is heavy. Late items count in this week. */
+function dueStrip(L){const t=today(),m0=addD(t,-((t.getDay()+6)%7));const N=6,B=Array.from({length:N},(_,i)=>({d:addD(m0,i*7),g:0,n:0,u:0,w:[]}));let lat={g:0,n:0};
+  L.forEach(x=>{const d=new Date(x.due+'T00:00:00');let i=Math.floor((d-m0)/(7*DAY));if(i<0)i=0;const g=payGbp(x);if(i>=N){lat.g+=g;lat.n++;return}const b=B[i];b.n++;if(g>0)b.g+=g;else b.u++;b.w.push(x.to||x.what)});
+  const mx=Math.max(...B.map(b=>b.g),1);
+  return '<div class="dstrip"><div class="dsh"><b>When it\'s due</b><span>next 6 weeks</span></div><div class="dsb">'+B.map((b,i)=>{const h=b.g?Math.max(8,b.g/mx*100):0,c=i===0?'#cc0c39':b.g>=mx*.6?'#c45500':'#ff9900';
+   const who=[...new Set(b.w.map(w=>String(w).split(/[ (]/)[0]))].slice(0,2).join(', ');
+   return '<div class="dsc'+(i===0?' now':'')+'" title="'+esc(b.w.join(' · '))+'"><div class="dsv">'+(b.g?'£'+(b.g>=1000?(b.g/1000).toFixed(1)+'k':Math.round(b.g)):b.n?'?':'')+'</div><div class="dsbar"><i style="height:'+h+'%;background:'+c+';animation-delay:'+(i*60)+'ms"></i>'+(!b.g&&!b.n?'<em>✓</em>':'')+'</div><div class="dsl">'+(i===0?'Now':fmtD(b.d))+'</div><div class="dsw">'+esc(who)+'</div></div>'}).join('')+'</div>'+
+   (lat.n?'<div class="dsl2">+ '+money(Math.round(lat.g),'GBP')+' after that ('+lat.n+' item'+(lat.n===1?'':'s')+')</div>':'')+'</div>'}
 function payGbp(x){const c=DATA.cfo||{};return x.gbp?x.gbp:(x.amount!=null?(x.cur==='USD'?x.amount*(c.usd_gbp||.79):x.cur==='EUR'?x.amount*.86:x.amount):0)}
 /* A2 25 Nov: Amazon payouts on hold while the 'payouts stopped' task is open (and not ticked Done) */
 function payHold(){let D={};try{D=JSON.parse(localStorage.getItem('zdis')||'{}')}catch(e){}return (DATA.tasks||[]).find(t=>/payouts?\b.*(stopp|hold)|on hold/i.test(t.title||'')&&!isHid(D['t:'+t.id]))||null}

@@ -119,6 +119,14 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .cover .cf{position:absolute;right:3px;top:50%;transform:translateY(-50%);font-size:12px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
 .cover .cl2{display:flex;justify-content:space-between;font-size:12px;opacity:.9}
 @media (prefers-reduced-motion:reduce){.cover .cb i{transition:none}}
+.owed{background:var(--card);border-radius:22px;padding:16px;margin:14px 0;box-shadow:var(--shadow);border-left:6px solid var(--pink)}
+.owh{display:flex;align-items:center;gap:12px;margin-bottom:12px}.owi{width:44px;height:44px;border-radius:14px;background:var(--dark);display:grid;place-items:center;flex:none;position:relative}.owi::after{content:"";position:absolute;right:-3px;top:-3px;width:12px;height:12px;border-radius:50%;background:var(--pink);border:2px solid var(--card)}
+.owl{font-size:13px;color:var(--muted);font-weight:600}.owt{font-size:30px;font-weight:800;letter-spacing:-.5px;line-height:1.05}.own2{margin-left:auto;background:var(--pinkbg);color:var(--ink);font-weight:700;font-size:12px;border-radius:99px;padding:5px 10px;white-space:nowrap}
+.owr{display:grid;gap:10px}.owb{display:grid;grid-template-columns:72px 1fr auto;align-items:center;gap:10px}.owk{font-weight:700;font-size:14px}.owb b{font-size:16px;font-weight:800;min-width:64px;text-align:right}
+.owt2{height:14px;background:var(--soft);border-radius:99px;overflow:hidden}.owt2 i{display:block;height:100%;width:var(--w);border-radius:99px;animation:owg .8s cubic-bezier(.2,.8,.2,1) var(--d) both}.owt2 i.hi{background:linear-gradient(90deg,#e4576b,#c2412d)}.owt2 i.mid{background:linear-gradient(90deg,#F07C8C,#e4576b)}.owt2 i.lo{background:#f5b3bd}
+.owt2 i{min-width:6px}@media (prefers-color-scheme:dark){.owi{background:var(--pink)}.owi::after{background:#fff}}
+.ows{margin-top:12px;font-size:12px;color:var(--muted)}@keyframes owg{from{width:0}}@media(prefers-reduced-motion:reduce){.owt2 i{animation:none}}
+.mhero .pendn{display:inline-block;margin-top:4px;font-size:12px;font-weight:600;background:rgba(255,255,255,.18);border-radius:99px;padding:3px 10px}
 .mhero{background:linear-gradient(135deg,#1f7a45,#2fa463);color:#fff;border-radius:24px;padding:18px;box-shadow:0 10px 24px rgba(31,122,69,.25)}
 .mhero .l{font-size:13px;opacity:.9;font-weight:500}.mhero .big{font-size:40px;font-weight:800;letter-spacing:-1px;line-height:1.1}
 .bars{display:flex;gap:12px;align-items:flex-end;height:130px;margin:16px 2px 4px}
@@ -769,7 +777,10 @@ function saveDel(){try{localStorage.setItem('sesaDel',JSON.stringify(DEL))}catch
 async function deriveKey(pw,salt,iter){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:iter,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt'])}
 let RAW='';
 async function load(pw){const r=await fetch('data.enc.json?t='+Date.now(),{cache:'no-store'});const e=await r.json();if(!KEY||pw)KEY=await deriveKey(pw,b64(e.salt),e.iter);const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(e.iv)},KEY,b64(e.ct));RAW=new TextDecoder().decode(p);if(SHARED())await pullState();DATA=JSON.parse(RAW);norm(DATA);applyShared(DATA);try{seenInit()}catch(e){DIFF=null}render()}
-function norm(d){d.properties=d.properties||[];d.top3=d.top3||[];d.watch=d.watch||[];d.properties.forEach(p=>{p.units=p.units||[];p.tasks=(p.tasks||[]).filter(t=>!DEL[t.id]);p.name=p.name||'Property'});if(d.money){const m=d.money;m.months=m.months||[];m.payments=m.payments||[];m.costs_top=m.costs_top||[];m.expected=m.expected||[]}}
+function norm(d){d.properties=d.properties||[];d.top3=d.top3||[];d.watch=d.watch||[];d.properties.forEach(p=>{p.units=p.units||[];p.tasks=(p.tasks||[]).filter(t=>!DEL[t.id]);p.name=p.name||'Property'});if(d.money){const m=d.money;m.months=m.months||[];m.payments=m.payments||[];m.costs_top=m.costs_top||[];m.expected=m.expected||[];
+ /* A2 26 Nov: rent that has landed but is 'not yet in books' was missing from the rent totals (hero said £3,272 while Castleford's own clock said £4,820). Count it in the totals and its month, once. */
+ if(!m._pend){m._pend=0;const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];m.payments.forEach(x=>{if(!/not yet in (the )?books/i.test(x.from||'')||!(+x.amount>0))return;m._pend+=+x.amount;const k=MN[new Date((x.date||'')+'T00:00:00').getMonth()];const mo=m.months.find(y=>y.m===k)||m.months[m.months.length-1];if(mo)mo.rent=Math.round(((+mo.rent||0)+(+x.amount))*100)/100});
+ if(m._pend&&m.rent_total!=null)m.rent_total=Math.round(((+m.rent_total)+m._pend)*100)/100}}}
 function remPw(k){try{const o=JSON.parse(localStorage.getItem(k)||'null');if(o&&o.pw&&Date.now()-o.t<6048e5){o.t=Date.now();localStorage.setItem(k,JSON.stringify(o));return o.pw}localStorage.removeItem(k)}catch(e){}return null}
 function savePw(k,pw){try{localStorage.setItem(k,JSON.stringify({pw:pw,t:Date.now()}))}catch(e){}}
 function forgetPw(k){try{localStorage.removeItem(k)}catch(e){}}
@@ -1174,7 +1185,7 @@ function runway(d){const m=d.money;if(!m)return '';const ev=runEvents(d);if(!ev.
   <div class="rwf">From the notes in your emails. Bills without a date aren't shown.</div></div>`}
 function t0d(){return new Date().getDate()}
 function money(m){let h='';const max=Math.max(...m.months.map(x=>Math.max(x.rent||0,x.costs||0)),1);
- h+=`<div class="mhero"><div class="l">Rent received since Sep</div><div class="big" data-count="${Number(m.rent_total)||0}">${gbp(m.rent_total)}</div>
+ h+=`<div class="mhero"><div class="l">Rent received since Sep</div><div class="big" data-count="${Number(m.rent_total)||0}">${gbp(m.rent_total)}</div>${m._pend?`<div class="pendn">incl. ${gbp(m._pend)} just paid - not in the books yet</div>`:''}
  ${(()=>{/* A2 22 Nov: one-glance 'is rent paying for it yet?' meter */const r=+m.rent_total||0,c=+m.costs_total||0;if(!c)return '';const pc=Math.min(100,Math.round(r/c*100)),gap=c-r;
   return `<div class="cover"><div class="ct"><span>${pc>=100?'🎉 Rent now covers all costs':`Rent has paid back <b>${pc}%</b> of costs`}</span><em>${pc>=100?'+'+gbp(r-c):gbp(gap)+' to go'}</em></div><div class="cb" role="img" aria-label="Rent ${gbp(r)} of costs ${gbp(c)}"><i data-w="${pc}" style="width:0"></i>${[25,50,75].map(x=>`<s style="left:${x}%"></s>`).join('')}<span class="cf">${pc>=100?'🏁':'🏠'}</span></div><div class="cl2"><span>${gbp(r)} rent in</span><span>${gbp(c)} spent</span></div></div>`})()}
  ${m.months.length?`<div class="bars">${m.months.map(x=>`<div class="bar"><b>${gbp(x.rent)}</b><div class="bpair"><i class="r" data-h="${Math.round((x.rent||0)/max*100)}"></i><i class="c" data-h="${Math.round((x.costs||0)/max*100)}"></i></div><span>${esc(x.m)}${x.partial?' so far':''}</span>${(()=>{const n=(+x.rent||0)-(+x.costs||0);return `<em class="net ${n<0?'neg':'pos'}" title="Rent ${gbp(x.rent)} - costs ${gbp(x.costs)}">${n<0?'-':'+'}${gbp(Math.abs(n))}</em>`})()}</div>`).join('')}</div><div class="netkey">Pill = what was left after costs that month</div>
@@ -1249,19 +1260,28 @@ function wxOf(p){let sc=100;const why=[];const op=p.tasks.filter(x=>!DONE[x.id])
  const bad=p.units.filter(x=>tagOf(x)==='bad').length,wt=p.units.filter(x=>tagOf(x)==='warn').length;sc-=Math.min(35,bad*8+wt*3);
  if(p.units.length)why.push(bad?{c:'bad',t:`${bad} problem${bad>1?'s':''} with ${bad>1?'units':'a unit'}`}:wt?{c:'warn',t:`${wt} waiting on ${wt>1?'tenants':'a tenant'}`}:{c:'ok',t:'Every unit happy'});
  if(DATA.money){const r=rentOf(p);let d=null;if(r.last){const t0=new Date();t0.setHours(0,0,0,0);const l=new Date(r.last);l.setHours(0,0,0,0);d=Math.round((t0-l)/864e5)}
-  if(d===null){sc-=20;why.push({c:'bad',t:'No rent in yet'})}else if(d>45){sc-=12;why.push({c:'bad',t:`Rent late - ${d} days`})}else if(d>31){sc-=6;why.push({c:'warn',t:'Rent due now'})}else why.push({c:'ok',t:`Rent in ${d} day${d===1?'':'s'} ago`})}
+  if(d===null){sc-=20;why.push({c:'bad',t:'No rent in yet'})}else if(d>45){sc-=12;why.push({c:'bad',t:`Rent late - ${d} days`})}else if(d>31){sc-=6;why.push({c:'warn',t:'Rent due now'})}else why.push({c:'ok',t:d<=0?'Rent in today':d===1?'Rent in yesterday':`Rent in ${d} days ago`})}
  sc=Math.max(0,Math.min(100,Math.round(sc)));const k=sc>=70?'sun':sc>=40?'cloud':'storm';
  return {sc,k,l:{sun:'Sunny',cloud:'Cloudy',storm:'Stormy'}[k],s:{sun:'Running nicely',cloud:'A few things to sort',storm:'Needs you this week'}[k],why}}
 function wxIcon(k,z){const sun=(cx,cy,r)=>`<g class="wsun"><circle cx="${cx}" cy="${cy}" r="${r}" fill="#FFC94D"/>${[0,45,90,135,180,225,270,315].map(a=>`<line x1="${cx}" y1="${cy-r-4}" x2="${cx}" y2="${cy-r-10}" stroke="#FFC94D" stroke-width="4" stroke-linecap="round" transform="rotate(${a} ${cx} ${cy})"/>`).join('')}</g>`;
  const cloud=(f)=>`<path class="wcl" d="M18 52h40a12 12 0 0 0 0-24 16 16 0 0 0-30-4 11 11 0 0 0-10 28z" fill="${f}"/>`;
  const inner=k==='sun'?sun(32,32,14):k==='cloud'?sun(42,22,10)+cloud('#fff'):cloud('#cfd3da')+[18,32,46].map((x,i)=>`<line class="wrn" style="animation-delay:${i*.25}s" x1="${x}" y1="58" x2="${x-4}" y2="66" stroke="#7fb2f0" stroke-width="3.5" stroke-linecap="round"/>`).join('')+`<path class="wbt" d="M36 54l-5 9h6l-4 9" fill="none" stroke="#FFC94D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
  return `<svg width="${z}" height="${z}" viewBox="0 0 72 72" aria-hidden="true">${inner}</svg>`}
+/* A2 26 Nov design: 'Who owes rent' - reads 'Room 6 owes £1,300' style lines from the unit notes and draws one bar per room, biggest first. Shows nothing when no one owes. */
+function owedOf(p){const R=[];let tot=null,src='';const re=/\b(Room|Flat)\s*(\d+)\s+(?:(?:owes|is owed|behind by|arrears(?: of)?)\s*)?£\s?([\d,]+(?:\.\d+)?)/gi;
+ p.units.forEach(u=>{const txt=(u.label||'')+' '+(u.note||'');if(!/owes|arrears|behind/i.test(txt))return;let m;while((m=re.exec(txt))){const k=m[1][0].toUpperCase()+m[1].slice(1).toLowerCase()+' '+m[2];if(!R.find(x=>x.k===k))R.push({k,v:+m[3].replace(/,/g,'')})}
+  const t=/£\s?([\d,]+(?:\.\d+)?)\s*(?:in\s+)?arrears/i.exec(txt);if(t&&tot==null)tot=+t[1].replace(/,/g,'');if(!src)src=u.tenant||'';const st=/statement\s*#?\s*(\d+)\s*\(([^)]+)\)/i.exec(txt);if(st)src+=' - statement #'+st[1]+' ('+st[2]+')'});
+ if(!R.length)return null;R.sort((a,b)=>b.v-a.v);return{R,tot:tot!=null?tot:R.reduce((s,x)=>s+x.v,0),src}}
+function owedCard(p){const o=owedOf(p);if(!o)return '';const mx=o.R[0].v||1;
+ return `<div class="owed" role="img" aria-label="Rent owed ${gbp(o.tot)}"><div class="owh"><div class="owi">${ic('pound',22,2.4,'#fff')}</div><div><div class="owl">Rent owed</div><div class="owt">${gbp(o.tot)}</div></div><span class="own2">${o.R.length} ${o.R.length===1?'room':'rooms'} behind</span></div>
+ <div class="owr">${o.R.map((x,i)=>`<div class="owb"><span class="owk">${esc(x.k)}</span><span class="owt2"><i class="${x.v>=1000?'hi':x.v>=600?'mid':'lo'}" style="--w:${Math.max(8,x.v/mx*100).toFixed(1)}%;--d:${i*90}ms"></i></span><b>${gbp(x.v)}</b></div>`).join('')}</div>
+ ${o.src?`<div class="ows">From ${esc(o.src)}</div>`:''}</div>`}
 function wxCard(p){const w=wxOf(p);return `<div class="wx k-${w.k}" id="wx"><div class="wxi">${wxIcon(w.k,76)}</div><div class="wxb"><div class="wxl">Property weather</div><div class="wxt">${w.l}<span>${w.s}</span></div><div class="wxm" role="img" aria-label="Health ${w.sc} out of 100"><i style="width:${w.sc}%"></i></div><div class="wxs">${w.sc}/100</div></div>
  <div class="wxw">${w.why.map(x=>`<span class="wxr ${x.c}">${x.c==='ok'?ic('check',14,3):'<b>!</b>'}${esc(x.t)}</span>`).join('')}</div></div>`}
 function prop(p,i){let h='';const t=p.tasks.length,o=open_(p),att=p.units.filter(u=>u.tag!=='ok').length;
  h+=`<div class="pban ${GR[i%4]}"><div class="t">${esc(p.name)}</div><div class="a">${esc(p.area||'')}</div>${p.status?`<div class="s">${esc(p.status)}</div>`:''}${p.event?`<div class="ev">${ic('cal',16)} ${esc(String(p.event).replace(/^([A-Z])([A-Z]{3,})\b/,(m,a,b)=>a+b.toLowerCase()))}</div>`:''}${DATA.money?rentStrip(p):''}
  <div class="pstats"><div><b id="po">${o}</b><span>Jobs left</span></div><div><b>${p.units.length}</b><span>Units</span></div><div><b>${att}</b><span>Need a look</span></div></div></div>`;
- h+=wxCard(p);
+ h+=wxCard(p);h+=owedCard(p);
  h+=`<h2>Jobs <span class="cnt" id="pc">${t-o}/${t} done</span></h2>`;{const nd=Object.values(DEL).filter(v=>v.prop===p.id).length;h+=`<div class="jbar"><button class="own none addt" data-addtask="${esc(p.id)}">+ Add task</button>${nd?`<button class="own none undel" data-undel="1">${nd} deleted - bring back</button>`:''}</div>`}if(t)h+=jobMix(p);if(t)h+=topicMix(p.tasks.filter(x=>!DONE[x.id]).length?p.tasks.filter(x=>!DONE[x.id]):p.tasks);
  if(!t)h+=`<div class="alldone">Nothing to do here<small>Enjoy it while it lasts</small></div>`;
  for(const [lv,name,col] of LVLS){const ts=p.tasks.filter(x=>lvOf(x)===lv);if(!ts.length)continue;const lf=lvlLeft(p,lv);
