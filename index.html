@@ -108,6 +108,20 @@ h2{font-size:21px;margin:30px 0 4px;font-weight:700}
 .order.now{background:var(--redbg);color:var(--red)}.order.soon{background:var(--amberbg);color:var(--amber)}.order.ok{background:var(--greenbg);color:var(--green)}.order.stop,.order.slow{background:var(--greybg);color:var(--grey)}
 /* winners */
 .win{display:flex;flex-direction:column;gap:10px}
+/* A1 26 Nov: Christmas stock check */
+.xh>div:last-child{min-width:0}.xh{display:flex;gap:16px;align-items:center;padding:4px 0 14px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.xh .big{font-size:44px;font-weight:800;line-height:1;color:#0b5d3b;white-space:nowrap}.xh .big small{font-size:22px;color:var(--muted)}
+.xh .dots{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.xh .dots i{width:14px;height:14px;border-radius:50%;display:block}
+.xr{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:start;padding:11px 0;border-bottom:1px solid #eef0f0;cursor:pointer;transition:background .15s}
+.xr:last-child{border-bottom:0}.xr:hover{background:#f7fafa}.xr img{width:44px;height:44px;object-fit:contain;border-radius:6px;background:#fff}
+.xr .nm{display:flex;justify-content:space-between;gap:8px;font-size:14px}.xr .nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.xr .nm b{white-space:nowrap;font-size:13px}
+.xt{position:relative;height:16px;border-radius:8px;margin:7px 0 4px;overflow:visible}
+.xt .tk{position:absolute;top:-2px;bottom:-2px;width:1px;background:rgba(255,255,255,.55)}
+.xt .tr{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:15px;line-height:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+.xt .end{position:absolute;right:-6px;top:50%;transform:translateY(-50%);font-size:20px}
+.xax{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin:2px 22px 0 0}
+.xsay{font-size:13px;color:var(--muted)}.xsay b.r{color:var(--red)}.xsay b.g{color:var(--green)}.xsay b.a{color:var(--amber)}
+.szx{display:inline-block;margin-top:6px;color:#fff;font-weight:700;font-size:13px;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:999px;text-decoration:none}
 .wr{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;cursor:pointer}
 .wr img{width:44px;height:44px;object-fit:contain;background:#fff;border:1px solid #eee;border-radius:6px}
 .wr .nm{font-size:14px;font-weight:600;display:flex;justify-content:space-between;gap:8px}
@@ -875,6 +889,9 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
         <div class="legend"><span><i style="background:#ffc266"></i>Sales</span><span><i style="background:var(--green)"></i>Profit</span></div>
         <div id="yearchart"></div>
       </div>
+      <div id="xmasw"><h2>Christmas stock check</h2>
+      <p class="h2sub">Will each product last until Christmas? Green = stock on the shelf, red = empty. 🚚 = new stock landing. Tap a product for more.</p>
+      <div class="card" id="xmas"></div></div>
       <h2>Valentine's timeline</h2>
       <p class="h2sub">Every Valentine order, from the factory to Amazon. The pink zone is the rush - stock should be at Amazon before it starts.</p>
       <div class="card" id="vtl"></div>
@@ -1012,7 +1029,7 @@ function render(){
   $('upd').innerHTML='<span class="dot'+(age>2?' old':'')+'"></span>Last update '+esc(upd.toLocaleString('en-GB',{timeZone:'Europe/London',weekday:'short',hour:'2-digit',minute:'2-digit'}));
   const h=new Date().getHours();$('greet').textContent=(h<12?'Good morning':h<18?'Good afternoon':'Good evening')+', Eli';
   $('todaydate').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
-  renderKpis();renderActs();renderCfo();try{renderPayin()}catch(e){console.error(e)}loadPayx();try{renderToday()}catch(e){console.error(e)}renderBar();setupAsk();renderChips();renderGrid();renderPay();renderWin();renderYear();renderVal();try{renderVTL()}catch(e){console.error(e)}try{renderBF()}catch(e){console.error(e)}try{renderROF()}catch(e){console.error(e)}try{tip3()}catch(e){}
+  renderKpis();renderActs();renderCfo();try{renderPayin()}catch(e){console.error(e)}loadPayx();try{renderToday()}catch(e){console.error(e)}renderBar();setupAsk();renderChips();renderGrid();renderPay();renderWin();renderYear();renderVal();try{renderXmas()}catch(e){console.error(e)}try{renderVTL()}catch(e){console.error(e)}try{renderBF()}catch(e){console.error(e)}try{renderROF()}catch(e){console.error(e)}try{tip3()}catch(e){}
 }
 function per(k){const a=DATA.accounts[ACC];return a&&a.periods.find(p=>p.key===k)||{}}
 function renderKpis(){
@@ -1029,7 +1046,7 @@ function renderKpis(){
   ].join('');
   $('kpis').querySelectorAll('[data-f]').forEach(x=>x.onclick=()=>{FILTER=x.dataset.f;renderChips();renderGrid()});
   const s=DATA.season||{},sz=[];
-  if(s.christmas){const d=daysTo(s.christmas.date);if(d>=0)sz.push('<div class="sz x"><div class="n">'+d+'<small>days</small></div><div class="t"><b>Christmas</b><br>Last December you sold '+money(s.christmas.last_year_sales,'GBP')+' and made '+money(s.christmas.last_year_profit,'GBP')+' profit.</div></div>')}
+  if(s.christmas){const d=daysTo(s.christmas.date);if(d>=0)sz.push('<div class="sz x"><div class="n">'+d+'<small>days</small></div><div class="t"><b>Christmas</b><br>Last December you sold '+money(s.christmas.last_year_sales,'GBP')+' and made '+money(s.christmas.last_year_profit,'GBP')+' profit.'+(()=>{try{const X=xmasCalc();return X?'<br><a class="szx" href="#xmasw">🎄 '+X.ok+' of '+X.R.length+' products last - see the stock check</a>':''}catch(e){return ''}})()+'</div></div>')}
   if(s.valentines){const d=daysTo(s.valentines.date),o=daysTo(s.valentines.peak_from)-(DATA.lead_days||45);sz.push('<div class="sz v"><div class="n">'+d+'<small>days</small></div><div class="t"><b>Valentine\'s Day</b> - your biggest month<br>Last year: '+money(s.valentines.last_year_sales,'GBP')+' sales in 4 weeks. '+(o<=0?'<b>Order stock now</b> to land in time.':'Order stock in the next '+o+' days.')+'</div></div>')}
   $('seasonbar').innerHTML=sz.join('');
 }
@@ -1866,6 +1883,33 @@ function renderVal(){
    return '<div class="wr" data-id="'+esc(p.id)+'" style="margin:10px 0"><img src="'+img(p.img,100)+'" alt=""><div><div class="nm"><span>'+esc(p.name)+'</span><b style="color:'+(cov>=100?'var(--green)':cov>=60?'var(--amber)':'var(--red)')+'">'+cov+'% covered</b></div>'+
    '<div style="height:12px;border-radius:4px;background:#e8436a;margin-top:4px;width:'+(p.val_units/mx*100)+'%"></div><div style="height:12px;border-radius:4px;background:#146eb4;margin-top:3px;width:'+Math.max(1,have/mx*100)+'%"></div><div class="note">Needed ~'+n0(p.val_units)+' · have '+n0(have)+'</div>'+quoteHtml(p,false)+'</div></div>'}).join('');
   $('valready').querySelectorAll('.wr').forEach(x=>x.onclick=()=>openP(x.dataset.id));wireQ($('valready'));
+}
+
+/* A1 26 Nov: Christmas stock check - a lane from today to Christmas Eve per product */
+function xmasCalc(){const S=DATA.season||{},t0=today();const xd=S.christmas&&S.christmas.date?new Date(S.christmas.date+'T00:00:00'):new Date(t0.getFullYear()+'-12-25T00:00:00');
+  const xi=Math.round((addD(xd,-1)-t0)/DAY);if(xi<1||xi>60)return null;
+  const L=DATA.products.filter(p=>p.account===ACC&&p.xmas_units>0&&!(p.margin<0)&&!clearItem(p));if(!L.length)return null;
+  const R=L.map(p=>{const f=forecast(p),ln=f.line.slice(0,xi+1),out=ln.map((v,i)=>v<=0&&(i>0||!(p.stock>0)));
+    const first=out.indexOf(true),endOut=out[xi],days=out.filter(Boolean).length,arr=(f.AL||[]).filter(a=>a.i>0&&a.i<=xi);
+    let back=-1;if(first>=0&&!endOut){for(let i=first;i<=xi;i++)if(!out[i]){back=i;break}}
+    const v=first<0?'ok':endOut?'out':'gap';return {p,f,xi,out,first,back,days,arr,v,left:Math.round(ln[xi]||0)}});
+  const rk={out:0,gap:1,ok:2};R.sort((a,b)=>rk[a.v]-rk[b.v]||(a.first-b.first)||(b.p.xmas_units-a.p.xmas_units));
+  return {R,xi,xd,ok:R.filter(r=>r.v==='ok').length}}
+function renderXmas(){const w=$('xmasw'),el=$('xmas');if(!el)return;const X=xmasCalc();if(!X){w.style.display='none';return}w.style.display='';
+  const {R,xi}=X,t0=today(),pc=i=>(i/xi*100).toFixed(2)+'%',col={ok:'#067d62',gap:'#c45500',out:'#cc0c39'};
+  const ticks=[];for(let i=1;i<xi;i++){const d=addD(t0,i);if(d.getDay()===1)ticks.push(i)}
+  const head='<div class="xh"><div class="big">'+X.ok+'<small>/'+R.length+'</small></div><div><b style="font-size:16px">'+(X.ok===R.length?'Every product lasts to Christmas 🎄':X.ok===0?'None of your Christmas sellers last to Christmas':X.ok+' of '+R.length+' Christmas sellers last to Christmas')+'</b><div class="note">Christmas Eve is '+xi+' days away. Based on how each one sold last December.</div><div class="dots">'+R.map(r=>'<i style="background:'+col[r.v]+'" title="'+esc(r.p.name)+'"></i>').join('')+'</div></div></div>';
+  const rows=R.map(r=>{const st=[];let prev=null;for(let i=0;i<=xi;i++){const c=r.out[i]?'o':'g';if(c!==prev){st.push([c,i]);prev=c}}
+    const g=st.map(([c,i],k)=>{const e=k+1<st.length?st[k+1][1]:xi+1,a=(i/(xi+1)*100).toFixed(2),b=(e/(xi+1)*100).toFixed(2);return c==='g'?'#1d8f5f '+a+'%,#1d8f5f '+b+'%':'#ef8fa3 '+a+'%,#ef8fa3 '+b+'%'}).join(',');
+    const tr=r.arr.map(a=>'<span class="tr" style="left:'+pc(a.i)+'" title="'+n0(a.q)+' landing ~'+fmtD(addD(t0,a.i))+'">🚚</span>').join('');
+    const tight=r.v==='ok'&&r.left<r.p.xmas_units/31*3;const say=r.v==='ok'?(tight?'<b class="a">Only just</b> - about '+n0(r.left)+' left on Christmas Eve':'<b class="g">✅ Enough</b> - about '+n0(r.left)+' left on Christmas Eve'):
+      r.v==='out'?'<b class="r">'+(r.first<=0?'Out of stock now':'Runs out ~'+fmtD(addD(t0,r.first)))+'</b>'+((r.f.AL||[]).some(a=>a.i>xi)?' - new stock lands after Christmas':r.arr.length?' - sells out again before Christmas':' - nothing new on the way'):
+      '<b class="a">Empty ~'+fmtD(addD(t0,r.first))+' to '+fmtD(addD(t0,r.back))+'</b>, then new stock lands';
+    return '<div class="xr" data-id="'+esc(r.p.id)+'"><img src="'+img(r.p.img,100)+'" alt=""><div><div class="nm"><span>'+esc(r.p.name)+'</span><b style="color:'+(tight?col.gap:col[r.v])+'">'+(r.v==='ok'?(tight?'Only just':'Lasts'):r.v==='out'?r.days+' days empty':'Short gap')+'</b></div>'+
+      '<div class="xt" style="background:linear-gradient(90deg,'+g+')">'+ticks.map(i=>'<span class="tk" style="left:'+pc(i)+'"></span>').join('')+tr+'<span class="end">🎄</span></div><div class="xsay">'+say+'</div></div></div>'}).join('');
+  const ax='<div class="xax"><span>Today</span><span>'+fmtD(addD(t0,Math.round(xi/2)))+'</span><span>Christmas Eve</span></div>';
+  el.innerHTML=head+'<div style="margin:0 0 0 54px">'+ax+'</div>'+rows;
+  el.querySelectorAll('.xr').forEach(x=>x.onclick=()=>openP(x.dataset.id));
 }
 
 
