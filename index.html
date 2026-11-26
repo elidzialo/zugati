@@ -345,9 +345,13 @@ svg text{font-family:inherit}
 .shp.ok{background:var(--greenbg);color:var(--green)}
 .shp.wt{background:var(--amberbg);color:var(--amber);border:1px solid #ffcf8a}
 .shp.wt:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--orange);animation:raPulse 1.6s ease-in-out infinite}
+.shp.trk{background:var(--green);color:#fff;box-shadow:0 2px 6px rgba(29,143,95,.35)}
+.shp.trk:hover{filter:brightness(1.08)}
 .shp.tk{background:#e3f2f5;color:var(--teal)}
 .shp.go{background:var(--orange);color:var(--nav)}
 .ralert .rwhy{position:relative;font-size:16px;line-height:1.4;margin:12px 0 4px;background:rgba(0,0,0,.18);border-radius:12px;padding:10px 12px}
+.ralert .rgw{position:relative;font-size:14px;line-height:1.4;margin:6px 0 4px;background:rgba(255,255,255,.12);border:1px dashed rgba(255,255,255,.45);border-radius:12px;padding:8px 12px}
+.ralert .rgw span{display:block;opacity:.85;font-size:13px;margin-top:2px}
 .ralert .ramt{position:relative;display:inline-flex;align-items:baseline;gap:8px;background:#fff;color:#b3001b;border-radius:12px;padding:8px 12px;margin-top:8px;font-weight:900;font-size:18px}
 .ralert .ramt small{font-weight:700;font-size:13px;color:#565959}
 @media(max-width:560px){.shr{gap:10px;align-items:flex-start}.shr img{width:46px;height:46px}.shipc{padding:16px 14px 6px}}
@@ -1049,7 +1053,7 @@ function draftBadge(x){const a=draftAge(x);if(!a)return '';const n=a.days;return
 /* A1 24 Nov: big red alert at the very top when tasks[0] is the urgent payouts-on-hold task (t27). Hides once Done. */
 function renderAlert(){const el=$('ralert');if(!el)return;const x=(DATA.tasks||[])[0];let DIS={};try{DIS=JSON.parse(localStorage.getItem('zdis')||'{}')}catch(e){}
   if(!x||x.level!=='urgent'||x.id!=='t27'||isHid(DIS['t:'+x.id])){el.innerHTML='';return}
-  el.innerHTML='<div class="ralert" role="alert"><div class="rah"><span class="rai">🚨</span><div class="rat">'+esc(x.title)+'</div></div>'+(()=>{const w=(x.detail||'').match(/^.*?[.!?](?=\s|$)/),a=(DATA.payments||[]).find(p=>p.id==='amzus'&&p.status!=='paid');return (w?'<div class="rwhy"><b>Why:</b> '+esc(w[0])+'</div>':'')+(a?'<div class="ramt">💳 '+(a.cur==='USD'?'$':a.cur==='EUR'?'€':'£')+Number(a.amount).toFixed(2)+' <small>'+(/declin/i.test(a.what||'')?'declined':'not paid')+(a.gbp?' (about £'+n0(a.gbp)+')':'')+'</small></div>':'')})()+'<div class="ral">No payouts until this is fixed.</div><div class="rab">'+(x.link?'<a class="rago" target="_blank" rel="noopener" href="'+esc(x.link)+'">💳 Fix the card in Seller Central ↗</a>':'')+(x.email?'<a class="rae" target="_blank" rel="noopener" href="'+esc(x.email)+'">Open Amazon\'s email</a>':'')+'<button class="rad" data-dis="t:'+esc(x.id)+'" data-st="done" data-t="'+esc(x.title)+'">✓ Done - fixed it</button></div></div>';
+  el.innerHTML='<div class="ralert" role="alert"><div class="rah"><span class="rai">🚨</span><div class="rat">'+esc(x.title)+'</div></div>'+(()=>{const w=(x.detail||'').match(/^.*?[.!?](?=\s|$)/),a=(DATA.payments||[]).find(p=>p.id==='amzus'&&p.status!=='paid');const g=(x.detail||'').match(/(?:^|[.!?]\s+)([^.!?]*Google Workspace.*?[.!?])(?=\s|$)/i);return (w?'<div class="rwhy"><b>Why:</b> '+esc(w[0])+'</div>':'')+(g?'<div class="rgw">📧 <b>Also fix:</b> '+esc(g[1].replace(/^\s*Same problem:\s*/i,'').replace(/\s+also\s+/i,' ').trim())+' <span>Same 2 minutes - do both cards together.</span></div>':'')+(a?'<div class="ramt">💳 '+(a.cur==='USD'?'$':a.cur==='EUR'?'€':'£')+Number(a.amount).toFixed(2)+' <small>'+(/declin/i.test(a.what||'')?'declined':'not paid')+(a.gbp?' (about £'+n0(a.gbp)+')':'')+'</small></div>':'')})()+'<div class="ral">No payouts until this is fixed.</div><div class="rab">'+(x.link?'<a class="rago" target="_blank" rel="noopener" href="'+esc(x.link)+'">💳 Fix the card in Seller Central ↗</a>':'')+(x.email?'<a class="rae" target="_blank" rel="noopener" href="'+esc(x.email)+'">Open Amazon\'s email</a>':'')+'<button class="rad" data-dis="t:'+esc(x.id)+'" data-st="done" data-t="'+esc(x.title)+'">✓ Done - fixed it</button></div></div>';
   wireDis(el);const b=el.querySelector('[data-dis]'),h=b.onclick;b.onclick=e=>{e.stopPropagation();el.firstChild.classList.add('gone');setTimeout(()=>h.call(b,e),330)}}
 /* A1 24 Nov: 'Reorder now' - one tap fills the basket with the suggested qty for this supplier and opens it, ready to hand to Claude */
 function canRe(p,f){return f.st==='now'&&!p.valentine&&supOf(p)!==NOSUP}
@@ -1062,7 +1066,7 @@ function shipRows(){const S=DATA.shipping||{},M=S.methods||{},t=today(),dt=s=>s?
   const words=p=>[p.id].concat((p.name||'').toLowerCase().replace(/\(.*?\)/g,'').split(/\s+/).filter(w=>w.length>4));
   (DATA.valentine_orders||[]).forEach(o=>{const p=P(o.product);if(!p||p.account!==ACC)return;const m=M[o.ship||'air']||{};
     if(o.shipped||o.tracking){const sh=dt(o.shipped)||t,land=dt(o.lands||o.at_amazon)||addD(sh,m.days||12);seen[p.id]=1;
-      out.push({p,qty:o.qty,icon:m.icon||'✈️',how:(m.label||'Air').toLowerCase(),st:'go',from:sh,land,tracking:o.tracking||null});return}
+      out.push({p,qty:o.qty,icon:m.icon||'✈️',how:(m.label||'Air').toLowerCase(),st:'go',from:sh,land,tracking:o.tracking||null,turl:o.tracking_url||null});return}
     if(!o.qty||(o.ready&&dt(o.ready)>t))return;const q=[String(o.qty),n0(o.qty)],W=words(p);
     const w=pays.find(x=>{const tx=(x.what||'').toLowerCase();return q.some(v=>tx.indexOf(v)>=0)&&W.some(v=>tx.indexOf(v)>=0)});
     if(w){seen[p.id]=1;const sym=w.cur==='USD'?'$':w.cur==='EUR'?'€':'£';out.push({p,qty:o.qty,icon:/air/i.test(w.what)?'✈️':(m.icon||'🚚'),st:'pay',pay:w,payTxt:'Waiting: pay '+sym+n0(w.amount)+(/air/i.test(w.what)?' for air':'')})}});
@@ -1081,7 +1085,8 @@ function shipBadge(r){if(!r)return '';const t=today();
 function shipRowHtml(r,i){const t=today();{const nm=esc(r.p.short||r.p.name);let pct=8,trk='wait',lab='',pills='';
     if(r.st==='go'){const tot=Math.max(1,r.land-r.from),done=Math.min(1,Math.max(0,(t-r.from)/tot));pct=Math.round(8+done*84);trk='go';const ld=Math.round((r.land-t)/DAY);
       lab='<div class="shl"><span>Left '+fmtD(r.from)+'</span><span>'+(ld<=0?'Should be there now':'Lands ~'+shipMon(r.land))+'</span></div>';
-      pills='<span class="shp ok">'+r.icon+' Shipped by '+esc(r.how)+'</span>'+(r.tracking?(/^https?:/.test(r.tracking)?'<a class="shp tk" target="_blank" rel="noopener" href="'+esc(r.tracking)+'">📍 Track it ↗</a>':'<span class="shp tk">📍 '+esc(r.tracking)+'</span>'):'<span class="shp wt">Tracking: waiting</span>')}
+      const car=((r.tracking||'').match(/^(UPS|DHL|FedEx|TNT|DPD|USPS|Royal Mail)\b/i)||[])[1];
+      pills='<span class="shp ok">'+r.icon+' Shipped by '+esc(r.how)+'</span>'+(r.turl&&/^https?:/.test(r.turl)?'<a class="shp trk" target="_blank" rel="noopener" href="'+esc(r.turl)+'" title="'+esc(r.tracking||'')+'">📍 Track on '+esc(car||'the courier site')+' ↗</a>':r.tracking?(/^https?:/.test(r.tracking)?'<a class="shp tk" target="_blank" rel="noopener" href="'+esc(r.tracking)+'">📍 Track it ↗</a>':'<span class="shp tk">📍 '+esc(r.tracking)+'</span>'):'<span class="shp wt">Tracking: waiting</span>')}
     else if(r.st==='pay'){pct=6;lab='<div class="shl"><span>Made - not moving yet</span><span>Leaves once paid</span></div>';
       pills='<span class="shp wt">'+esc(r.payTxt)+'</span>'+(r.pay.link?'<a class="shp go" target="_blank" rel="noopener" href="'+esc(r.pay.link)+'">Open pay link ↗</a>':'')}
     else{pct=30;lab='<div class="shl"><span>Booked'+(r.where?' '+esc(r.where):'')+'</span><span>Date not known yet</span></div>';pills='<span class="shp wt">Tracking: waiting'+(r.who?' for '+esc(r.who):'')+'</span>'}
