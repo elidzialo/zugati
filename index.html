@@ -147,6 +147,10 @@ h2{font-size:21px;margin:30px 0 4px;font-weight:700}
 .tpay .amt{font-size:24px;font-weight:800;white-space:nowrap;text-align:right}.tpay .amt small{display:block;font-size:11px;color:var(--muted);font-weight:600}
 .tpay .when{display:inline-block;font-size:12px;font-weight:800;padding:2px 8px;border-radius:10px;background:var(--amberbg);color:var(--amber)}
 .tpay.late .when{background:var(--redbg);color:var(--red)}
+/* A1 27 Nov: payments that wait for the £5,000 are calm (no red 'late', outline pay link); once it lands they turn green 'pay now' */
+.tpay.wait{border-left:6px dashed #8fb3b5;background:#f7fafa}.tpay.wait .when{background:#e6f2f3;color:var(--teal)}.tpay.wait .bpay{background:#fff;color:var(--teal);border:1.5px solid var(--teal)}
+.tpay.go5k{border-left-color:var(--green)}.tpay.go5k .when{background:var(--greenbg);color:var(--green)}
+.tpay .wnote{font-size:12px;color:var(--muted);margin-top:3px}
 .tpay .bt{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
 .tpay .bt a,.tpay .bt span{flex:1 1 auto;text-align:center;text-decoration:none;font-weight:800;font-size:14px;border-radius:20px;padding:10px 12px;cursor:pointer;min-height:20px}
 .tpay .bpay{background:var(--orange);color:#0f1111}.tpay .bpay:hover{background:#f08804}
@@ -1667,19 +1671,21 @@ function renderToday(){try{renderDidPay()}catch(e){console.error(e)}try{renderFi
   const t0=today(),wk=addD(t0,7),{start}=cashWeeks(),safe=safeSpend();
   const due=(DATA.payments||[]).filter(x=>['unpaid','overdue'].includes(x.status)&&!DIS['p:'+x.id]&&new Date(x.due+'T00:00:00')<=wk).sort((a,b)=>a.due<b.due?-1:1);
   const dueSum=due.reduce((s,x)=>s+payGbp(x),0);
+  let FK=null;try{FK=fkInfo()}catch(e){}const fkIds=new Set(FK?(FK.Q||[]).map(q=>q.u.id):[]),gated=x=>!!(FK&&!FK.landed&&fkIds.has(x.id)),go5=x=>!!(FK&&FK.landed&&fkIds.has(x.id));
+  const nGate=due.filter(gated).length;
   const must=mustDo(DIS),mustIds=must.map(x=>x.id);
   const inc=(DATA.payments||[]).filter(x=>/^in/.test(x.id)&&x.status!=='paid'&&!DIS['p:'+x.id]&&new Date(x.due+'T00:00:00')<=wk);
   const whenTxt=x=>{const d=daysTo(x.due);return d<0?'Late by '+(-d)+' day'+(d<-1?'s':''):d===0?'Due today':d===1?'Due tomorrow':'Due '+new Date(x.due+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long'})};
   const draft=x=>x.draft||('https://mail.google.com/mail/?authuser=eli@zelr.co.uk#search/'+encodeURIComponent('in:draft '+String(x.to||'').split(/[\s(-]/)[0]));
   let h=mustHtml(must)+'<div class="tst">'+
    '<div class="tsv cash"><div class="ic">🏦</div><div class="l">Cash in the bank now</div><div class="v">'+money(start,'GBP')+'</div><div class="d">All your Amazon bank accounts together</div></div>'+
-   '<div class="tsv due"><div class="ic">🧾</div><div class="l">To pay this week</div><div class="v">'+(due.length?money(dueSum,'GBP'):'£0')+'</div><div class="d">'+(due.length?due.length+' payment'+(due.length>1?'s':'')+' - see below':'Nothing due')+'</div></div>'+
+   '<div class="tsv due"><div class="ic">🧾</div><div class="l">To pay this week</div><div class="v">'+(due.length?money(dueSum,'GBP'):'£0')+'</div><div class="d">'+(due.length?due.length+' payment'+(due.length>1?'s':'')+(nGate?' - '+(nGate===due.length?(nGate>1?'all wait':'waits'):nGate+' wait')+' for the £5,000':' - see below'):'Nothing due')+'</div></div>'+
    '<div class="tsv safe'+(safe<=0?' zero':'')+'"><div class="ic">'+(safe>0?'✅':'✋')+'</div><div class="l">Safe to spend</div><div class="v">'+money(safe,'GBP')+'</div><div class="d">'+(safe>0?'Extra on new stock, on top of the plan':'Stick to the plan - nothing extra')+'</div></div></div>';
   inc.forEach(x=>{h+='<div class="tsin"><span style="font-size:20px">💷</span><span><b>'+money(x.amount,x.cur||'GBP')+' coming in</b> '+(daysTo(x.due)<=0?'today':'by '+fmtD(new Date(x.due+'T00:00:00')))+' '+esc(String(x.to||'').replace(/^From/,'from'))+'. Pay the cards below once it lands.</span></div>'});
   h+='<div class="tsh">Pay this week</div>';
   const dueL=due.filter(x=>!mustIds.includes(x.id));
-  h+=dueL.length?'<div class="tpays">'+dueL.map(x=>{const late=daysTo(x.due)<0;return '<div class="tpay'+(late?' late':'')+'" data-pid="'+esc(x.id)+'"><div class="top"><div><span class="when">'+whenTxt(x)+'</span><div class="who" style="margin-top:5px">'+esc(x.to)+'</div><div class="wh">'+esc(x.what)+'</div></div><div class="amt">'+money(payGbp(x),'GBP')+(x.cur&&x.cur!=='GBP'&&x.amount?'<small>'+money(x.amount,x.cur)+'</small>':'')+'</div></div>'+
-    '<div class="bt">'+(x.link?'<a class="bpay" target="_blank" rel="noopener" href="'+esc(x.link)+'">Pay now ↗</a>':'')+'<a class="tbdr" target="_blank" rel="noopener" href="'+esc(draft(x))+'">✉ Gmail draft</a><span class="bok" data-dis="p:'+esc(x.id)+'" data-st="paid" data-t="'+esc(x.what)+'" title="Mark as paid">✓ Paid</span></div></div>'}).join('')+'</div>'
+  h+=dueL.length?'<div class="tpays">'+dueL.map(x=>{const gt=gated(x),g5=go5(x),late=!gt&&!g5&&daysTo(x.due)<0;return '<div class="tpay'+(late?' late':'')+(gt?' wait':'')+(g5?' go5k':'')+'" data-pid="'+esc(x.id)+'"><div class="top"><div><span class="when">'+(gt?'⏳ Waits for the £5,000':g5?'💷 £5,000 is in - pay now':whenTxt(x))+'</span><div class="who" style="margin-top:5px">'+esc(x.to)+'</div><div class="wh">'+esc(x.what)+'</div>'+(gt?'<div class="wnote">Not late - on hold until the money is in. Nothing to do yet.</div>':'')+'</div><div class="amt">'+money(payGbp(x),'GBP')+(x.cur&&x.cur!=='GBP'&&x.amount?'<small>'+money(x.amount,x.cur)+'</small>':'')+'</div></div>'+
+    '<div class="bt">'+(x.link?'<a class="bpay" target="_blank" rel="noopener" href="'+esc(x.link)+'">'+(gt?'Pay link ↗':'Pay now ↗')+'</a>':'')+'<a class="tbdr" target="_blank" rel="noopener" href="'+esc(draft(x))+'">✉ Gmail draft</a><span class="bok" data-dis="p:'+esc(x.id)+'" data-st="paid" data-t="'+esc(x.what)+'" title="Mark as paid">✓ Paid</span></div></div>'}).join('')+'</div>'
    :'<div class="tnone">'+(must.length?'☝️ Just the red one at the top for now.':'🎉 Nothing to pay this week. Let the cash build.')+'</div>';
   const u=DATA.team&&DATA.team.update;if(u&&u.text){const L=String(u.text).split('\n').filter(Boolean),tm=new Date(String(u.time).replace(/Z?$/,'Z'));
     h+='<div class="tupd'+(L.length>2?' cl':'')+'"><div class="h">Team update · '+(isNaN(tm)?'':esc(tm.toLocaleString('en-GB',{timeZone:'Europe/London',weekday:'short',hour:'2-digit',minute:'2-digit'})))+'</div><ul>'+L.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>'+(L.length>2?'<span class="tmore">Show all ▾</span>':'')+'</div>'}
