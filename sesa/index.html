@@ -684,6 +684,27 @@ h2 .cnt{font-size:12px;font-weight:600;background:var(--card);border:1px solid v
 .stairs .stpulse{animation:stp 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
 @keyframes stp{50%{transform:scale(1.35)}}
 @media (prefers-reduced-motion:reduce){.stairs .stl{animation:none;stroke-dashoffset:0}.stairs .stpulse{animation:none}}
+/* A2 27 Nov: road to completion + buying states */
+.road{background:linear-gradient(135deg,#2a1f4d,#1d1d1f);color:#fff;border-radius:24px;padding:16px 16px 14px;margin:14px 0;box-shadow:0 10px 30px rgba(42,31,77,.25)}
+.rdh{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.rdi{width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:26px}
+.rdl{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#cfc6ef;font-weight:700}.rdt{font-size:17px;line-height:1.25}.rdt b{color:var(--pink)}
+.rdp{margin-left:auto;background:rgba(240,124,140,.18);color:#ffc3cc;border-radius:12px;padding:4px 10px;font-size:12.5px;font-weight:700}
+.rdr{position:relative;display:grid;grid-template-columns:repeat(7,1fr);margin:18px 0 4px}
+.rdtrk{position:absolute;left:7%;right:7%;top:17px;height:4px;border-radius:2px;background:rgba(255,255,255,.15)}.rdtrk i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:2px;background:linear-gradient(90deg,#8f7be0,var(--pink));animation:rdgrow 1.1s .2s forwards cubic-bezier(.3,.9,.3,1)}
+@keyframes rdgrow{to{width:var(--w)}}
+.rds{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;opacity:0;animation:rdin .4s var(--d) forwards}
+@keyframes rdin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.rdb{width:38px;height:38px;border-radius:50%;background:#3a3150;border:2px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:17px;filter:grayscale(.6);opacity:.75}
+.rds.d .rdb{background:#2f9a63;border-color:#2f9a63;color:#fff;filter:none;opacity:1}
+.rds.c .rdb{background:#fff;border-color:var(--pink);filter:none;opacity:1;box-shadow:0 0 0 0 rgba(240,124,140,.6);animation:rdpulse 1.8s 1.2s infinite}
+.rds.c[data-goto]{cursor:pointer}
+@keyframes rdpulse{0%{box-shadow:0 0 0 0 rgba(240,124,140,.6)}70%{box-shadow:0 0 0 12px rgba(240,124,140,0)}100%{box-shadow:0 0 0 0 rgba(240,124,140,0)}}
+.rds em{font-style:normal;font-size:11.5px;line-height:1.2;color:#bdb6cf;font-weight:600}.rds.c em{color:#fff}.rds.d em{color:#bfe6cf}
+.rdgo{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:12px;min-height:46px;border:0;border-radius:14px;background:var(--pink);color:#1d1d1f;font:inherit;font-weight:700;font-size:15px;cursor:pointer}
+.rentchip.buy{background:rgba(106,75,196,.18);color:#fff}.rcs.buy{background:#ece6fb;color:#5a3db0}.rc.k-buy{border-top-color:#6a4bc4}
+#nav.many .nb{font-size:11px;letter-spacing:-.1px}
+@media (max-width:420px){.rds em{font-size:10.5px}.rdb{width:34px;height:34px;font-size:15px}.rdtrk{top:15px}.rdp{margin-left:0}}
+@media (prefers-reduced-motion:reduce){.rds,.rdtrk i,.rds.c .rdb{animation:none;opacity:1}.rdtrk i{width:var(--w)}}
 </style>
 </head>
 <body>
@@ -768,7 +789,7 @@ const avatar=(p,cls='av')=>`<span class="${cls}" style="background:${pcol(p.id)}
 const first=n=>String(n||'').split(/\s+/)[0];
 const nick=p=>{const f=first(p.name),w=String(p.name||'').split(/\s+/);return people().some(o=>o.id!==p.id&&first(o.name)===f)&&w[1]?f+' '+w[1][0]:f};
 /* A2 20 Nov: the bank figure is the last bank-feed sync; when the note gives a newer estimate, show that (with a small 'est.' chip) so Eli isn't misled */
-function realCash(m){if(!m)return null;const t=String(m.note||'')+' '+(m.cash_note||'');const v=t.match(/(?:real cash is|cash should be|cash is|real balance is|balance is) (?:about |around |roughly )?£(\d{1,3}(?:,\d{3})*(?:\.\d+)?)/i);const sy=t.match(/(?:not synced since|last synced?|feed[^.]*?since) (\d{1,2} [A-Z][a-z]{2})/);return {v:v?+v[1].replace(/,/g,''):null,sync:sy?sy[1]:null}}
+function realCash(m){if(!m)return null;const t=String(m.note||'')+' '+(m.cash_note||'');const v=t.match(/(?:real cash is|cash should be|cash is|real balance is|balance is) (?:about |around |roughly )?£(\d{1,3}(?:,\d{3})*(?:\.\d+)?)/i)||t.match(/(?:about|around|roughly)\s+£(\d{1,3}(?:,\d{3})*(?:\.\d+)?)\s+(?:now|today|in the bank)\b/i); /* A2 27 Nov: 'so roughly £355 now' */const sy=t.match(/(?:not synced since|last synced?|feed[^.]*?since) (\d{1,2} [A-Z][a-z]{2})/);return {v:v?+v[1].replace(/,/g,''):null,sync:sy?sy[1]:null}}
 let DONE={};try{DONE=JSON.parse(localStorage.getItem('sesaDone')||'{}')}catch(e){}
 function saveDone(){try{localStorage.setItem('sesaDone',JSON.stringify(DONE))}catch(e){}}
 /* Deleted tasks (22 Nov): hidden on this device, by task id, so a refresh does not bring them back */
@@ -867,6 +888,11 @@ async function go(){const pw=document.getElementById('pw').value;document.getEle
 function ago(t){const m=Math.round((Date.now()-new Date(t))/60000);if(!isFinite(m))return 'recently';if(m<2)return 'just now';if(m<60)return m+' min ago';const h=Math.round(m/60);if(h<48)return h+'h ago';return Math.round(h/24)+' days ago'}
 function greet(){const h=new Date().getHours();return h<12?'Good morning':h<18?'Good afternoon':'Good evening'}
 const short=n=>String(n).replace(/^\d+\s*/,'').replace(/ Road South$/,'').replace(/ HMO$/,'');
+/* A2 27 Nov: nav needs short names now there are 3 properties (was 'St Andre...', 'Trafalga...') */
+const navName=n=>short(n).replace(/ (Square|Street|Road|Avenue|Lane|Close|Terrace)$/,'');
+/* A2 27 Nov: a property we are still buying (sale agreed, not completed) - no rent is expected, so no red 'chase' states */
+function buying(p){if(!p)return false;const t=[p.status,p.event].join(' ');if(/\bcompleted\b|completion (?:done|happened)|keys (?:in|collected)/i.test(t))return false;
+ if(/sale agreed|not ours yet|new purchase|until completion|buying/i.test(t))return true;const e=((DATA.money||{}).expected||[]).find(x=>clockProp(x)===p);return !!(e&&/not ours yet|until completion/i.test(e.note||''))}
 const open_=p=>p.tasks.filter(t=>!DONE[t.id]).length;
 const allT=()=>DATA.properties.reduce((a,p)=>a+p.tasks.length,0),allO=()=>DATA.properties.reduce((a,p)=>a+open_(p),0);
 const t3left=()=>DATA.top3.slice(0,3).filter(x=>!DONE[hash(x)]).length;
@@ -1130,7 +1156,7 @@ function rentStrip(p){const x=rentOf(p),m=DATA.money,k=short(p.name).toLowerCase
  for(let d=new Date(2026,8,1);d<=t0;d=new Date(d.getFullYear(),d.getMonth()+1,1))M.push({y:d.getFullYear(),mo:d.getMonth(),v:0});
  (m.payments||[]).filter(q=>String(q.property||'').toLowerCase().includes(k)).forEach(q=>{const d=new Date(q.date),b=M.find(z=>z.y===d.getFullYear()&&z.mo===d.getMonth());if(b)b.v+=(+q.amount||0)});
  const mx=Math.max(...M.map(z=>z.v),1),last=M.length-1;
- if(!x.sum)return `<div class="rentchip">${ic('pound',14,2.4)} No rent in yet</div>`;
+ if(!x.sum)return buying(p)?`<div class="rentchip buy">${ic('key',14,2.4)} Rent starts once it's yours</div>`:`<div class="rentchip">${ic('pound',14,2.4)} No rent in yet</div>`;
  return `<div class="rstrip"><div class="rsh">${ic('pound',14,2.4)} <b>${gbp(x.sum)}</b> rent in since Sep${x.last?` <span>· last ${esc(dShort(x.last))}</span>`:''}</div><div class="rsb">${M.map((z,i)=>`<div class="rsc${i===last?' now':''}${z.v?'':' zero'}" title="${esc(MON[z.mo])}: ${gbp(z.v)}"><em>${z.v?gbp(z.v):'-'}</em><i style="--h:${z.v?Math.max(10,Math.round(z.v/mx*100)):4}%;animation-delay:${i*90}ms"></i><span>${esc(new Date(z.y,z.mo,1).toLocaleDateString('en-GB',{month:'short'}))}</span></div>`).join('')}</div></div>`}
 function dShort(d){return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
 function nextRentDate(n,t0){const re=/\b(\d{1,2})(?:st|nd|rd|th)?\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b/gi;let m;
@@ -1141,10 +1167,10 @@ function clockProp(e){const k=String(e.property||'').toLowerCase();return DATA.p
 function rentClock(e){const p=clockProp(e);
  const t0=new Date();t0.setHours(0,0,0,0);const r=p?rentOf(p):{sum:0,n:0,last:null};let days=null;if(r.last){const l=new Date(r.last);l.setHours(0,0,0,0);days=Math.max(0,Math.round((t0-l)/864e5))}
  const nx=nextRentDate(e.note||'',t0),inN=nx?Math.round((nx-t0)/864e5):null;
- const st=days===null?{c:'bad',l:'No rent yet',s:'Worth a chase'}:days<=31?{c:'ok',l:'On track',s:'Paid within a month'}:days<=45?{c:'warn',l:'Due now',s:'Over a month since rent'}:{c:'bad',l:'Late',s:'Well over a month'};
- const col={ok:'var(--grn)',warn:'var(--amb)',bad:'var(--red)'}[st.c],S=92,W=9,R=(S-W)/2,C=2*Math.PI*R,f=days===null?1:Math.min(days/31,1);
- const dial=`<svg class="rcd" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" role="img" aria-label="${days===null?'No rent received yet':days+' days since last rent'}"><circle cx="${S/2}" cy="${S/2}" r="${R}" fill="none" stroke="var(--line)" stroke-width="${W}"/><circle class="rca" cx="${S/2}" cy="${S/2}" r="${R}" fill="none" stroke="${col}" stroke-width="${W}" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}" data-off="${C*(1-f)}" transform="rotate(-90 ${S/2} ${S/2})"/>${days===null?`<text x="${S/2}" y="${S/2+7}" text-anchor="middle" font-size="22" font-weight="700" fill="${col}">?</text>`:`<text x="${S/2}" y="${S/2+4}" text-anchor="middle" font-size="24" font-weight="700" fill="var(--ink)">${days}</text><text x="${S/2}" y="${S/2+20}" text-anchor="middle" font-size="12" fill="var(--muted)">${days===1?'day':'days'}</text>`}</svg>`;
- const pts=[r.last?`<div class="rp1 pa"><i></i><b>Last rent</b><span>${esc(dShort(r.last))}</span></div>`:`<div class="rp1 no"><i></i><b>Last rent</b><span>None yet</span></div>`,`<div class="rp1 td"><i></i><b>Today</b><span>${esc(dShort(t0))}</span></div>`,nx?`<div class="rp1 fu"><i></i><b>Next</b><span>${esc(dShort(nx))}</span></div>`:''].join('');
+ const bz=days===null&&buying(p);const st=bz?{c:'buy',l:'Buying',s:'Not ours yet - no rent to chase'}:days===null?{c:'bad',l:'No rent yet',s:'Worth a chase'}:days<=31?{c:'ok',l:'On track',s:'Paid within a month'}:days<=45?{c:'warn',l:'Due now',s:'Over a month since rent'}:{c:'bad',l:'Late',s:'Well over a month'};
+ const col={ok:'var(--grn)',warn:'var(--amb)',bad:'var(--red)',buy:'#6a4bc4'}[st.c],S=92,W=9,R=(S-W)/2,C=2*Math.PI*R,f=bz?(roadOf(p).done/roadOf(p).S.length):days===null?1:Math.min(days/31,1);
+ const dial=`<svg class="rcd" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" role="img" aria-label="${days===null?'No rent received yet':days+' days since last rent'}"><circle cx="${S/2}" cy="${S/2}" r="${R}" fill="none" stroke="var(--line)" stroke-width="${W}"/><circle class="rca" cx="${S/2}" cy="${S/2}" r="${R}" fill="none" stroke="${col}" stroke-width="${W}" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}" data-off="${C*(1-f)}" transform="rotate(-90 ${S/2} ${S/2})"/>${bz?`<text x="${S/2}" y="${S/2+9}" text-anchor="middle" font-size="26">🔑</text>`:days===null?`<text x="${S/2}" y="${S/2+7}" text-anchor="middle" font-size="22" font-weight="700" fill="${col}">?</text>`:`<text x="${S/2}" y="${S/2+4}" text-anchor="middle" font-size="24" font-weight="700" fill="var(--ink)">${days}</text><text x="${S/2}" y="${S/2+20}" text-anchor="middle" font-size="12" fill="var(--muted)">${days===1?'day':'days'}</text>`}</svg>`;
+ const pts=bz?(()=>{const R=roadOf(p);return `<div class="rp1 pa"><i></i><b>Step ${Math.min(R.done+1,R.S.length)} of ${R.S.length}</b><span>${esc(R.S[Math.min(R.done,R.S.length-1)].l)}</span></div><div class="rp1 fu"><i></i><b>Rent</b><span>After completion</span></div>`})():[r.last?`<div class="rp1 pa"><i></i><b>Last rent</b><span>${esc(dShort(r.last))}</span></div>`:`<div class="rp1 no"><i></i><b>Last rent</b><span>None yet</span></div>`,`<div class="rp1 td"><i></i><b>Today</b><span>${esc(dShort(t0))}</span></div>`,nx?`<div class="rp1 fu"><i></i><b>Next</b><span>${esc(dShort(nx))}</span></div>`:''].join('');
  return `<div class="rc k-${st.c}"><div class="rch"${p?` data-tab="${esc(p.id)}" role="button" aria-label="Open ${esc(short(p.name))}"`:''}>${dial}<div class="rci"><div class="rcn">${esc(e.property)}</div><span class="rcs ${st.c}">${st.l}</span><div class="rcsub">${days===null?st.s:`<b style="color:var(--ink)">${gbp(r.sum)}</b> in since Sep`}</div>${inN!==null?`<span class="nx">${ic('cal',14,2.4)} ${inN===1?'Next rent tomorrow':`Next in about ${inN} days`}</span>`:''}</div></div>
  <div class="rtr${nx?' three':''}">${pts}</div><details class="rcd2"><summary><span class="cl">${esc(e.note)}</span></summary></details></div>`}
 /* A2 25 Nov: rent already paid (past tense, or already in money.payments on that day) is no longer added again - it is in the bank figure */
@@ -1152,9 +1178,10 @@ function rentClock(e){const p=clockProp(e);
 function runEvents(d){const m=d.money||{},MO='JanFebMarAprMayJunJulAugSepOctNovDec',now=new Date(),t0=new Date(now.getFullYear(),now.getMonth(),now.getDate()),ev=[],seen={};
   const src=[].concat((d.watch||[]).map(t=>({t})),[{t:m.note||''}],(m.expected||[]).map(e=>({t:e.note||'',p:e.property})));
   const dt=c=>{const r=c.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\b/);if(!r)return null;let x=new Date(t0.getFullYear(),MO.indexOf(r[2])/3,+r[1]);if(x<new Date(t0-60*864e5))x.setFullYear(x.getFullYear()+1);const n=Math.round((x-t0)/864e5);return n>=0&&n<=21?{x,n}:null};
-  src.forEach(s=>String(s.t).split(/(?<=[.!?])\s+|\s+-\s+|;\s*/).forEach(c=>{const D=dt(c);if(!D)return;const am=c.match(/£(\d{1,3}(?:,\d{3})*(?:\.\d+)?)/),a=am?+am[1].replace(/,/g,''):null;
+  src.forEach(s=>String(s.t).split(/(?<=[.!?])\s+|\s+-\s+|;\s*/).forEach(c=>{const D=dt(c);if(!D)return;if(/\b(sheet|statement)\b/i.test(c)||/\b(Flat|Room)\s*\d+\b[^.]*\bdue\b/i.test(c))return; /* A2 27 Nov: 'Tiger's 27 Nov sheet: Flat 1 £398.80 due 29th' is tenants' rent, not a bill */
+    const am=c.match(/£(\d{1,3}(?:,\d{3})*(?:\.\d+)?)/),a=am?+am[1].replace(/,/g,''):null;
     const isIn=/standing order|\brent\b|payout|pay out/i.test(c)&&!/interest|direct debit/i.test(c)&&!/\bno\b|n't\b|\bnot\b|\bstill\b|checked|\bpaid\b|\breceived\b|\blanded\b|came in/i.test(c)&&!(m.payments||[]).some(q=>{const qd=new Date(q.date);return qd.getFullYear()===D.x.getFullYear()&&qd.getMonth()===D.x.getMonth()&&qd.getDate()===D.x.getDate()}),isOut=!isIn&&a&&/direct debit|goes out|\btakes\b|\bdue\b|\bbill/i.test(c);if(!isIn&&!isOut)return;
-    let who=(isIn?(c.match(/\b([A-Z][a-z]+)(?:'s|\s+\()/)||[])[1]||String(s.p||'').split(' ')[0]:(c.slice(0,am.index).replace(/\b(takes|by|the|his|her|bridging)\b/gi,' ').trim().split(/\s+/).slice(0,2).join(' ')))||'Payment';
+    let who=(isIn?(c.match(/\b([A-Z][a-z]+)(?:'s|\s+\()/)||[])[1]||short(String(s.p||'').split(',')[0]):(c.slice(0,am.index).replace(/\b(takes|by|the|his|her|bridging)\b/gi,' ').trim().split(/\s+/).slice(0,2).join(' ')))||'Payment';
     const k=(isIn?'i':'o')+D.n+'|'+(a||who);if(seen[k])return;seen[k]=1;ev.push({n:D.n,x:D.x,a,dir:isIn?1:-1,who,c:c.trim().replace(/\.$/,'')})}));
   return ev.sort((a,b)=>a.n-b.n||b.dir-a.dir)}
 /* A2 25 Nov: balance staircase - cash after each dated step over the next 3 weeks, red zone under £0 */
@@ -1198,7 +1225,7 @@ function money(m){let h='';const max=Math.max(...m.months.map(x=>Math.max(x.rent
  const clocked=m.expected.length&&DATA.properties.every(p=>m.expected.some(e=>clockProp(e)===p));
  if(DATA.properties.length&&!clocked){const rs=DATA.properties.map(p=>[p,rentOf(p)]),mx=Math.max(...rs.map(x=>x[1].sum),1);
  h+=`<h2>Rent by property</h2><div class="rp">${rs.map(([p,x],i)=>`<button class="rpc ${GR[i%4]} ${x.sum?'':'zero'}" data-tab="${esc(p.id)}"><div class="n">${esc(short(p.name))}</div><div class="v">${gbp(x.sum)}</div><div class="tr"><i data-w="${Math.max(x.sum?6:0,Math.round(x.sum/mx*100))}" style="width:0"></i></div><div class="m">${x.sum?`${x.n} payment${x.n>1?'s':''} since Sep - last on ${esc(dShort(x.last))}`:'No rent in yet - worth chasing'}</div></button>`).join('')}</div>`}
- if(m.expected.length){const ch=m.expected.filter(e=>{const p=clockProp(e);return !p||!rentOf(p).last}).length;h+=`<h2>Rent clock${ch?` <span class="cnt">${ch} to chase</span>`:''}</h2><div class="wait">${m.expected.map(rentClock).join('')}</div>`}
+ if(m.expected.length){const ch=m.expected.filter(e=>{const p=clockProp(e);return !buying(p)&&(!p||!rentOf(p).last)}).length;h+=`<h2>Rent clock${ch?` <span class="cnt">${ch} to chase</span>`:''}</h2><div class="wait">${m.expected.map(rentClock).join('')}</div>`}
  if(m.payments.length)h+=`<h2>Money in</h2><div class="pays">${m.payments.map(p=>`<div class="pay"><div class="ic">${ic('in',18)}</div><div><div class="w">${esc(p.from)}</div><div class="d">${esc(p.property)} - ${esc(new Date(p.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'}))}</div></div><div class="amt">+${gbp(p.amount,2)}</div></div>`).join('')}</div>`;
  if(m.costs_top.length){const cols=['#F07C8C','#4c7de0','#6a4bc4','#e3a32e','#2f9a63','#8a8a8a'],tot=m.costs_top.reduce((a,c)=>a+(+c[1]||0),0)||1,R=52,C=2*Math.PI*R;let off=0;
   const arcs=m.costs_top.map((c,i)=>{const len=(+c[1]||0)/tot*C,s=`<circle cx="66" cy="66" r="${R}" fill="none" stroke="${cols[i%6]}" stroke-width="20" stroke-dasharray="${Math.max(len-2,0)} ${C}" stroke-dashoffset="${-off}" transform="rotate(-90 66 66)"/>`;off+=len;return s}).join('');
@@ -1257,6 +1284,7 @@ function syncRow(id){const c=document.querySelector(`.task [data-task="${CSS.esc
 /* A2 21 Nov: property weather - one look tells you how a property is doing (rent, urgent jobs, tenants), updates as you tick */
 function wxOf(p){let sc=100;const why=[];const op=p.tasks.filter(x=>!DONE[x.id]),u=op.filter(x=>lvOf(x)==='urgent').length,hi=op.filter(x=>lvOf(x)==='high').length,nm=op.length-u-hi;
  sc-=Math.min(45,u*8+hi*4+nm);why.push(u?{c:'bad',t:`${u} urgent job${u>1?'s':''}`}:op.length?{c:'warn',t:`${op.length} job${op.length>1?'s':''} left, none urgent`}:{c:'ok',t:'All jobs done'});
+ if(buying(p)){sc=Math.max(0,Math.min(100,Math.round(sc)));why.push({c:'ok',t:'Rent starts after completion'});const k=sc>=70?'sun':sc>=40?'cloud':'storm';return {sc,k,l:{sun:'Sunny',cloud:'Cloudy',storm:'Stormy'}[k],s:{sun:'Purchase on track',cloud:'A few steps to sort',storm:'The purchase needs you'}[k],why}}
  const bad=p.units.filter(x=>tagOf(x)==='bad').length,wt=p.units.filter(x=>tagOf(x)==='warn').length;sc-=Math.min(35,bad*8+wt*3);
  if(p.units.length)why.push(bad?{c:'bad',t:`${bad} problem${bad>1?'s':''} with ${bad>1?'units':'a unit'}`}:wt?{c:'warn',t:`${wt} waiting on ${wt>1?'tenants':'a tenant'}`}:{c:'ok',t:'Every unit happy'});
  if(DATA.money){const r=rentOf(p);let d=null;if(r.last){const t0=new Date();t0.setHours(0,0,0,0);const l=new Date(r.last);l.setHours(0,0,0,0);d=Math.round((t0-l)/864e5)}
@@ -1278,10 +1306,25 @@ function owedCard(p){const o=owedOf(p);if(!o)return '';const mx=o.R[0].v||1;
  ${o.src?`<div class="ows">From ${esc(o.src)}</div>`:''}</div>`}
 function wxCard(p){const w=wxOf(p);return `<div class="wx k-${w.k}" id="wx"><div class="wxi">${wxIcon(w.k,76)}</div><div class="wxb"><div class="wxl">Property weather</div><div class="wxt">${w.l}<span>${w.s}</span></div><div class="wxm" role="img" aria-label="Health ${w.sc} out of 100"><i style="width:${w.sc}%"></i></div><div class="wxs">${w.sc}/100</div></div>
  <div class="wxw">${w.why.map(x=>`<span class="wxr ${x.c}">${x.c==='ok'?ic('check',14,3):'<b>!</b>'}${esc(x.t)}</span>`).join('')}</div></div>`}
+/* A2 27 Nov design: 'Road to completion' for a property we are buying - 7 steps read from the status, event and job ticks (no new data needed) */
+function roadOf(p){const T=[p.status,p.event,...p.units.map(u=>(u.label||'')+' '+(u.note||''))].join(' ');
+ const job=re=>p.tasks.find(x=>re.test(x.title));const jd=re=>{const j=job(re);return j?!!DONE[j.id]:null};
+ const S=[{k:'agree',l:'Offer agreed',i:'🤝',d:/sale agreed|agreed|accepted/i.test(T)},
+  {k:'fee',l:'Fee paid',i:'💳',d:/reservation fee[^.]*paid|fee paid|paid[^.]*reservation/i.test(T)},
+  {k:'id',l:'ID checks',i:'🪪',d:jd(/\bID\b/)===true||/ID checks? (done|complete|passed)/i.test(T),j:job(/\bID\b/)},
+  {k:'sol',l:'Solicitor',i:'⚖️',d:jd(/solicitor/i)===true||/solicitor (instructed|appointed)/i.test(T),j:job(/solicitor/i)},
+  {k:'cash',l:'Money ready',i:'🏦',d:jd(/£[\d,]+[^ ]* for completion|fund|mortgage|bridg/i)===true||/(mortgage|bridge|funding) (offer|approved|agreed)/i.test(T),j:job(/£[\d,]+[^ ]* for completion|fund|mortgage|bridg/i)},
+  {k:'ex',l:'Exchange',i:'✍️',d:/\bexchanged\b/i.test(T)},{k:'keys',l:'Keys',i:'🔑',d:/\bcompleted\b|keys (in|collected)/i.test(T)}];
+ let done=0;while(done<S.length&&S[done].d)done++;const extra=S.slice(done).filter(x=>x.d).length;return {S,done,extra}}
+function roadCard(p){const R=roadOf(p),S=R.S,cur=S[Math.min(R.done,S.length-1)],pr=(((p.status||'')+' '+p.units.map(u=>u.note||'').join(' ')).match(/£\s?([\d,]{5,})\b/)||[])[1];
+ const pct=Math.round((R.done+(R.done<S.length?.5:0))/S.length*100);
+ return `<div class="road" role="group" aria-label="Road to completion: step ${R.done+1} of ${S.length}"><div class="rdh"><div class="rdi">🏡</div><div><div class="rdl">Road to completion</div><div class="rdt">Step ${Math.min(R.done+1,S.length)} of ${S.length}: <b>${esc(cur.l)}</b></div></div>${pr?`<span class="rdp">£${esc(pr)} due on completion</span>`:''}</div>
+ <div class="rdr"><div class="rdtrk"><i style="--w:${pct}%"></i></div>${S.map((x,i)=>`<div class="rds ${x.d?'d':''} ${i===R.done?'c':''}" style="--d:${i*80}ms"${i===R.done&&x.j?` data-goto="${esc(x.j.id)}" role="button" tabindex="0"`:''}><span class="rdb">${x.d?ic('check',16,3.2):x.i}</span><em>${esc(x.l)}</em></div>`).join('')}</div>
+ ${cur.j&&!cur.d?`<button class="rdgo" data-goto="${esc(cur.j.id)}">Next: ${esc(cur.j.title)} ${ic('arrow',16,2.6)}</button>`:''}</div>`}
 function prop(p,i){let h='';const t=p.tasks.length,o=open_(p),att=p.units.filter(u=>u.tag!=='ok').length;
  h+=`<div class="pban ${GR[i%4]}"><div class="t">${esc(p.name)}</div><div class="a">${esc(p.area||'')}</div>${p.status?`<div class="s">${esc(p.status)}</div>`:''}${p.event?`<div class="ev">${ic('cal',16)} ${esc(String(p.event).replace(/^([A-Z])([A-Z]{3,})\b/,(m,a,b)=>a+b.toLowerCase()))}</div>`:''}${DATA.money?rentStrip(p):''}
  <div class="pstats"><div><b id="po">${o}</b><span>Jobs left</span></div><div><b>${p.units.length}</b><span>Units</span></div><div><b>${att}</b><span>Need a look</span></div></div></div>`;
- h+=wxCard(p);h+=owedCard(p);
+ if(buying(p))h+=roadCard(p);h+=wxCard(p);h+=owedCard(p);
  h+=`<h2>Jobs <span class="cnt" id="pc">${t-o}/${t} done</span></h2>`;{const nd=Object.values(DEL).filter(v=>v.prop===p.id).length;h+=`<div class="jbar"><button class="own none addt" data-addtask="${esc(p.id)}">+ Add task</button>${nd?`<button class="own none undel" data-undel="1">${nd} deleted - bring back</button>`:''}</div>`}if(t)h+=jobMix(p);if(t)h+=topicMix(p.tasks.filter(x=>!DONE[x.id]).length?p.tasks.filter(x=>!DONE[x.id]):p.tasks);
  if(!t)h+=`<div class="alldone">Nothing to do here<small>Enjoy it while it lasts</small></div>`;
  for(const [lv,name,col] of LVLS){const ts=p.tasks.filter(x=>lvOf(x)===lv);if(!ts.length)continue;const lf=lvlLeft(p,lv);
@@ -1359,7 +1402,7 @@ function render(){const d=DATA,o=allO();let h='';
  if(TAB==='money'&&d.money)h+=money(d.money);else{const i=d.properties.findIndex(p=>p.id===TAB);if(i>=0)h+=prop(d.properties[i],i);else{TAB='home';h+=home(d)}}
  h+=`</div>`;
  document.getElementById('app').innerHTML=h;bindSwipe();bindStory();
- const tabs=[['home','Today','home',0],...(d.money?[['money','Money','pound',0]]:[]),...d.properties.map(p=>[p.id,short(p.name),'bld',open_(p)])];
+ const tabs=[['home','Today','home',0],...(d.money?[['money','Money','pound',0]]:[]),...d.properties.map(p=>[p.id,navName(p.name),buying(p)?'key':'bld',open_(p)])];document.getElementById('nav').classList.toggle('many',d.properties.length>2);
  document.getElementById('nav').innerHTML=tabs.map(([id,l,icn,n])=>`<button class="nb ${TAB===id?'on':''}" data-tab="${esc(id)}" ${TAB===id?'aria-current="page"':''}>${ic(icn,20)}<span>${esc(l)}</span>${n?`<b class="n" data-n="${esc(id)}">${n}</b>`:''}${propNews(id)?'<i class="nd" aria-label="Something new"></i>':''}</button>`).join('');navPill();
  requestAnimationFrame(()=>setTimeout(()=>{document.querySelectorAll('.bpair i').forEach(e=>e.style.height=e.dataset.h+'%');document.querySelectorAll('[data-w]').forEach(e=>e.style.width=e.dataset.w+'%');document.querySelectorAll('.rca').forEach(e=>e.style.strokeDashoffset=e.dataset.off)},40));countUp()}
 function refresh(){const o=allO(),$=id=>document.getElementById(id);refreshTeam();

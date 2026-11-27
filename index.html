@@ -79,6 +79,17 @@ h2{font-size:21px;margin:30px 0 4px;font-weight:700}
 .pimg img{max-width:85%;max-height:170px;object-fit:contain}
 .rib{position:absolute;top:10px;left:0;padding:5px 12px 5px 10px;font-size:12px;font-weight:800;color:#fff;border-radius:0 14px 14px 0;text-transform:uppercase;letter-spacing:.4px}
 .mk{position:absolute;top:10px;right:10px;background:var(--nav);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px}
+.vls{margin:4px 0 10px;border-radius:12px;padding:8px 10px 6px;background:#e9f6f1;border:1px solid #bfe3d4;--vc:#067d62}
+.vls.tight{background:#fff6e5;border-color:#ffd58a;--vc:#a35d00}.vls.mid{background:#fff1e0;border-color:#ffb766;--vc:#b35400}.vls.bad{background:#fde8ec;border-color:#f3a6b6;--vc:#cc0c39}
+.vlh{display:flex;align-items:center;gap:6px;color:var(--vc);font-size:14px;line-height:1.2}.vli{font-size:16px}.vlsub{font-size:12.5px;color:#3d4447;margin:2px 0 6px;line-height:1.3}
+.vlb{position:relative;height:10px;border-radius:6px;background:rgba(0,0,0,.08);margin:12px 4px 2px}.vlb i{position:absolute;font-style:normal}
+.vrz{top:0;bottom:0;border-radius:6px;background:linear-gradient(90deg,#f7a1b5,#e8436a)}.vhd{top:-3px;transform:translateX(-50%);font-size:13px;color:#cc0c39;line-height:1}
+.vpl{top:50%;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid var(--vc);display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 1px 4px rgba(0,0,0,.2);animation:vfly 1s .2s both cubic-bezier(.2,.9,.3,1.2)}
+.vls.mid .vpl,.vls.bad .vpl{animation:vfly 1s .2s both cubic-bezier(.2,.9,.3,1.2),vpulse 1.8s 1.2s ease-in-out infinite}
+@keyframes vfly{from{left:0;opacity:0}}@keyframes vpulse{50%{box-shadow:0 0 0 6px rgba(255,153,0,.25)}}
+.vll{position:relative;height:16px;font-size:11px;color:#6b7476;margin:0 2px}.vll span{position:absolute;top:2px;white-space:nowrap}.vll span:first-child{left:0}.vll span:last-child{right:0}.vll span:nth-child(2){transform:translateX(-50%);color:#b0123b;font-weight:700}
+.vls.big{padding:12px 14px 8px}.vls.big .vlh{font-size:16px}.vls.big .vlsub{font-size:14px}
+@media (prefers-reduced-motion:reduce){.vpl{animation:none!important}}
 .vtag{position:absolute;bottom:8px;right:10px;font-size:11px;font-weight:700;color:#b0123b;background:#fde8ec;padding:2px 8px;border-radius:10px}
 #totop{position:fixed;left:14px;bottom:calc(78px + env(safe-area-inset-bottom));width:44px;height:44px;border-radius:50%;border:0;background:#232f3e;color:#fff;font-size:22px;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:60;opacity:0;transform:translateY(20px) scale(.8);pointer-events:none;transition:opacity .25s,transform .25s;cursor:pointer;z-index:39}#totop.on{opacity:1;transform:none;pointer-events:auto}body:has(.ov:not(.hidden)) #totop,body:has(.sov) #totop,body:has(.bdr:not(.hidden)) #totop{display:none}#totop:active{transform:scale(.92)}
 .s-now{background:var(--red)}.s-soon{background:var(--amber)}.s-ok{background:var(--green)}.s-stop{background:var(--grey)}.s-slow{background:#8a8f8f}.s-clear{background:#6b4fa3}
@@ -163,6 +174,7 @@ h2{font-size:21px;margin:30px 0 4px;font-weight:700}
 @media (max-width:620px){.tst{grid-template-columns:1fr 1fr}.tst .tsv.cash{grid-column:1/-1}.tsv .v{font-size:24px}.tpays{grid-template-columns:1fr}.tstrip{padding:12px;margin-left:-4px;margin-right:-4px}}
 /* cash flow chart */
 .cfsay{font-size:16px;line-height:1.45;margin:4px 0 10px}.cfsay b{color:var(--teal)}
+.cfsent{display:inline-block;background:#e3f4ee;color:#067d62;border-radius:12px;padding:2px 10px;margin:0 4px 4px 0;font-size:14px}.cfpin{animation:cfpop .5s .6s both cubic-bezier(.3,1.6,.6,1);transform-box:fill-box;transform-origin:center bottom}@keyframes cfpop{from{opacity:0;transform:translateY(8px) scale(.6)}to{opacity:1;transform:none}}@media (prefers-reduced-motion:reduce){.cfpin{animation:none}}
 .cflg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;margin-top:6px}.cflg i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 .cfbar{transform-box:fill-box;animation:cfg .6s ease both}.cfbar.up{transform-origin:bottom}.cfbar.dn{transform-origin:top}
 @keyframes cfg{from{transform:scaleY(0)}to{transform:scaleY(1)}}
@@ -976,6 +988,19 @@ function arrivals(p){const lead=DATA.lead_days||45,t0=today(),A=[];let inb=p.inb
   if(inb>0)A.push({i:wait?lead:14,q:inb,src:'inb',wait,est:true});
   if(ord>0)A.push({i:lead,q:ord,src:'ord',est:true});
   return A.sort((a,b)=>a.i-b.i)}
+/* A2 27 Nov: 'Will it land in time?' - when the last Valentine order for this product reaches Amazon, against the rush (peak_from) and 14 Feb */
+function valLand(p){const V=DATA.season&&DATA.season.valentines;if(!V)return null;const O=(DATA.valentine_orders||[]).filter(o=>o.product===p.id&&o.qty>0&&(o.account||p.account)===p.account);if(!O.length)return null;
+  let w=null,q=0;O.forEach(o=>{let c={};try{c=vtlCalc(o)}catch(e){}if(!c.land)return;if(!w||c.land>w.land){w=c;q=0}if(c.land.getTime()===w.land.getTime())q+=o.qty});
+  if(!w)return null;const t=today(),pk=new Date(V.peak_from+'T00:00:00'),vd=new Date(V.date+'T00:00:00');if(vd<t)return null;
+  const gap=Math.round((w.land-pk)/DAY);return {land:w.land,v:w.v,gap,q,pk,vd,ship:(w.M&&w.M.icon)||'✈️',all:O.length>1&&q<O.reduce((a,o)=>a+o.qty,0)}}
+function valStrip(p,big){const L=valLand(p);if(!L)return '';const t=today(),end=addD(L.vd,4),span=Math.max(1,(end-t)/DAY),pc=d=>Math.max(0,Math.min(100,(d-t)/DAY/span*100)).toFixed(1);
+  const dm=d=>d.getDate()+' '+d.toLocaleDateString('en-GB',{month:'short'}),late=L.gap>0,after=L.land>=L.vd;
+  const cls=after?'bad':late?'mid':L.gap>-7?'tight':'ok';
+  const head=after?'Lands after Valentine\'s Day':late?'Lands after Valentine starts':L.gap>-7?'Just in time':'In time for Valentine\'s';
+  const sub=(L.q?n0(L.q)+' '+(L.all?'(the last batch) ':'')+'reach Amazon ~':'Reaches Amazon ~')+dm(L.land)+' - '+(after?'too late for the rush':late?L.gap+' day'+(L.gap>1?'s':'')+' after the rush starts ('+dm(L.pk)+')':(-L.gap)+' days before the rush ('+dm(L.pk)+')');
+  return '<div class="vls '+cls+(big?' big':'')+'" title="'+esc(sub)+'"><div class="vlh"><span class="vli">'+(late?'⚠️':L.ship)+'</span><b>'+head+'</b></div><div class="vlsub">'+esc(sub)+'</div>'+
+   '<div class="vlb"><i class="vrz" style="left:'+pc(L.pk)+'%;width:'+(pc(L.vd)-pc(L.pk)).toFixed(1)+'%"></i><i class="vhd" style="left:'+pc(L.vd)+'%">♥</i><i class="vpl" style="left:'+pc(L.land)+'%">'+L.ship+'</i></div>'+
+   '<div class="vll"><span>Today</span><span style="left:'+pc(L.pk)+'%">Rush '+dm(L.pk)+'</span><span>14 Feb</span></div></div>'}
 /* A1 22 Nov: products on the clear-out list never say 'Order now' (A4: US Gold Card stock shows 0 while Amazon moves it) */
 function clearItem(p){const C=DATA.clearout;if(!C||!C.items)return null;if(C.date&&daysTo(C.date)<-100)return null;return C.items.find(it=>(it.ids||[]).includes(p.id))||null}
 function forecast(p){
@@ -1168,7 +1193,7 @@ function renderGrid(){
     const [lab,cls]=stBadge(f);const left=f.left;const pct=left==null?0:Math.min(100,left/120*100);
     const RI=runInfo(p,f),top=RI.c==='bad'&&f.run!=null;const col=f.st==='now'||RI.c==='bad'?'var(--red)':f.st==='soon'||RI.c==='mid'?'var(--amber)':'var(--green)';
     return '<div class="pc" data-id="'+esc(p.id)+'"><div class="pimg"><img loading="lazy" src="'+img(p.img,400)+'" alt=""><span class="rib '+cls+'">'+lab+'</span><span class="mk">'+esc(p.market)+'</span>'+(p.valentine?'<span class="vtag">♥ Valentine\'s</span>':'')+shipBadge(SHIPS[p.id])+'</div>'+
-    '<div class="pb">'+(top?'<div class="robig"><span class="rbi">📅</span><div><b>'+esc(RI.t)+'</b><small>'+(f.run<=1?'today':'in '+f.run+' day'+(f.run===1?'':'s'))+(RI.s?' · '+esc(RI.s.replace(/^⚠\s*/,'')):'')+'</small></div></div>':'')+'<div class="pn">'+esc(p.name)+'</div>'+leakB(p)+
+    '<div class="pb">'+(top?'<div class="robig"><span class="rbi">📅</span><div><b>'+esc(RI.t)+'</b><small>'+(f.run<=1?'today':'in '+f.run+' day'+(f.run===1?'':'s'))+(RI.s?' · '+esc(RI.s.replace(/^⚠\s*/,'')):'')+'</small></div></div>':'')+'<div class="pn">'+esc(p.name)+'</div>'+valStrip(p)+leakB(p)+
     '<div class="big"><span class="num">'+n0(p.stock)+'</span><span class="u">in stock</span>'+inbPill(p)+'</div>'+
     '<div class="run"><i style="width:'+pct+'%;background:'+col+'"></i></div><div class="runl"><span class="ro '+RI.c+'">'+(top?'':esc(RI.t))+'</span><span>'+(p.per_day?(p.per_day<1?p.per_day.toFixed(1):Math.round(p.per_day))+' sold / day':'')+'</span></div>'+(RI.s&&!top?'<div class="rosub '+RI.c+'">'+esc(RI.s)+'</div>':'')+
     '<div class="facts"><div class="fact">'+(p.valentine&&p.val_units?'<div class="k">Need until 14 Feb</div><div class="x">'+n0(f.needVal)+'</div>':'<div class="k">Next 60 days need</div><div class="x">'+n0(f.need60)+'</div>')+'</div><div class="fact"><div class="k">Profit 30 days</div><div class="x" style="color:'+((p.profit30||0)<0?'var(--red)':'var(--green)')+'">'+(p.profit30==null?'-':money(p.profit30,p.cur))+'</div>'+ncTag(p)+'</div></div>'+
@@ -1220,7 +1245,7 @@ function openP(id){
    '<h3>'+esc(p.name)+'</h3><div class="note">ASIN '+esc(p.asin)+' · SKU '+esc(p.sku)+(supOf(p)!==NOSUP?' · Supplier: '+esc(supOf(p)):'')+'</div>'+(supOf(p)===NOSUP?'<button class="asksup" data-asksup="'+esc(p.id)+'">❓ Ask Eli who supplies this <span>Tap to answer</span></button>':'')+
    '<div class="bubbles"><div class="bub"><div class="x">'+n0(p.stock)+'</div><div class="k">In stock</div></div><div class="bub"><div class="x">'+n0((p.inbound||0)+(p.on_order||0))+'</div><div class="k">On the way</div></div><div class="bub"><div class="x">'+(p.per_day?(p.per_day<1?p.per_day.toFixed(1):Math.round(p.per_day)):'0')+'</div><div class="k">Sold / day</div></div><div class="bub"><div class="x" style="color:'+((p.profit30||0)<0?'var(--red)':'var(--green)')+'">'+(p.profit30==null?'-':money(p.profit30,p.cur))+'</div><div class="k">Profit 30d</div>'+ncTag(p,1)+'</div></div>'+
    '<div class="btns" style="margin-top:12px"><a class="btn ghost" target="_blank" rel="noopener" href="https://www.amazon.'+(p.account==='USA'?'com':p.market.indexOf('DE')===0?'de':p.market==='FR'?'fr':'co.uk')+'/dp/'+esc(p.asin)+'">View on Amazon</a></div></div></div>'+
-   (()=>{const R=shipFor(p.id);return R.length?'<div class="shipc pship"><div class="shh"><span>🌍</span><b>On the way to Amazon</b></div>'+R.map(shipRowHtml).join('')+'</div>':''})()+
+   (()=>{const v=valStrip(p,1);return v?'<div style="margin:0 22px 12px">'+v+'</div>':''})()+(()=>{const R=shipFor(p.id);return R.length?'<div class="shipc pship"><div class="shh"><span>🌍</span><b>On the way to Amazon</b></div>'+R.map(shipRowHtml).join('')+'</div>':''})()+
    '<div class="rec '+(f.st==='ok'&&f.nx&&f.gap>2?'soon':f.st)+'">'+rec+(['now','soon','ok'].includes(f.st)?'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><div style="min-width:220px">'+(canRe(p,f)?reBtn(p,f):addBtn(p,f))+'</div><button class="claude" style="width:auto;padding:7px 16px;font-size:14px" data-ask1="'+esc(p.id)+'">Ask Claude to order this ↗</button></div>':'')+'</div>'+(()=>{const q=quoteHtml(p,false);return q?'<div style="margin:0 22px">'+q+'</div>':''})()+
    '<div class="msec"><h4>Stock forecast - next 5 months</h4><div class="legend"><span><i style="background:#ff9900"></i>Units left</span><span><i style="background:#146eb4"></i>Last day to order</span><span><i style="background:#cc0c39"></i>Runs out</span></div>'+runwaySvg(p,f)+'<div class="note">Includes stock on the way and last year\'s seasonal peaks.</div></div>'+
    yoyOnly(p)+'<details class="hist"><summary><span>📊 Show the full history</span><span class="note">every month, every year, units then and now</span></summary>'+monthlyRest(p)+'<div class="msec"><h4>Money made each year</h4>'+yearsSvg(p)+'</div>'+'<div class="msec"><h4>Units sold - then and now</h4><div style="max-width:460px">'+barsSvg(bars)+'</div></div></details>'+'<div class="msec"><div><h4>Money</h4>'+
@@ -1337,8 +1362,10 @@ function fkInfo(){const F=DATA.fivek;if(!F)return null;let D={};try{D=JSON.parse
   const P=id=>(DATA.payments||[]).find(p=>p.id===id),isPaid=id=>{const x=P(id),l=D['p:'+id];return !!((x&&x.status==='paid')||(l&&l.st==='paid'))};
   const inx=P(F.in_id),landed=isPaid(F.in_id)||!!(inx&&/^(in|landed|received)$/.test(inx.status||''));
   const Q=(F.unlocks||[]).filter(u=>!isPaid(u.id)).map(u=>{const x=P(u.id);return {u,x,g:u.gbp!=null?u.gbp:(x?payGbp(x):0)}});return {F,landed,Q}}
+const nums=t=>(String(t||'').match(/\d[\d,]*/g)||[]).map(v=>+v.replace(/,/g,''));
 const nWords=t=>String(t||'').toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(/\s+/).map(w=>w.replace(/s$/,'')).filter(w=>w.length>=4&&!/^(love|pack|gift)$/.test(w)||w==='cup');
-function qMatch(q,p){if(!q.x)return false;if(sFirst(q.x.to).toLowerCase()!==sFirst(supOf(p)).toLowerCase())return false;const h=nWords(q.x.what+' '+q.u.label);return nWords(p.name).filter(w=>h.includes(w)).length>=2}
+/* A2 27 Nov: a basket item only counts as an already-promised payment when the quantity matches too (700 new penguins are not the promised 2,400) */
+function qMatch(q,p){if(!q.x)return false;const bq=BASKET[p.id];if(bq&&!nums(q.x.what+' '+q.u.label).includes(bq))return false;if(sFirst(q.x.to).toLowerCase()!==sFirst(supOf(p)).toLowerCase())return false;const h=nWords(q.x.what+' '+q.u.label);return nWords(p.name).filter(w=>h.includes(w)).length>=2}
 function itemGbp(p){const S=DATA.shipping||{},fx=S.usd_gbp||0.79,q=BASKET[p.id]||0,sp=shipPlan(p,q,recFor(p)),B=p.buy||{};let usd=0,unk=false;if(B.unit_usd!=null)usd+=B.unit_usd*q;else unk=true;if(sp&&sp.pick.cost!=null)usd+=sp.pick.cost;return {g:usd*fx,unk}}
 function afford(){const c=DATA.cfo;if(!c)return null;let bank=0;try{bank=cashWeeks().start}catch(e){bank=(c.cash||[]).reduce((a,x)=>a+(x.gbp||0),0)}
   const K=fkInfo(),extra=K&&!K.landed?(K.F.amount||5000):0,pot=Math.max(0,bank)+extra;const Q=K?K.Q.map(q=>Object.assign({},q)):[];
@@ -1377,7 +1404,7 @@ function openB(){const g=groups(),d=$('bdr');const T=coTotals(),n=Object.keys(BA
   d.querySelectorAll('[data-place]').forEach(b=>b.onclick=()=>{d.classList.add('hidden');document.body.style.overflow='';sendOrder()});
   $('clearb').onclick=()=>{BASKET={};saveB();renderBar();renderGrid();d.classList.add('hidden');document.body.style.overflow=''};
 }
-function orderPrompt(B){B=B||BASKET;const g=groups(B);let t='Hi Claude, Eli here - I clicked "order" in my Zugati portal. Please help me reorder the items below.\n\nWhat I want:\n- Draft ONE email per supplier (cc eli@zelr.co.uk, short professional subject, natural human tone, regular hyphens).\n- Check my Gmail for my last order with each supplier: confirm the right email address, last unit price, packaging, labels and shipping method, and use them in the email.\n- Ask each supplier for a PI and payment link (30% deposit if they agree).\n- Tell me roughly what it will cost in total and when payment is due, and whether it fits my cash (portal says I can safely spend about '+($('cfokpis')?($('cfokpis').querySelectorAll('.v')[3]||{}).textContent||'':'')+' on stock right now).\n- Show me the drafts first. Do NOT send anything until I say yes.\n';try{const A=afford();if(A)t+='- Portal money check: I can spend about £'+n0(A.pot)+' (bank £'+n0(A.bank)+(A.extra?' + the £'+n0(A.extra)+' not landed yet':'')+'), £'+n0(A.prom)+' is already promised ('+A.Q.map(q=>q.u.label).join(', ')+'), this order is about £'+n0(A.order)+' - '+(A.over?'OVER by £'+n0(-A.left)+', so suggest what to cut or delay.':'leaves about £'+n0(A.left)+'.')+'\n'}catch(e){}
+function orderPrompt(B){B=B||BASKET;const g=groups(B);let t='Hi Claude, Eli here - I clicked "order" in my Zugati portal. Please help me reorder the items below.\n\nWhat I want:\n- Draft ONE email per supplier (cc eli@zelr.co.uk, short professional subject, natural human tone, regular hyphens).\n- Check my Gmail for my last order with each supplier: confirm the right email address, last unit price, packaging, labels and shipping method, and use them in the email.\n- Ask each supplier for a PI and payment link (30% deposit if they agree).\n- Tell me roughly what it will cost in total and when payment is due, and whether it fits my cash (see the money check below).\n- Show me the drafts first. Do NOT send anything until I say yes.\n';try{const A=afford();if(A)t+='- Portal money check: I can spend about £'+n0(A.pot)+' (bank £'+n0(A.bank)+(A.extra?' + the £'+n0(A.extra)+' not landed yet':'')+'), £'+n0(A.prom)+' is already promised ('+A.Q.map(q=>q.u.label).join(', ')+'), this order is about £'+n0(A.order)+(A.unk?' plus items with no price yet':'')+' - '+(A.over?'OVER by £'+n0(-A.left)+', so suggest what to cut or delay.':'leaves about £'+n0(A.left)+'.')+'\n'}catch(e){}
   /* A1 27 Nov: hand Claude the payment links too, so the handoff has everything in one go */
   try{const open=(DATA.payments||[]).filter(x=>x.link&&x.status!=='paid'),sup=Object.keys(g).map(k=>sFirst(k).toLowerCase());
     const L=open.filter(x=>sup.includes(sFirst(x.to).toLowerCase()));const K=fkInfo();const Pr=K?K.Q.map(q=>q.x).filter(x=>x&&x.link&&!L.includes(x)):[];
@@ -1731,13 +1758,24 @@ function piDay(d){return d.toLocaleDateString('en-GB',{weekday:'long',day:'numer
 function piTime(d){const h=d.getHours(),m=d.getMinutes();return (h%12||12)+(m?':'+String(m).padStart(2,'0'):'')+(h<12?'am':'pm')}
 function piLon(iso){const x=new Date(iso);return new Date(x.toLocaleString('en-US',{timeZone:'Europe/London'}))}
 function piCount(d){const ms=d-new Date(new Date().toLocaleString('en-US',{timeZone:'Europe/London'}));if(ms<=0)return 'any minute';const h=Math.round(ms/36e5);return h<24?h+' hours':Math.round(h/24)+(Math.round(h/24)===1?' day':' days')}
+/* A2 27 Nov: payouts Amazon has already sent. From the Coming-in feed (on_way), plus a fallback read from the team's payout task
+   ('Amazon sent £1,232.25 on 26 Nov 21:50') when the feed has not caught up yet. Landed ones drop off. */
+function sentPays(){const P=window.PAYX||DATA.payouts||{},out=[],nowMs=Date.now(),Ld=P.landed||[];
+ (P.on_way||[]).forEach(x=>{const t=x.expected?piLon(x.expected):piLand(new Date(x.requested));out.push({amt:x.amount,cur:x.cur||'GBP',t,req:x.requested})});
+ const MO={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+ (DATA.tasks||[]).forEach(x=>{const tx=[x.title,x.detail].join(' ');const m=tx.match(/sent\s+£\s?([\d,]+(?:\.\d+)?)\s+on\s+(\d{1,2})\s+([A-Za-z]{3})[a-z]*\.?\s+(\d{1,2})[:.](\d\d)/i);if(!m)return;
+  const amt=parseFloat(m[1].replace(/,/g,'')),mo=MO[m[3].toLowerCase()];if(!(amt>0)||mo==null)return;if(out.some(o=>Math.abs(o.amt-amt)<1))return;
+  const t0=today();let y=t0.getFullYear();if(mo>t0.getMonth()+1)y--;const ymdS=y+'-'+String(mo+1).padStart(2,'0')+'-'+String(+m[2]).padStart(2,'0');
+  const req=londonDate(ymdS,+m[4],+m[5]);if(Ld.some(l=>Math.abs(l.amount-amt)<1&&new Date(l.landed)>req))return;
+  out.push({amt,cur:'GBP',t:piLand(req),req:req.toISOString(),task:x.id})});
+ return out.filter(o=>o.t&&o.t.getTime()>nowMs-36*36e5)}
 function renderPayin(){const el=$('payin');if(!el)return;const P=window.PAYX||DATA.payouts;if(!P){el.innerHTML='';return}
  const R=P.rule||{},nowL=new Date(new Date().toLocaleString('en-US',{timeZone:'Europe/London'}));
  // what's expected: on its way (UK, exact) + Europe (pattern)
- const exp=[];(P.on_way||[]).forEach(x=>exp.push({t:x.expected?piLon(x.expected):piLand(new Date(x.requested)),amt:x.amount,cur:x.cur||'GBP',k:'uk',lab:'UK payout',sure:true,req:x.requested}));
+ const exp=[];sentPays().forEach(x=>exp.push({t:x.t,amt:x.amt,cur:x.cur,k:'uk',lab:'UK payout',sure:true,req:x.req}));
  if(P.eu_gbp&&P.eu_gbp.next){let t=piLon(P.eu_gbp.next);while(t<nowL)t=new Date(t.getTime()+P.eu_gbp.every_days*864e5);exp.push({t,amt:P.eu_gbp.typical,cur:'GBP',k:'eu',lab:'Europe (in £)',sure:false});exp.push({t:new Date(t.getTime()+P.eu_gbp.every_days*864e5),amt:P.eu_gbp.typical,cur:'GBP',k:'eu',lab:'Europe (in £)',sure:false})}
  if(P.eu_eur&&P.eu_eur.next){let t=piLon(P.eu_eur.next);while(t<nowL)t=new Date(t.getTime()+7*864e5);exp.push({t,amt:P.eu_eur.typical,cur:'EUR',k:'eur',lab:'Europe (in €)',sure:false})}
- exp.sort((a,b)=>a.t-b.t);const nx=exp.find(x=>x.t>nowL);
+ exp.sort((a,b)=>a.t-b.t);const nx=exp.find(x=>x.t>nowL&&x.sure)||exp.find(x=>x.t>nowL);
  let h='<div class="pi'+(payHold()?' held':'')+'"><h3>💰 Amazon money coming in</h3><div class="pis">When Amazon pays you, and when it actually lands in Wise.</div>';
  const HOLD=payHold();if(HOLD)h+='<div class="pihold"><span class="pip">⏸</span><div><b>On hold - nothing is coming in right now</b><span>Amazon is holding your payouts until the card in Seller Central is fixed. The dates below start again once it is fixed.</span>'+(HOLD.link?'<a target="_blank" rel="noopener" href="'+esc(HOLD.link)+'">'+esc(HOLD.link_label||'Fix it now')+' ↗</a>':'')+'</div></div>';
  if(nx)h+='<div class="pihero"><div class="coin">'+(nx.cur==='EUR'?'€':'£')+'</div><div><div class="amt">'+(nx.sure?money(nx.amt,nx.cur,2):'~'+money(nx.amt,nx.cur))+'</div><div class="when">'+(nx.sure?'Lands ':'Likely ')+esc(piDay(nx.t))+', about '+piTime(nx.t)+'</div><div class="when" style="font-size:13px;opacity:.8">'+esc(nx.lab)+(nx.sure?' - Amazon has sent it':' - usual pattern, no email from Amazon')+'</div></div><div class="cd">in<b>'+piCount(nx.t)+'</b></div></div>';
@@ -1747,10 +1785,11 @@ function renderPayin(){const el=$('payin');if(!el)return;const P=window.PAYX||DA
  h+='</div>';
  // request calculator
  const now=new Date(),cut=+(R.cutoff||'14:00').split(':')[0],lateNow=nowL.getHours()>=cut;
- const a=piLand(now);const t2=new Date(nowL.getFullYear(),nowL.getMonth(),nowL.getDate()+(lateNow?1:0),10,0);const b=piLand(new Date(t2.toLocaleString('en-US')));
+ const a=piLand(now);let t2=new Date(nowL.getFullYear(),nowL.getMonth(),nowL.getDate()+(lateNow?1:0),10,0);const b=piLand(new Date(t2.toLocaleString('en-US')));
+ const t2n=Math.round((new Date(t2.getFullYear(),t2.getMonth(),t2.getDate())-new Date(nowL.getFullYear(),nowL.getMonth(),nowL.getDate()))/864e5),t2l=t2n===1?'Tomorrow':t2.toLocaleDateString('en-GB',{weekday:'long'}),same=b.toDateString()===a.toDateString();
  h+='<div class="pireq"><div class="q">Thinking of pressing "Request payment" in Seller Central?</div>'+
   '<div class="row"><span class="tag'+(lateNow?' late':'')+'">Now</span><span>Lands <b>'+esc(piDay(a))+'</b> about '+piTime(a)+'</span></div>'+
-  (lateNow?'<div class="row"><span class="tag">Tomorrow before '+cut+':00</span><span>Lands <b>'+esc(piDay(b))+'</b> - same as now'+(b.toDateString()===a.toDateString()?'':'')+'</span></div>':'<div class="row"><span class="tag late">After '+cut+':00 today</span><span>One day later: <b>'+esc(piDay(piLand(new Date(new Date().setHours(cut+1)))))+'</b></span></div>')+
+  (lateNow?'<div class="row"><span class="tag">'+t2l+' before '+cut+':00</span><span>Lands <b>'+esc(piDay(b))+'</b>'+(same?' - same as now, so no need to wait':b<a?' - <b>a day sooner</b> than asking now':'')+'</span></div>':'<div class="row"><span class="tag late">After '+cut+':00 today</span><span>One day later: <b>'+esc(piDay(piLand(new Date(new Date().setHours(cut+1)))))+'</b></span></div>')+
   '<div style="color:#565959;font-size:13px;padding-top:8px;border-top:1px solid #eee">Tip: request <b>before '+cut+':00</b> UK time to save a day. Weekends and bank holidays don\'t count.</div></div>';
  // rules learnt
  const okp=R.of?Math.round(R.hits/R.of*100):0;
@@ -1789,7 +1828,9 @@ function renderCashFlow(){const el=$('cashline');if(!el)return;const c=DATA.cfo,
   const slot=(Wd-pl-pr)/(N+0.6),X=i=>pl+slot*(i+0.3),Y=v=>pt+(mx-v)/(mx-mn)*(H-pt-pb),bw=Math.min(slot*0.62,30);let g='';
   const loan=(c.loans_in||[])[0];let li=-1,ri=-1;
   W.forEach((x,i)=>{if(!i)return;const d0=x.d,d1=addD(d0,7);if(loan&&li<0){const ld=new Date(loan.date+'T00:00:00');if(ld>=d0&&ld<d1)li=i;}if(ri<0&&x.pay&&/pay back|repay/i.test(x.pay))ri=i});
-  if(loan&&li<0)li=1;
+  /* A2 27 Nov: no longer pin the loan on next week when it has not come - it is not in these weeks at all */
+  const LK=fkInfo(),loanWait=!!(loan&&li<0&&LK&&!LK.landed);
+  let SP=[];try{SP=sentPays().map(x=>{const i=W.findIndex((w,j)=>j&&x.t>=w.d&&x.t<addD(w.d,7));return Object.assign({i},x)}).filter(x=>x.i>0)}catch(e){}
   // valentine band
   const vi=W.map((x,i)=>i&&x.d.getMonth()===1?i:-1).filter(i=>i>0);
   if(vi.length){const a=X(vi[0])-slot/2,b=X(vi[vi.length-1])+slot/2;g+='<rect x="'+a+'" y="'+(pt-24)+'" width="'+(b-a)+'" height="'+(H-pb-pt+24)+'" rx="6" fill="rgba(232,67,106,.08)"/><text x="'+((a+b)/2)+'" y="'+(pt-10)+'" text-anchor="middle" font-size="'+(sm?11:12)+'" font-weight="800" fill="#e8436a">♥ Valentine\'s money</text>'}
@@ -1797,7 +1838,9 @@ function renderCashFlow(){const el=$('cashline');if(!el)return;const c=DATA.cfo,
   const step=mx-mn>15000?5000:2000;for(let v=Math.ceil(mn/step)*step;v<=mx;v+=step){g+='<line x1="'+pl+'" x2="'+(Wd-pr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="'+(v===0?'#9aa':'#eee')+'"'+(v===0?' stroke-width="1.5"':'')+'/><text x="'+(pl-5)+'" y="'+(Y(v)+4)+'" font-size="11" fill="#888" text-anchor="end">'+(v<0?'-':'')+'£'+Math.abs(v/1000)+'k</text>'}
   // bars
   W.forEach((x,i)=>{if(!i)return;const cx=X(i),y0=Y(0);
-    if(x.in>0){const y=Y(x.in);g+='<rect class="cfbar up" style="animation-delay:'+(i*35)+'ms" x="'+(cx-bw/2)+'" y="'+y+'" width="'+bw+'" height="'+(y0-y)+'" rx="3" fill="'+(i===li?'#0b9e7c':'#5cc4a4')+'"><title>Week of '+fmtD(x.d)+' - money in £'+n0(x.in)+'</title></rect>'}
+    if(x.in>0){const y=Y(x.in),sp=SP.filter(s=>s.i===i);g+='<rect class="cfbar up" style="animation-delay:'+(i*35)+'ms" x="'+(cx-bw/2)+'" y="'+y+'" width="'+bw+'" height="'+(y0-y)+'" rx="3" fill="'+(i===li?'#0b9e7c':'#5cc4a4')+'"><title>Week of '+fmtD(x.d)+' - money in £'+n0(x.in)+'</title></rect>';
+      /* A2 27 Nov: the part Amazon has already sent - solid green slice at the bottom of the bar */
+      sp.forEach(s=>{const g2=s.cur==='EUR'?s.amt*.87:s.amt,ys=Y(Math.min(g2,x.in));g+='<rect class="cfbar up sent" style="animation-delay:'+(i*35)+'ms" x="'+(cx-bw/2)+'" y="'+ys+'" width="'+bw+'" height="'+(y0-ys)+'" rx="3" fill="#067d62"><title>Amazon has sent £'+n0(g2)+' - lands '+esc(piDay(s.t))+'</title></rect>'})}
     if(x.out>0){const y=Y(-x.out);g+='<rect class="cfbar dn" style="animation-delay:'+(i*35)+'ms" x="'+(cx-bw/2)+'" y="'+y0+'" width="'+bw+'" height="'+(y-y0)+'" rx="3" fill="'+(i===ri?'#cc0c39':'#f08a9c')+'"><title>Week of '+fmtD(x.d)+' - money out £'+n0(x.out)+(x.pay?' ('+esc(x.pay)+')':'')+'</title></rect>'}
     if(sm?(i%3===1):(i%2===1))g+='<text x="'+cx+'" y="'+(H-pb+16)+'" font-size="11" fill="#666" text-anchor="middle">'+fmtD(x.d)+'</text>'});
   /* A2 25 Nov (A3 priority): while payouts are on hold, this week's Amazon money is a grey striped 'held' bar */
@@ -1817,13 +1860,15 @@ function renderCashFlow(){const el=$('cashline');if(!el)return;const c=DATA.cfo,
   // labels
   const flag=(i,y,txt,col,up)=>{const cx=Math.min(Math.max(X(i),pl+50),Wd-pr-50),fy=up?y-12:y+20;return '<g><rect x="'+(cx-52)+'" y="'+(fy-14)+'" width="104" height="20" rx="10" fill="'+col+'"/><text x="'+cx+'" y="'+(fy+1)+'" text-anchor="middle" font-size="11.5" font-weight="800" fill="#fff">'+txt+'</text></g>'};
   if(li>0){const lb=(loan.gbp>=1000?'£'+Math.round(loan.gbp/1000)+'k':'£'+n0(loan.gbp));g+=flag(li,Y(W[li].in),lb+' loan in','#067d62',true)}
+  SP.forEach(s=>{if(s.i===li)return;const x=W[s.i],cx=Math.min(Math.max(X(s.i),pl+66),Wd-pr-66),ty=Y(x.in)-14,tw=132,txt='💷 £'+n0(s.amt)+' · '+s.t.getDate()+' '+s.t.toLocaleDateString('en-GB',{month:'short'});
+    g+='<g class="cfpin"><line x1="'+X(s.i)+'" x2="'+X(s.i)+'" y1="'+(ty+6)+'" y2="'+Y(x.in)+'" stroke="#067d62" stroke-width="1.5"/><rect x="'+(cx-tw/2)+'" y="'+(ty-15)+'" width="'+tw+'" height="22" rx="11" fill="#067d62"/><text x="'+cx+'" y="'+(ty+1)+'" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">'+txt+'</text></g>'});
   if(ri>0){g+=flag(ri,Y(-W[ri].out),'£5k paid back','#cc0c39',false)}
   const pk=W.reduce((b,x,i)=>x.b>W[b].b?i:b,0);g+='<text x="'+Math.min(X(pk),Wd-pr-30)+'" y="'+(Y(W[pk].b)-12<pt+4?Y(W[pk].b)+22:Y(W[pk].b)-12)+'" text-anchor="middle" font-size="13" font-weight="800" fill="#007185" paint-order="stroke" stroke="#fff" stroke-width="3">£'+(W[pk].b/1000).toFixed(1)+'k</text>';
-  el.innerHTML='<svg viewBox="0 0 '+Wd+' '+H+'" width="100%" role="img" aria-label="Cash flow chart">'+g+'</svg><div class="cflg"><span><i style="background:#5cc4a4"></i>Money in</span><span><i style="background:#f08a9c"></i>Money out</span>'+(heldG>0?'<span><i style="background:repeating-linear-gradient(45deg,#8d9699 0 2px,#c9cfd1 2px 5px)"></i>Held by Amazon (~£'+n0(heldG)+')</span>':'')+'<span><i style="background:#007185;height:4px;vertical-align:3px"></i>Cash in the bank</span><span><i style="background:none;border-top:2px dashed #c45500;height:0;border-radius:0;vertical-align:3px"></i>Keep above this</span></div>';
+  el.innerHTML='<svg viewBox="0 0 '+Wd+' '+H+'" width="100%" role="img" aria-label="Cash flow chart">'+g+'</svg><div class="cflg"><span><i style="background:#5cc4a4"></i>Money in</span><span><i style="background:#f08a9c"></i>Money out</span>'+(SP.length?'<span><i style="background:#067d62"></i>Already sent by Amazon</span>':'')+(heldG>0?'<span><i style="background:repeating-linear-gradient(45deg,#8d9699 0 2px,#c9cfd1 2px 5px)"></i>Held by Amazon (~£'+n0(heldG)+')</span>':'')+'<span><i style="background:#007185;height:4px;vertical-align:3px"></i>Cash in the bank</span><span><i style="background:none;border-top:2px dashed #c45500;height:0;border-radius:0;vertical-align:3px"></i>Keep above this</span></div>';
   // one sentence
   const rest=W.slice(1),low=rest.reduce((b,x)=>x.b<b.b?x:b,rest[0]),pkw=W[pk],k=v=>(v<0?'-':'')+'£'+(Math.abs(v)/1000).toFixed(1).replace(/\.0$/,'')+'k';
   const mon=d=>d.toLocaleDateString('en-GB',{month:'long'});
-  $('cfsay').innerHTML=(loan?'The <b>'+k(loan.gbp)+' loan</b> gets you started, ':'')+'cash stays tight until Christmas (lowest about <b>'+k(low.b)+'</b> in '+mon(low.d)+'), then <b>Valentine\'s money</b> lifts it to about <b>'+k(pkw.b)+'</b> in '+mon(pkw.d)+(ri>0?' - enough to pay the loan back.':'.')}
+  $('cfsay').innerHTML=(SP.length?'<span class="cfsent">💷 Amazon has sent <b>£'+n0(SP.reduce((a,x)=>a+x.amt,0))+'</b> - lands '+esc(piDay(SP[0].t))+'</span> ':'')+(loanWait?'Not counting the <b>'+k(loan.gbp)+' loan</b> (not in yet), ':li>0?'The <b>'+k(loan.gbp)+' loan</b> gets you started, ':'')+'cash stays tight until Christmas (lowest about <b>'+k(low.b)+'</b> in '+mon(low.d)+'), then <b>Valentine\'s money</b> lifts it to about <b>'+k(pkw.b)+'</b> in '+mon(pkw.d)+(ri>0?' - enough to pay the loan back.':'.')}
 let _cfT;window.addEventListener('resize',()=>{clearTimeout(_cfT);_cfT=setTimeout(()=>{try{renderCashFlow()}catch(e){}},250)});
 /* ---------- CFO ---------- */
 function payoutFor(d){const h=DATA.history;if(!h)return 0;const L=h.months.length,ratio=h.payout[L-14]?h.payout[L-2]/h.payout[L-14]:1;const key=(d.getFullYear()-1)+'-'+String(d.getMonth()+1).padStart(2,'0');const i=h.months.indexOf(key);if(i<0)return 0;return h.payout[i]*ratio/new Date(d.getFullYear(),d.getMonth()+1,0).getDate()}
