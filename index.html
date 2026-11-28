@@ -809,6 +809,36 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
 .nct{font-size:11.5px;line-height:1.3;color:#c45500;font-weight:700;margin-top:3px}.nct b{color:#565959}
 .nct.big{font-size:11px;margin-top:4px}
 .ncs{color:#c45500;font-weight:900}
+
+/* A1 28 Nov: Order now or run out (top of Today) */
+.ros:empty{display:none}
+.ros{background:#fff;border-radius:16px;overflow:hidden;margin:4px 0 16px;box-shadow:0 8px 24px rgba(204,12,57,.18);border:2px solid #cc0c39;animation:raIn .5s ease}
+.rosh{background:linear-gradient(135deg,#b3001b,#e0102f);color:#fff;padding:12px 16px;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
+.rosh b{font-size:20px;font-weight:900}.rosh small{font-size:13px;opacity:.9}
+.rosr{display:grid;grid-template-columns:56px 1fr auto 74px;gap:4px 12px;align-items:center;padding:12px 16px;border-top:1px solid #f3d5dc;cursor:pointer;transition:background .15s}
+.rosr:first-of-type{border-top:0}.rosr:hover{background:#fff6f8}
+.rosi{width:56px;height:56px;border-radius:10px;object-fit:contain;background:#f7f7f7}
+.rosn{font-weight:800;font-size:16px;line-height:1.2;color:#0f1111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rosbar{height:12px;background:#fde3e8;border-radius:6px;overflow:hidden;margin:6px 0 4px}
+.rosbar i{display:block;height:100%;background:linear-gradient(90deg,#cc0c39,#ff4d6d);border-radius:6px;animation:rosIn 1s ease-out both;transform-origin:left}
+.rosbar.hot i{animation:rosIn 1s ease-out both,rosP 1.4s ease-in-out 1s infinite}
+@keyframes rosIn{from{transform:scaleX(0)}}@keyframes rosP{50%{opacity:.55}}
+.ross{font-size:13px;color:#565959}
+.rosd{grid-column:4;grid-row:1;text-align:center;background:#cc0c39;color:#fff;border-radius:12px;padding:6px 0;line-height:1}
+.rosd b{display:block;font-size:30px;font-weight:900}.rosd span{font-size:12px;font-weight:700}
+.rosd.amb{background:#c45500}
+.rosx{grid-column:3;grid-row:1}
+.rosb{display:inline-flex;align-items:center;gap:6px;background:#ff9900;color:#0f1111;font-weight:800;font-size:15px;border-radius:22px;padding:9px 18px;text-decoration:none;border:0;cursor:pointer;font-family:inherit}
+.rosb:active{transform:scale(.97)}.rosb.gh{background:#fff;border:1.5px solid #8d9696}
+@media(max-width:600px){.rosr{grid-template-columns:48px 1fr 64px;padding:12px}.rosi{width:48px;height:48px;grid-row:span 2}.rosd{grid-column:3;grid-row:1/3}.rosx{grid-row:3}.rosd b{font-size:26px}.rosx{grid-column:1/4}.rosb{width:100%;justify-content:center;padding:11px}.rosn{white-space:normal}}
+/* A1 28 Nov: money made each month (product popup) */
+.mm{padding:16px 22px}
+.mmh{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 10px}.mmh h4{margin:0;font-size:17px}
+.mmbest{font-size:13px;background:#eaeded;border-radius:12px;padding:3px 10px;font-weight:700;color:#232f3e}
+.mmv{min-height:22px;font-size:15px;margin-top:6px;color:#232f3e}
+.mmv b{font-size:17px}
+.mmsvg .hit{cursor:pointer}.mmsvg .hit:hover+rect,.mmsvg .sel{filter:brightness(.85)}
+.mmsay{font-size:15px;margin-top:6px;background:#f3f5f5;border-radius:10px;padding:9px 12px;line-height:1.4}
 </style>
 </head>
 <body>
@@ -835,6 +865,7 @@ img.nofoto{object-fit:contain!important;background:#f3f5f5}
     <section id="today">
       <div id="ralert"></div>
       <div class="hello"><h1 id="greet">Hello Eli</h1><div class="note" id="todaydate"></div></div>
+      <div class="ros" id="ros"></div>
       <div class="fivek" id="fivek"></div>
       <div class="tstrip" id="tstrip"></div>
       <div id="didpay"></div>
@@ -1247,12 +1278,12 @@ function openP(id){
    '<div class="btns" style="margin-top:12px"><a class="btn ghost" target="_blank" rel="noopener" href="https://www.amazon.'+(p.account==='USA'?'com':p.market.indexOf('DE')===0?'de':p.market==='FR'?'fr':'co.uk')+'/dp/'+esc(p.asin)+'">View on Amazon</a></div></div></div>'+
    (()=>{const v=valStrip(p,1);return v?'<div style="margin:0 22px 12px">'+v+'</div>':''})()+(()=>{const R=shipFor(p.id);return R.length?'<div class="shipc pship"><div class="shh"><span>🌍</span><b>On the way to Amazon</b></div>'+R.map(shipRowHtml).join('')+'</div>':''})()+
    '<div class="rec '+(f.st==='ok'&&f.nx&&f.gap>2?'soon':f.st)+'">'+rec+(['now','soon','ok'].includes(f.st)?'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><div style="min-width:220px">'+(canRe(p,f)?reBtn(p,f):addBtn(p,f))+'</div><button class="claude" style="width:auto;padding:7px 16px;font-size:14px" data-ask1="'+esc(p.id)+'">Ask Claude to order this ↗</button></div>':'')+'</div>'+(()=>{const q=quoteHtml(p,false);return q?'<div style="margin:0 22px">'+q+'</div>':''})()+
-   '<div class="msec"><h4>Stock forecast - next 5 months</h4><div class="legend"><span><i style="background:#ff9900"></i>Units left</span><span><i style="background:#146eb4"></i>Last day to order</span><span><i style="background:#cc0c39"></i>Runs out</span></div>'+runwaySvg(p,f)+'<div class="note">Includes stock on the way and last year\'s seasonal peaks.</div></div>'+
+   moneyMonths(p)+'<div class="msec"><h4>Stock forecast - next 5 months</h4><div class="legend"><span><i style="background:#ff9900"></i>Units left</span><span><i style="background:#146eb4"></i>Last day to order</span><span><i style="background:#cc0c39"></i>Runs out</span></div>'+runwaySvg(p,f)+'<div class="note">Includes stock on the way and last year\'s seasonal peaks.</div></div>'+
    yoyOnly(p)+'<details class="hist"><summary><span>📊 Show the full history</span><span class="note">every month, every year, units then and now</span></summary>'+monthlyRest(p)+'<div class="msec"><h4>Money made each year</h4>'+yearsSvg(p)+'</div>'+'<div class="msec"><h4>Units sold - then and now</h4><div style="max-width:460px">'+barsSvg(bars)+'</div></div></details>'+'<div class="msec"><div><h4>Money</h4>'+
    '<div class="facts"><div class="fact"><div class="k">Sales 30 days</div><div class="x">'+(p.sales30==null?'-':money(p.sales30,p.cur))+'</div></div><div class="fact"><div class="k">Margin</div><div class="x">'+(p.margin==null?'-':p.margin.toFixed(0)+'%')+'</div></div><div class="fact"><div class="k">Missed sales (out of stock)</div><div class="x" style="color:'+(p.lost_sales?'var(--red)':'inherit')+'">'+money(p.lost_sales||0,p.cur)+'</div></div><div class="fact"><div class="k">Suggested order</div><div class="x">'+(f.qty?n0(f.qty)+' units':'none')+'</div></div></div>'+
    '</div></div>';
   $('ov').classList.remove('hidden');document.body.style.overflow='hidden';
-  $('md').querySelector('.mx').onclick=closeP;wireAdd($('md'));wireRe($('md'));wireQ($('md'));wireMonthly(p);$('md').querySelectorAll('[data-ask1]').forEach(b=>b.onclick=()=>{const id=b.dataset.ask1,pp=DATA.products.find(x=>x.id===id),ff=forecast(pp);const q=BASKET[id]||ff.qty||Math.max(100,Math.round((ff.need60||0)/50)*50);sendOrder({[id]:q})});
+  $('md').querySelector('.mx').onclick=closeP;wireAdd($('md'));wireRe($('md'));wireQ($('md'));wireMonthly(p);try{wireMM(p)}catch(e){console.error(e)}$('md').querySelectorAll('[data-ask1]').forEach(b=>b.onclick=()=>{const id=b.dataset.ask1,pp=DATA.products.find(x=>x.id===id),ff=forecast(pp);const q=BASKET[id]||ff.qty||Math.max(100,Math.round((ff.need60||0)/50)*50);sendOrder({[id]:q})});
 }
 function closeP(){$('ov').classList.add('hidden');document.body.style.overflow=''}
 $('ov').onclick=e=>{if(e.target.id==='ov')closeP()};
@@ -1482,15 +1513,17 @@ function draftFor(p){let DIS={};try{DIS=JSON.parse(localStorage.getItem('zdis')|
   const t=(DATA.tasks||[]).find(x=>x.who===s&&!isHid(DIS['t:'+x.id])&&/draft/i.test((x.link||'')+(x.link_label||'')+(x.title||'')));if(!t)return null;
   const w=s.split(/[\s(]/)[0];return {url:supDraftUrl(s)||'https://mail.google.com/mail/?authuser=eli@zelr.co.uk#search/'+encodeURIComponent('in:drafts '+w),w}}
 function draftBtn(p,big){const d=draftFor(p);if(!d)return '';return '<a class="drb'+(big?' big':'')+'" target="_blank" rel="noopener" href="'+esc(d.url)+'">✉ Open the '+esc(d.w)+' draft</a>'}
-function renderROF(){const el=$('rof');if(!el)return;const lead=DATA.lead_days||45;
+function renderROF(){const el=$('ros'),old=$('rof');if(old)old.innerHTML='';if(!el)return;const lead=DATA.lead_days||45;
+  /* A1 28 Nov: one big 'Order now or run out' strip at the top of Today (was 'Running out first' lower down) */
   const L=list().filter(x=>x.f.st==='now'&&x.f.run!=null&&x.f.run<=lead&&!x.f.nx).sort((a,b)=>a.f.run-b.f.run).slice(0,3);
   if(!L.length){el.innerHTML='';return}
-  el.innerHTML='<div class="rofh"><span>⏳ Running out first</span><small>Nothing new arrives before these sell out</small></div><div class="rofg">'+L.map(({p,f})=>{
-    const d=Math.max(0,f.run),pc=Math.max(4,Math.min(100,d/lead*100)),R=26,C=2*Math.PI*R,col=d<=10?'#ff5a5a':d<=21?'#ff9900':'#ffd166';
-    return '<div class="roft" data-id="'+esc(p.id)+'"><div class="rofr"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="'+R+'" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="7"/><circle class="rofa" cx="32" cy="32" r="'+R+'" fill="none" stroke="'+col+'" stroke-width="7" stroke-linecap="round" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+(C*(1-pc/100)).toFixed(1)+'" transform="rotate(-90 32 32)" style="--c:'+C.toFixed(1)+'"/></svg><b>'+d+'</b><i>'+(d===1?'day':'days')+'</i></div>'+
-    '<img class="rofi" loading="lazy" src="'+img(p.img,160)+'" alt=""><div class="rofb"><div class="rofn">'+esc(p.name)+'</div><div class="rofs">Gone ~'+fmtD(addD(today(),d))+' · '+(p.per_day<1?p.per_day.toFixed(1):Math.round(p.per_day))+' a day · '+n0(p.stock)+' left</div>'+
-    '<div class="rofx">'+draftBtn(p,1)+'<span class="rofo">'+esc(orderLine(p,f))+'</span></div></div></div>'}).join('')+'</div>';
-  el.querySelectorAll('.roft').forEach(x=>x.onclick=e=>{if(e.target.closest('a'))return;openP(x.dataset.id)})}
+  el.innerHTML='<div class="rosh"><b>🚨 Order now or run out</b><small>'+(L.length===1?'This sells':'These sell')+' out before new stock can arrive</small></div>'+L.map(({p,f})=>{
+    const d=Math.max(0,f.run),pc=Math.max(6,Math.min(100,d/lead*100)),dr=draftFor(p);
+    return '<div class="rosr" data-id="'+esc(p.id)+'"><img class="rosi" loading="lazy" src="'+img(p.img,160)+'" alt=""><div style="min-width:0"><div class="rosn">'+esc(p.name)+'</div>'+
+    '<div class="rosbar'+(d<=7?' hot':'')+'" title="'+d+' days of stock left"><i style="width:'+pc.toFixed(1)+'%"></i></div><div class="ross">'+(d<=0?'<b style="color:#cc0c39">Out now</b>':'Out ~<b>'+fmtD(addD(today(),d))+'</b>')+' · '+n0(p.stock)+' left</div></div>'+
+    '<div class="rosd'+(d>7?' amb':'')+'"><b>'+d+'</b><span>'+(d===1?'day left':'days left')+'</span></div>'+
+    '<div class="rosx">'+(dr?'<a class="rosb" target="_blank" rel="noopener" href="'+esc(dr.url)+'">✉ Open draft <span style="font-weight:600;opacity:.8">to '+esc(dr.w)+'</span></a>':'<button class="rosb gh" data-ro="'+esc(p.id)+'">See what to order</button>')+'</div></div>'}).join('');
+  el.querySelectorAll('.rosr').forEach(x=>x.onclick=e=>{if(e.target.closest('a'))return;openP(x.dataset.id)})}
 
 /* A2 20 Nov: Gmail compose is the main route (mailto got nothing in 4 days) */
 function gmailUrl(su,body){return 'https://mail.google.com/mail/?view=cm&fs=1&to=eli@zelr.co.uk&su='+encodeURIComponent(su)+'&body='+encodeURIComponent(body)}
@@ -1520,6 +1553,46 @@ function renderFlow(){const c=DATA.cfo,f=c.real_in;if(!f){$('flow').innerHTML=''
   $('flow').innerHTML='<div style="font-weight:800;color:var(--green);margin-top:4px">Money in</div>'+ins.map(row).join('')+'<div style="font-weight:800;color:var(--red);margin-top:10px">Money out</div>'+outs.map(row).join('')+'<div class="note" style="margin-top:8px">Amazon only brought in about '+money(f.amazon_in/f.weeks,'GBP')+' a week. The rest came from Zalo Estates.</div>'}
 function renderWk(){const {W}=cashWeeks();const rows=W.slice(1,11);
   $('wkplan').innerHTML=rows.map(x=>'<div style="display:grid;grid-template-columns:58px 1fr auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #eee"><div style="font-weight:800">'+fmtD(x.d)+'</div><div style="font-size:13px">'+(x.pay?'<b>Pay:</b> '+esc(x.pay):'<span class="note">Nothing extra - let cash build</span>')+'<div class="note">In '+money(x.in,'GBP')+' · out '+money(x.out,'GBP')+'</div></div><div style="font-weight:800;color:'+(x.b<DATA.cfo.floor?'var(--red)':'var(--green)')+'">'+money(x.b,'GBP')+'</div></div>').join('')+'<div class="note" style="margin-top:8px">'+esc(DATA.cfo.weekly_note||'')+'</div>'}
+/* A1 28 Nov: money made each month - one bar per month, Feb (Valentine's) and Dec (Christmas) highlighted */
+function mmK(p,v){const a=Math.abs(v),t=a>=1000?(a/1000).toFixed(a>=10000?0:1).replace(/\.0$/,'')+'k':Math.round(a)+'';return (v<0?'-':'')+sym(p.cur)+t}
+function moneyMonths(p){const M=p.monthly;
+  if(!M||!M.months||!M.profit)return '<div class="mm" id="mmon"><div class="mmh"><h4>💷 Money made each month</h4></div><div class="mmsay">Monthly history is not in yet - it will appear here.</div></div>';
+  let st=M.months.findIndex((k,i)=>(M.units[i]||0)>0||Math.abs(M.profit[i]||0)>=1);
+  if(st<0)return '<div class="mm" id="mmon"><div class="mmh"><h4>💷 Money made each month</h4></div><div class="mmsay">🌱 No sales yet - bars appear after its first month.</div></div>';
+  st=Math.max(st,M.months.length-48);const K=M.months.slice(st),V=M.profit.slice(st).map(v=>v||0),N=K.length,part=!!M.partial_last;
+  const sm=window.innerWidth<600,W=sm?360:860,H=sm?210:230,pt=30,pb=28,pl=2,pr=2,mx=Math.max(...V,1),mn=Math.min(0,...V),rng=mx-mn||1;
+  const slot=(W-pl-pr)/N,bw=Math.max(Math.min(slot*0.74,34),3),Y=v=>pt+(mx-v)/rng*(H-pt-pb);let g='';
+  const col=(mo,v)=>v<0?'#f08a9e':mo===2?'#e8436a':mo===12?'#1d8f5f':'#b8c4cf';
+  // best Feb and best Dec get a value label
+  const bestOf=m=>{let b=-1;V.forEach((v,i)=>{if(+K[i].slice(5)===m&&v>0&&(b<0||v>V[b]))b=i});return b};const bF=bestOf(2),bD=bestOf(12);
+  let best=0;V.forEach((v,i)=>{if(!(i===N-1&&part)&&v>V[best])best=i});
+  g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="#d5dbdb"/>';
+  V.forEach((v,i)=>{const k=K[i],mo=+k.slice(5),x=pl+i*slot+(slot-bw)/2,y0=Y(0),y=Y(v),last=i===N-1&&part,c=col(mo,v);
+    g+='<rect class="hit" data-i="'+i+'" x="'+(pl+i*slot)+'" y="0" width="'+slot+'" height="'+H+'" fill="transparent"/>';
+    g+='<rect class="mbar" data-b="'+i+'" style="animation-delay:'+(i*15)+'ms;pointer-events:none" x="'+x.toFixed(1)+'" y="'+Math.min(y,y0).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(Math.abs(y0-y),1.5).toFixed(1)+'" rx="'+Math.min(3,bw/2)+'" fill="'+c+'"'+(last?' fill-opacity=".45" stroke="'+c+'" stroke-dasharray="3 2"':'')+'/>';
+    if((i===bF||i===bD)&&v>0)g+='<text x="'+(x+bw/2)+'" y="'+(y-14)+'" text-anchor="middle" font-size="13" fill="'+c+'">'+(mo===2?'♥':'🎄')+'</text><text x="'+(x+bw/2)+'" y="'+(y-2)+'" text-anchor="middle" font-size="'+(sm?10.5:12)+'" font-weight="800" fill="'+c+'">'+mmK(p,v)+'</text>';
+    if(mo===1||(i===0&&!K.slice(1,4).some(q=>+q.slice(5)===1)))g+='<text x="'+Math.min(Math.max(x+bw/2,14),W-16)+'" y="'+(H-pb+17)+'" text-anchor="middle" font-size="12" font-weight="800" fill="#232f3e">'+k.slice(0,4)+'</text>';
+    if(mo===1&&i>0)g+='<line x1="'+(pl+i*slot)+'" x2="'+(pl+i*slot)+'" y1="'+(pt-6)+'" y2="'+(H-pb+4)+'" stroke="#eaeded" stroke-dasharray="2 3"/>';
+  });
+  const avg=f=>{const a=V.filter((v,i)=>f(+K[i].slice(5))&&!(i===N-1&&part));return a.length?a.reduce((s,v)=>s+v,0)/a.length:0};
+  const norm=avg(m=>m>=3&&m<=10),fe=avg(m=>m===2),de=avg(m=>m===12);let say='';
+  const x=(a)=>a>=1.95?Math.round(a)+' times':a.toFixed(1)+' times';
+  if(norm>20&&fe>norm*1.3)say+='<b style="color:#e8436a">♥ February</b> makes about <b>'+x(fe/norm)+'</b> a normal month. ';
+  if(norm>20&&de>norm*1.3)say+='<b style="color:#1d8f5f">🎄 December</b> makes about <b>'+x(de/norm)+'</b> a normal month. ';
+  const full=N-(part?1:0);if(!say&&full<12)say='🌱 New product - '+full+' month'+(full===1?'':'s')+' so far. Its first '+(K.some(k=>+k.slice(5)===2)?'':'Valentine\'s'+(K.some(k=>+k.slice(5)===12)?'':' and '))+(K.some(k=>+k.slice(5)===12)?'':'Christmas')+' '+((K.some(k=>+k.slice(5)===2)||K.some(k=>+k.slice(5)===12))?'is':'are')+' still to come. ';
+  if(!say&&fe>20&&fe>norm*1.3)say='<b style="color:#e8436a">♥ February</b> is its big month - the rest of the year is small. ';
+  if(!say&&de>20&&de>norm*1.3)say='<b style="color:#1d8f5f">🎄 December</b> is its big month - the rest of the year is small. ';
+  if(!say)say=norm>20?'Steady all year - no big Valentine\'s or Christmas jump. ':'Small amounts most months. ';
+  const neg=V.filter((v,i)=>v<-1&&!(i===N-1&&part)).length;if(neg)say+='Lost money in '+neg+' month'+(neg>1?'s':'')+' (pink bars below the line).';
+  const yrs=N>=30?'last '+Math.round(N/12)+' years':N>=20?'last 2 years':'since '+new Date(K[0]+'-01T00:00:00').toLocaleDateString('en-GB',{month:'short',year:'numeric'});
+  return '<div class="mm" id="mmon"><div class="mmh"><h4>💷 Money made each month <span class="note" style="font-weight:400">- '+yrs+'</span></h4>'+(V[best]>0?'<span class="mmbest">Best: '+new Date(K[best]+'-01T00:00:00').toLocaleDateString('en-GB',{month:'short',year:'numeric'})+' · '+mmK(p,V[best])+'</span>':'')+'</div>'+
+   '<div class="legend" style="margin:8px 0 2px">'+(K.some(k=>+k.slice(5)===2)?'<span><i style="background:#e8436a"></i>Feb (Valentine\'s)</span>':'')+(K.some(k=>+k.slice(5)===12)?'<span><i style="background:#1d8f5f"></i>Dec (Christmas)</span>':'')+'<span><i style="background:#b8c4cf"></i>Other</span></div>'+
+   '<svg viewBox="0 0 '+W+' '+H+'" width="100%" class="mmsvg" data-mm="'+esc(p.id)+'">'+g+'</svg>'+
+   '<div class="mmv" id="mmv"><span class="note">Tap a bar to see that month.'+(part?' The faded last bar is this month so far.':'')+'</span></div><div class="mmsay">'+say+'</div></div>'}
+function wireMM(p){const sv=document.querySelector('#md .mmsvg');if(!sv||!p.monthly)return;let st=p.monthly.months.findIndex((k,i)=>(p.monthly.units[i]||0)>0||Math.abs(p.monthly.profit[i]||0)>=1);st=Math.max(st,p.monthly.months.length-48);
+  sv.querySelectorAll('.hit').forEach(h=>h.onclick=()=>{const i=+h.dataset.i,j=st+i,k=p.monthly.months[j],v=p.monthly.profit[j]||0,u=p.monthly.units[j]||0,last=j===p.monthly.months.length-1&&p.monthly.partial_last;
+    sv.querySelectorAll('.sel').forEach(x=>x.classList.remove('sel'));const b=sv.querySelector('[data-b="'+i+'"]');if(b)b.classList.add('sel');
+    $('mmv').innerHTML='<b>'+mLabel(k)+'</b>'+(last?' (so far)':'')+': <b style="color:'+(v<0?'#cc0c39':'#067d62')+'">'+(v<0?'lost ':'made ')+money(Math.abs(v),p.cur)+'</b> · '+n0(u)+' sold'})}
 /* ---------- monthly history (up to 39 months) ---------- */
 function monthColour(mo){return mo===1||mo===2?'#e8436a':mo===11||mo===12?'#1d8f5f':'#ff9900'}
 function monthlySvg(p,mode){const M=p.monthly;const vals=mVals(p,mode);const N=vals.length;
